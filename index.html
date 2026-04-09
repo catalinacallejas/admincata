@@ -310,7 +310,12 @@ tr:hover td{background:var(--g50)}
         <label class="fl">Monto neto</label><input class="fi" type="number" id="ft-ne" placeholder="0" oninput="calcFact()">
         <div class="fg2"><div><label class="fl">IVA</label><input class="fi" type="number" id="ft-iv" placeholder="0" oninput="calcFact()"></div><div><label class="fl">Impuesto</label><input class="fi" type="number" id="ft-im" placeholder="0" oninput="calcFact()"></div></div>
         <label class="fl">Total</label><input class="fi" type="number" id="ft-to" placeholder="0">
-        <label class="fl">Fecha de pago</label><input class="fi" type="date" id="ft-fp">
+        <label class="fl">Estado de pago</label>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button type="button" id="ft-pg-no" onclick="selPago(false)" style="flex:1;height:48px;border:2px solid var(--g200);border-radius:10px;background:white;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--g500)">❌ No pagado</button>
+          <button type="button" id="ft-pg-si" onclick="selPago(true)" style="flex:1;height:48px;border:2px solid var(--g200);border-radius:10px;background:white;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--g500)">✅ Pagado</button>
+        </div>
+        <input type="hidden" id="ft-pagado" value="false">
         <div class="fmsg ok" id="ft-ok">✓ Factura guardada correctamente</div>
         <div class="fmsg err" id="ft-err">Error al guardar</div>
         <button class="fbtn" id="ft-btn" onclick="guardarFact()">Guardar factura</button>
@@ -455,7 +460,11 @@ tr:hover td{background:var(--g50)}
     <label class="modal-label">Monto neto</label><input class="modal-input" type="number" id="mft-ne" oninput="calcModalFact()">
     <div class="modal-grid2"><div><label class="modal-label">IVA</label><input class="modal-input" type="number" id="mft-iv" oninput="calcModalFact()"></div><div><label class="modal-label">Impuesto</label><input class="modal-input" type="number" id="mft-im" oninput="calcModalFact()"></div></div>
     <label class="modal-label">Total</label><input class="modal-input" type="number" id="mft-to">
-    <label class="modal-label">Fecha de pago</label><input class="modal-input" type="date" id="mft-fp">
+    <label class="modal-label">Estado de pago</label>
+    <select class="modal-select" id="mft-pagado">
+      <option value="false">❌ No pagado</option>
+      <option value="true">✅ Pagado</option>
+    </select>
     <div class="modal-btns"><button class="modal-cancel" onclick="cerrarModal('fact')">Cancelar</button><button class="modal-save" id="mft-btn" onclick="guardarEditFact()">Guardar cambios</button></div>
   </div>
 </div>
@@ -658,6 +667,26 @@ async function guardarCaja(){
   }catch(ex){document.getElementById('cj-err').style.display='block';document.getElementById('cj-err').textContent='Error: '+ex.message;btn.disabled=false;btn.textContent='Guardar cierre del día';}
 }
 
+function selPago(pagado){
+  document.getElementById('ft-pagado').value=pagado?'true':'false';
+  var si=document.getElementById('ft-pg-si'),no=document.getElementById('ft-pg-no');
+  si.style.borderColor=pagado?'var(--v)':'var(--g200)';
+  si.style.background=pagado?'var(--vl)':'white';
+  si.style.color=pagado?'var(--vd)':'var(--g500)';
+  no.style.borderColor=!pagado?'var(--r)':'var(--g200)';
+  no.style.background=!pagado?'var(--rl)':'white';
+  no.style.color=!pagado?'var(--r)':'var(--g500)';
+}
+
+async function togglePagado(id,actual){
+  try{
+    var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({pagado:!actual})});
+    if(r.ok)dpage('facturas',document.querySelector('.sb-item.active'));
+    else throw new Error(await r.text());
+  }catch(ex){alert('Error: '+ex.message);}
+}
+
+
 function calcFact(){
   var ne=v('ft-ne');if(ne>0&&!v('ft-iv'))document.getElementById('ft-iv').value=Math.round(ne*.19);
   var t=v('ft-ne')+v('ft-iv')+v('ft-im');if(t>0)document.getElementById('ft-to').value=t;
@@ -668,9 +697,9 @@ async function guardarFact(){
   var fecha=document.getElementById('ft-f').value;if(!fecha){alert('Selecciona la fecha');return;}
   var btn=document.getElementById('ft-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
-    var r=await fetch(SU+'/rest/v1/facturas',{method:'POST',headers:HJ(),body:JSON.stringify({fecha,proveedor:pv,numero_factura:document.getElementById('ft-nm').value,monto_neto:v('ft-ne'),iva:v('ft-iv'),impuesto:v('ft-im'),total:to,fecha_pago:document.getElementById('ft-fp').value||null,cliente_id:cli.id})});
+    var r=await fetch(SU+'/rest/v1/facturas',{method:'POST',headers:HJ(),body:JSON.stringify({fecha,proveedor:pv,numero_factura:document.getElementById('ft-nm').value,monto_neto:v('ft-ne'),iva:v('ft-iv'),impuesto:v('ft-im'),total:to,pagado:document.getElementById('ft-pagado').value==='true',cliente_id:cli.id})});
     if(r.ok){document.getElementById('ft-ok').style.display='block';btn.textContent='✓ Guardada';
-      setTimeout(function(){['ft-pv','ft-nm','ft-ne','ft-iv','ft-im','ft-to','ft-fp'].forEach(function(id){document.getElementById(id).value='';});btn.disabled=false;btn.textContent='Guardar factura';document.getElementById('ft-ok').style.display='none';},2500);}
+      setTimeout(function(){['ft-pv','ft-nm','ft-ne','ft-iv','ft-im','ft-to'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('ft-pagado').value='false';selPago(false);btn.disabled=false;btn.textContent='Guardar factura';document.getElementById('ft-ok').style.display='none';},2500);}
     else throw new Error(await r.text());
   }catch(ex){document.getElementById('ft-err').style.display='block';btn.disabled=false;btn.textContent='Guardar factura';}
 }
@@ -707,7 +736,7 @@ async function procesarFoto(input){
     if(data.iva)document.getElementById('ft-iv').value=data.iva;
     if(data.impuesto)document.getElementById('ft-im').value=data.impuesto;
     if(data.total)document.getElementById('ft-to').value=data.total;
-    if(data.fecha_pago)document.getElementById('ft-fp').value=data.fecha_pago;
+
     status.textContent='✓ Factura leída — revisa y corrige si es necesario';
     status.style.background='var(--vl)';status.style.color='var(--vd)';
   }catch(ex){
@@ -776,9 +805,8 @@ function renderCajaHist(d){
     return '<div class="hitem"><div class="htop"><span class="hfecha">'+fd+'</span><span class="hval '+cls+'">'+fmt(dif)+'</span></div><div class="hrow"><span>Total Z</span><span>'+fmt(r.total_z)+'</span></div><div class="hrow"><span>Retiros</span><span>'+fmt(r.retiros)+'</span></div></div>';}).join('');
 }
 function renderFactHist(d){
-  var bm={al_dia:'dia',cheque_15:'ch15',cheque_30:'ch30'},lm={al_dia:'Al día',cheque_15:'Cheque 15d',cheque_30:'Cheque 30d'};
   return d.map(function(r){var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-    return '<div class="hitem"><div class="htop"><span class="hfecha">'+r.proveedor+'</span><span class="hval neg">'+fmt(r.total)+'</span></div><div class="hrow"><span>'+fd+' · N°'+(r.numero_factura||'—')+'</span><span><span class="bdg '+(bm[r.forma_pago]||'otro')+'">'+(lm[r.forma_pago]||r.forma_pago)+'</span></span></div></div>';}).join('');
+    return '<div class="hitem"><div class="htop"><span class="hfecha">'+r.proveedor+'</span><span class="hval neg">'+fmt(r.total)+'</span></div><div class="hrow"><span>'+fd+' · N°'+(r.numero_factura||'—')+'</span><span><span class="bdg '+(r.pagado?'quincena':'adelanto')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</span></span></div></div>';}).join('');
 }
 function renderPersHist(d){
   var tm={Quincena:'quincena',Adelanto:'adelanto',Sueldo:'sueldo',Otro:'otro'};
@@ -921,8 +949,8 @@ function dpage(n,el){
     var tN=0,tI=0,tIM=0,tT=0;
     d.forEach(function(r){tN+=(r.monto_neto||0);tI+=(r.iva||0);tIM+=(r.impuesto||0);tT+=(r.total||0);});
     var h='<div class="rcards"><div class="rcard"><div class="rcard-l">Total compras</div><div class="rcard-v" style="color:var(--r)">'+fmt(tT)+'</div></div><div class="rcard"><div class="rcard-l">IVA total</div><div class="rcard-v" style="color:var(--a)">'+fmt(tI)+'</div></div><div class="rcard"><div class="rcard-l">Impuesto</div><div class="rcard-v" style="color:var(--az)">'+fmt(tIM)+'</div></div></div>';
-    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Facturas</span><span class="tc-c">'+d.length+'</span></div><table><tr><th>N° Factura</th><th>Proveedor</th><th>Neto</th><th>IVA</th><th>Impuesto</th><th>Total</th><th>Fecha pago</th><th></th></tr>';
-    d.forEach(function(r){var fp=r.fecha_pago?new Date(r.fecha_pago+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}):'—';h+='<tr><td style="font-weight:500">'+(r.numero_factura||'—')+'</td><td>'+r.proveedor+'</td><td>'+fmt(r.monto_neto)+'</td><td>'+fmt(r.iva)+'</td><td>'+(r.impuesto?fmt(r.impuesto):'—')+'</td><td style="font-weight:600">'+fmt(r.total)+'</td><td style="color:var(--g500)">'+fp+'</td><td style="white-space:nowrap"><button class="btn-edit" onclick=\'editFact('+JSON.stringify(r)+')\'>✏️</button><button class="btn-del" onclick="eliminarFact(\''+r.id+'\')">🗑️</button></td></tr>';});
+    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Facturas</span><span class="tc-c">'+d.length+'</span></div><table><tr><th>N° Factura</th><th>Proveedor</th><th>Neto</th><th>IVA</th><th>Impuesto</th><th>Total</th><th>Estado</th><th></th></tr>';
+    d.forEach(function(r){h+='<tr style="'+(r.pagado?'':'background:#fffbf0;')+'"><td style="font-weight:500">'+(r.numero_factura||'—')+'</td><td>'+r.proveedor+'</td><td>'+fmt(r.monto_neto)+'</td><td>'+fmt(r.iva)+'</td><td>'+(r.impuesto?fmt(r.impuesto):'—')+'</td><td style="font-weight:600">'+fmt(r.total)+'</td><td><button onclick="togglePagado(\''+r.id+'\','+r.pagado+')" style="border:none;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(r.pagado?'var(--vl)':'var(--al)')+';color:'+(r.pagado?'var(--vd)':'var(--a)')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</button></td><td style="white-space:nowrap"><button class="btn-edit" onclick=\'editFact('+JSON.stringify(r)+')\'>✏️</button><button class="btn-del" onclick="eliminarFact(\''+r.id+'\')">🗑️</button></td></tr>';});
     return h+'<tr style="background:var(--g50);font-weight:600;border-top:2px solid var(--g200)"><td colspan="2">Total</td><td>'+fmt(tN)+'</td><td>'+fmt(tI)+'</td><td>'+fmt(tIM)+'</td><td>'+fmt(tT)+'</td><td></td><td></td></tr></table></div>';
   });
   if(n==='gastosfijos'){
@@ -1204,7 +1232,7 @@ function editFact(r){
   document.getElementById('mft-iv').value=r.iva||0;
   document.getElementById('mft-im').value=r.impuesto||0;
   document.getElementById('mft-to').value=r.total||0;
-  document.getElementById('mft-fp').value=r.fecha_pago||'';
+  document.getElementById('mft-pagado').value=r.pagado?'true':'false';
   abrirModal('fact');
 }
 function calcModalFact(){
@@ -1216,7 +1244,7 @@ async function guardarEditFact(){
   var id=document.getElementById('mft-id').value;
   var btn=document.getElementById('mft-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
-    var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({proveedor:document.getElementById('mft-pv').value,numero_factura:document.getElementById('mft-nm').value,monto_neto:mv('mft-ne'),iva:mv('mft-iv'),impuesto:mv('mft-im'),total:mv('mft-to'),fecha_pago:document.getElementById('mft-fp').value||null})});
+    var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({proveedor:document.getElementById('mft-pv').value,numero_factura:document.getElementById('mft-nm').value,monto_neto:mv('mft-ne'),iva:mv('mft-iv'),impuesto:mv('mft-im'),total:mv('mft-to'),pagado:document.getElementById('mft-pagado').value==='true'})});
     if(r.ok){cerrarModal('fact');dpage('facturas',document.querySelector('.sb-item.active'));}
     else throw new Error(await r.text());
   }catch(ex){alert('Error al guardar: '+ex.message);}
