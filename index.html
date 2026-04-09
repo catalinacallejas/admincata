@@ -308,7 +308,7 @@ tr:hover td{background:var(--g50)}
         <label class="fl">Proveedor</label><input class="fi" type="text" id="ft-pv" placeholder="Nombre del proveedor">
         <div class="fdiv">Montos</div>
         <label class="fl">Monto neto</label><input class="fi" type="number" id="ft-ne" placeholder="0" oninput="calcFact()">
-        <div class="fg2"><div><label class="fl">IVA</label><input class="fi" type="number" id="ft-iv" placeholder="0" oninput="calcFact()"></div><div><label class="fl">Impuesto adicional</label><input class="fi" type="number" id="ft-im" placeholder="0" oninput="calcFact()"></div></div>
+        <div class="fg2"><div><label class="fl">IVA</label><input class="fi" type="number" id="ft-iv" placeholder="0" oninput="calcFact()"></div><div><label class="fl">Impuesto</label><input class="fi" type="number" id="ft-im" placeholder="0" oninput="calcFact()"></div></div>
         <label class="fl">Total</label><input class="fi" type="number" id="ft-to" placeholder="0">
         <label class="fl">Fecha de pago</label><input class="fi" type="date" id="ft-fp">
         <div class="fmsg ok" id="ft-ok">✓ Factura guardada correctamente</div>
@@ -453,7 +453,7 @@ tr:hover td{background:var(--g50)}
     <div class="modal-grid2"><div><label class="modal-label">N° Factura</label><input class="modal-input" type="text" id="mft-nm"></div><div><label class="modal-label">Proveedor</label><input class="modal-input" type="text" id="mft-pv"></div></div>
     <div class="modal-div">Montos</div>
     <label class="modal-label">Monto neto</label><input class="modal-input" type="number" id="mft-ne" oninput="calcModalFact()">
-    <div class="modal-grid2"><div><label class="modal-label">IVA</label><input class="modal-input" type="number" id="mft-iv" oninput="calcModalFact()"></div><div><label class="modal-label">Impuesto adicional</label><input class="modal-input" type="number" id="mft-im" oninput="calcModalFact()"></div></div>
+    <div class="modal-grid2"><div><label class="modal-label">IVA</label><input class="modal-input" type="number" id="mft-iv" oninput="calcModalFact()"></div><div><label class="modal-label">Impuesto</label><input class="modal-input" type="number" id="mft-im" oninput="calcModalFact()"></div></div>
     <label class="modal-label">Total</label><input class="modal-input" type="number" id="mft-to">
     <label class="modal-label">Fecha de pago</label><input class="modal-input" type="date" id="mft-fp">
     <div class="modal-btns"><button class="modal-cancel" onclick="cerrarModal('fact')">Cancelar</button><button class="modal-save" id="mft-btn" onclick="guardarEditFact()">Guardar cambios</button></div>
@@ -920,7 +920,7 @@ function dpage(n,el){
   if(n==='facturas')loadTD('facturas','df',function(d){
     var tN=0,tI=0,tIM=0,tT=0;
     d.forEach(function(r){tN+=(r.monto_neto||0);tI+=(r.iva||0);tIM+=(r.impuesto||0);tT+=(r.total||0);});
-    var h='<div class="rcards"><div class="rcard"><div class="rcard-l">Total compras</div><div class="rcard-v" style="color:var(--r)">'+fmt(tT)+'</div></div><div class="rcard"><div class="rcard-l">IVA total</div><div class="rcard-v" style="color:var(--a)">'+fmt(tI)+'</div></div><div class="rcard"><div class="rcard-l">Impuesto adicional</div><div class="rcard-v" style="color:var(--az)">'+fmt(tIM)+'</div></div></div>';
+    var h='<div class="rcards"><div class="rcard"><div class="rcard-l">Total compras</div><div class="rcard-v" style="color:var(--r)">'+fmt(tT)+'</div></div><div class="rcard"><div class="rcard-l">IVA total</div><div class="rcard-v" style="color:var(--a)">'+fmt(tI)+'</div></div><div class="rcard"><div class="rcard-l">Impuesto</div><div class="rcard-v" style="color:var(--az)">'+fmt(tIM)+'</div></div></div>';
     h+='<div class="tc"><div class="tc-h"><span class="tc-t">Facturas</span><span class="tc-c">'+d.length+'</span></div><table><tr><th>N° Factura</th><th>Proveedor</th><th>Neto</th><th>IVA</th><th>Impuesto</th><th>Total</th><th>Fecha pago</th><th></th></tr>';
     d.forEach(function(r){var fp=r.fecha_pago?new Date(r.fecha_pago+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}):'—';h+='<tr><td style="font-weight:500">'+(r.numero_factura||'—')+'</td><td>'+r.proveedor+'</td><td>'+fmt(r.monto_neto)+'</td><td>'+fmt(r.iva)+'</td><td>'+(r.impuesto?fmt(r.impuesto):'—')+'</td><td style="font-weight:600">'+fmt(r.total)+'</td><td style="color:var(--g500)">'+fp+'</td><td style="white-space:nowrap"><button class="btn-edit" onclick=\'editFact('+JSON.stringify(r)+')\'>✏️</button><button class="btn-del" onclick="eliminarFact(\''+r.id+'\')">🗑️</button></td></tr>';});
     return h+'<tr style="background:var(--g50);font-weight:600;border-top:2px solid var(--g200)"><td colspan="2">Total</td><td>'+fmt(tN)+'</td><td>'+fmt(tI)+'</td><td>'+fmt(tIM)+'</td><td>'+fmt(tT)+'</td><td></td><td></td></tr></table></div>';
