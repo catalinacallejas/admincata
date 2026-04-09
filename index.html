@@ -694,7 +694,7 @@ async function procesarFoto(input){
     console.log('Enviando foto a Edge Function, mime:', mime, 'tamaño base64:', base64.length);
     var r=await fetch('https://xeitfaxkatsejyyokhwa.supabase.co/functions/v1/bright-processor',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},
       body:JSON.stringify({image:base64,mime:mime})
     });
     console.log('Respuesta status:', r.status);
