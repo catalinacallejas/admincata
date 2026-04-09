@@ -684,7 +684,6 @@ async function procesarFoto(input){
   status.textContent='📷 Leyendo factura con IA...';
   btn.disabled=true;
   try{
-    // Convertir imagen a base64
     var base64=await new Promise(function(res,rej){
       var reader=new FileReader();
       reader.onload=function(){res(reader.result.split(',')[1]);};
@@ -692,15 +691,17 @@ async function procesarFoto(input){
       reader.readAsDataURL(file);
     });
     var mime=file.type||'image/jpeg';
-    // Llamar Edge Function
+    console.log('Enviando foto a Edge Function, mime:', mime, 'tamaño base64:', base64.length);
     var r=await fetch('https://xeitfaxkatsejyyokhwa.supabase.co/functions/v1/bright-processor',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SK},
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK},
       body:JSON.stringify({image:base64,mime:mime})
     });
-    var data=await r.json();
+    console.log('Respuesta status:', r.status);
+    var txt=await r.text();
+    console.log('Respuesta texto:', txt);
+    var data=JSON.parse(txt);
     if(data.error)throw new Error(data.error);
-    // Rellenar campos
     if(data.proveedor)document.getElementById('ft-pv').value=data.proveedor;
     if(data.numero_factura)document.getElementById('ft-nm').value=data.numero_factura;
     if(data.monto_neto)document.getElementById('ft-ne').value=data.monto_neto;
@@ -709,7 +710,8 @@ async function procesarFoto(input){
     status.textContent='✓ Factura leída — revisa y corrige si es necesario';
     status.style.background='var(--vl)';status.style.color='var(--vd)';
   }catch(ex){
-    status.textContent='⚠️ No se pudo leer — ingresa los datos manualmente';
+    console.error('Error procesarFoto:', ex);
+    status.textContent='⚠️ Error: '+ex.message;
     status.style.background='var(--al)';status.style.color='var(--a)';
   }
   btn.disabled=false;
