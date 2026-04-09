@@ -713,11 +713,25 @@ function calcFact(){
 }
 async function guardarFact(){
   var pv=document.getElementById('ft-pv').value.trim();if(!pv){alert('Ingresa el proveedor');return;}
+  var nm=document.getElementById('ft-nm').value.trim();
   var to=v('ft-to');if(!to){alert('Ingresa el total');return;}
   var fecha=document.getElementById('ft-f').value;if(!fecha){alert('Selecciona la fecha');return;}
-  var btn=document.getElementById('ft-btn');btn.disabled=true;btn.textContent='Guardando...';
+  var btn=document.getElementById('ft-btn');btn.disabled=true;btn.textContent='Verificando...';
+  // Verificar duplicado
+  if(nm){
+    try{
+      var chk=await fetch(SU+'/rest/v1/facturas?numero_factura=eq.'+encodeURIComponent(nm)+'&proveedor=eq.'+encodeURIComponent(pv)+'&cliente_id=eq.'+cli.id+'&select=id',{headers:H()});
+      var dup=await chk.json();
+      if(dup&&dup.length>0){
+        document.getElementById('ft-err').style.display='block';
+        document.getElementById('ft-err').textContent='⚠️ Ya existe una factura N°'+nm+' de '+pv;
+        btn.disabled=false;btn.textContent='Guardar factura';return;
+      }
+    }catch(ex){}
+  }
+  btn.textContent='Guardando...';
   try{
-    var r=await fetch(SU+'/rest/v1/facturas',{method:'POST',headers:HJ(),body:JSON.stringify({fecha,proveedor:pv,numero_factura:document.getElementById('ft-nm').value,monto_neto:v('ft-ne'),iva:v('ft-iv'),impuesto:v('ft-im'),total:to,pagado:document.getElementById('ft-pagado').value==='true',cliente_id:cli.id})});
+    var r=await fetch(SU+'/rest/v1/facturas',{method:'POST',headers:HJ(),body:JSON.stringify({fecha,proveedor:pv,numero_factura:nm,monto_neto:v('ft-ne'),iva:v('ft-iv'),impuesto:v('ft-im'),total:to,pagado:document.getElementById('ft-pagado').value==='true',cliente_id:cli.id})});
     if(r.ok){document.getElementById('ft-ok').style.display='block';btn.textContent='✓ Guardada';
       setTimeout(function(){['ft-pv','ft-nm','ft-ne','ft-iv','ft-im','ft-to'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('ft-pagado').value='false';selPago(false);btn.disabled=false;btn.textContent='Guardar factura';document.getElementById('ft-ok').style.display='none';},2500);}
     else throw new Error(await r.text());
