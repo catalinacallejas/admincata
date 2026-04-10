@@ -599,16 +599,18 @@ function mkMesSel(id){var s=document.getElementById(id);s.innerHTML='';for(var i
 
 async function entrar(){
   var e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
-  if(!e||!p){document.getElementById('lerr').style.display='block';return;}
+  if(!e||!p){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Ingresa email y contraseña';return;}
   try{
     var r=await fetch(SU+'/rest/v1/clientes?email=eq.'+encodeURIComponent(e)+'&password=eq.'+encodeURIComponent(p)+'&activo=eq.true&select=*',{headers:H()});
     var d=await r.json();
-    if(!d||!d.length){document.getElementById('lerr').style.display='block';return;}
+    if(!d||!d.length){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Email o contraseña incorrectos';return;}
     cli=d[0];document.getElementById('lerr').style.display='none';
     document.getElementById('p-login').style.display='none';
+    var ancho=window.innerWidth;
     if(cli.rol==='admin')inicAdmin();
-    else if(window.innerWidth<768)inicCel();else inicDash();
-  }catch(ex){document.getElementById('lerr').style.display='block';}
+    else if(ancho<768){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='CEL OK ancho:'+ancho;inicCel();}
+    else{document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='PC OK ancho:'+ancho;inicDash();}
+  }catch(ex){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Error: '+ex.message;}
 }
 
 function logout(){
