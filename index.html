@@ -864,18 +864,24 @@ async function loadBalCel(){
   var el=document.getElementById('bal-ct');el.innerHTML='<div class="ld">Cargando...</div>';
   var a=hoy.getFullYear();
   try{
-    var [rC,rF,rP,rG]=await Promise.all([fetch(SU+'/rest/v1/cierres_caja?select=fecha,total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/facturas?select=fecha,total&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/pagos_personal?select=fecha,monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/gastos_fijos?select=mes,total&cliente_id=eq.'+cli.id+'&anio=eq.'+a,{headers:H()})]);
+    var [rC,rF,rP,rG]=await Promise.all([fetch(SU+'/rest/v1/cierres_caja?select=fecha,total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/facturas?select=fecha,total&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/pagos_personal?select=fecha,monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/gastos_fijos?select=mes,total,sueldos&cliente_id=eq.'+cli.id+'&anio=eq.'+a,{headers:H()})]);
     var c=await rC.json(),f=await rF.json(),p=await rP.json(),g=await rG.json();
+    var tV=0,tC=0,tS=0,tG=0;
     var h='';
     for(var m=1;m<=12;m++){
       var pf=a+'-'+String(m).padStart(2,'0');
       var vv=c.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.total_z||0);},0);
       var co=f.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.total||0);},0);
-      var pa=p.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.monto||0);},0);
-      var gf=(g.find(function(r){return r.mes===m;})||{}).total||0,u=vv-co-pa-gf,ea=m===hoy.getMonth()+1;
-      if(vv>0||gf>0)h+='<div class="hitem" style="'+(ea?'border-color:var(--v);':'')+'"><div class="htop"><span class="hfecha" style="'+(ea?'color:var(--vd)':'')+'">'+MS[m-1]+'</span><span class="hval '+(u>=0?'pos':'neg')+'">'+fmt(u)+'</span></div><div class="hrow"><span>Ventas</span><span>'+fmt(vv)+'</span></div><div class="hrow"><span>Egresos</span><span>'+fmt(co+pa+gf)+'</span></div></div>';
+      var su=p.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.monto||0);},0);
+      var gfRow=g.find(function(r){return r.mes===m;})||{};
+      var gf=(gfRow.total||0),res=vv-co-su-gf,mar=vv>0?Math.round((res/vv)*100):0,ea=m===hoy.getMonth()+1;
+      tV+=vv;tC+=co;tS+=su;tG+=gf;
+      if(vv>0||gf>0)h+='<div class="hitem" style="'+(ea?'border-color:var(--v);border-width:2px;':'')+'"><div class="htop"><span class="hfecha" style="'+(ea?'color:var(--vd);font-size:14px':'')+'">'+(ea?'▶ ':'')+MS[m-1]+'</span><span class="hval '+(res>=0?'pos':'neg')+'">'+fmt(res)+'</span></div><div class="hrow"><span>🟢 Ventas</span><span style="font-weight:600;color:var(--vd)">'+fmt(vv)+'</span></div><div class="hrow"><span>🔴 Compras</span><span>'+fmt(co)+'</span></div><div class="hrow"><span>🔴 Sueldos</span><span>'+fmt(su)+'</span></div><div class="hrow"><span>🔴 Gastos fijos</span><span>'+fmt(gf)+'</span></div><div class="hrow" style="border-top:1px solid var(--g200);margin-top:4px;padding-top:4px"><span style="font-weight:600">Margen</span><span style="font-weight:600;color:'+(res>=0?'var(--vd)':'var(--r)')+'">'+(mar>0?'+':'')+mar+'%</span></div></div>';
     }
-    el.innerHTML=h||'<div class="empty">Sin datos en '+a+'</div>';
+    var tR=tV-tC-tS-tG,tM=tV>0?Math.round((tR/tV)*100):0;
+    var resumen='<div class="fres '+(tR>=0?'ok':'bad')+'" style="margin-bottom:1rem"><div class="fres-l">Resultado '+a+'</div><div class="fres-v">'+fmt(tR)+'</div><div class="fres-h">Ventas '+fmt(tV)+' · Margen '+tM+'%</div></div>';
+    resumen+='<div class="hitem" style="margin-bottom:1rem"><div class="hrow"><span>🟢 Ventas totales</span><span style="font-weight:600;color:var(--vd)">'+fmt(tV)+'</span></div><div class="hrow"><span>🔴 Compras totales</span><span>'+fmt(tC)+'</span></div><div class="hrow"><span>🔴 Sueldos totales</span><span>'+fmt(tS)+'</span></div><div class="hrow"><span>🔴 Gastos fijos totales</span><span>'+fmt(tG)+'</span></div></div>';
+    el.innerHTML=resumen+(h||'<div class="empty">Sin datos en '+a+'</div>');
   }catch(ex){el.innerHTML='<div class="empty">Error al cargar</div>';}
 }
 
@@ -941,17 +947,39 @@ async function loadB(){
       var pf=a+'-'+String(m).padStart(2,'0');
       var vv=c.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.total_z||0);},0);
       var co=f.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.total||0);},0);
-      var pa=p.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.monto||0);},0);
-      var gf=(g.find(function(r){return r.mes===m;})||{}).total||0,eg=co+pa+gf,u=vv-eg;
-      if(vv>maxV)maxV=vv;data.push({m,v:vv,eg,u,td:vv>0||eg>0});
+      var su=p.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.monto||0);},0);
+      var gf=(g.find(function(r){return r.mes===m;})||{}).total||0,eg=co+su+gf,u=vv-eg;
+      var mar=vv>0?Math.round((u/vv)*100):0;
+      if(vv>maxV)maxV=vv;data.push({m,v:vv,co,su,gf,eg,u,mar,td:vv>0||eg>0});
     }
     if(!maxV)maxV=1;
-    var tV=data.reduce(function(s,r){return s+r.v;},0),tE=data.reduce(function(s,r){return s+r.eg;},0),tU=tV-tE;
-    var h='<div class="kgrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem"><div class="kpi v"><div class="kl">Ventas '+a+'</div><div class="kv">'+fmt(tV)+'</div></div><div class="kpi c"><div class="kl">Egresos '+a+'</div><div class="kv">'+fmt(tE)+'</div></div><div class="kpi '+(tU>=0?'v':'c')+'"><div class="kl">Utilidad '+a+'</div><div class="kv">'+fmt(tU)+'</div></div></div>';
+    var tV=data.reduce(function(s,r){return s+r.v;},0),tC=data.reduce(function(s,r){return s+r.co;},0),tS=data.reduce(function(s,r){return s+r.su;},0),tG=data.reduce(function(s,r){return s+r.gf;},0),tU=tV-tC-tS-tG,tM=tV>0?Math.round((tU/tV)*100):0;
+    var h='<div class="kgrid" style="grid-template-columns:repeat(5,1fr);margin-bottom:1.5rem">';
+    h+='<div class="kpi v"><div class="kl">Ventas '+a+'</div><div class="kv">'+fmt(tV)+'</div></div>';
+    h+='<div class="kpi c"><div class="kl">Compras</div><div class="kv">'+fmt(tC)+'</div></div>';
+    h+='<div class="kpi g"><div class="kl">Sueldos</div><div class="kv">'+fmt(tS)+'</div></div>';
+    h+='<div class="kpi c"><div class="kl">Gastos fijos</div><div class="kv">'+fmt(tG)+'</div></div>';
+    h+='<div class="kpi '+(tU>=0?'v':'c')+'"><div class="kl">Resultado</div><div class="kv">'+fmt(tU)+'</div><div class="ks">Margen '+tM+'%</div></div></div>';
     h+='<div class="cc2"><div class="cc2-t">Ventas por mes — '+a+'</div><div class="bchart">';
     data.forEach(function(r){var pct=Math.round((r.v/maxV)*100)||0,ea=r.m===hoy.getMonth()+1;h+='<div class="bcol"><div class="bv2">'+(r.td?fmtK(r.v):'')+'</div><div class="bf'+(ea?' act':'')+'" style="height:'+pct+'%"></div><div class="bl2'+(ea?' act':'')+'">'+MC[r.m-1]+'</div></div>';});
-    h+='</div></div><div class="tc"><div class="tc-h"><span class="tc-t">Detalle por mes</span></div><div class="brow bh"><span>Mes</span><span style="text-align:right">Ventas</span><span style="text-align:right">Egresos</span><span style="text-align:right">Utilidad</span></div>';
-    data.forEach(function(r){var ea=r.m===hoy.getMonth()+1,pct=Math.round((r.v/maxV)*80)||0;h+='<div class="brow"><span class="bmes'+(ea?' act':'')+'">'+MS[r.m-1]+'</span><span class="bnum'+(r.v?'':' m')+'">'+fmt(r.v)+'</span><span class="bnum'+(r.eg?' neg':' m')+'">'+fmt(r.eg)+'</span><span class="bnum'+(r.u>0?' pos':r.u<0?' neg':' m')+'">'+fmt(r.u)+'</span></div>';if(r.td)h+='<div class="bmini"><div class="bmini-f'+(r.u<0?' neg':'')+'" style="width:'+pct+'%"></div></div>';});
+    h+='</div></div>';
+    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Balance por mes</span></div>';
+    h+='<div class="brow bh" style="grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 60px"><span>Mes</span><span style="text-align:right">Ventas</span><span style="text-align:right">Compras</span><span style="text-align:right">Sueldos</span><span style="text-align:right">Gastos</span><span style="text-align:right">Resultado</span><span style="text-align:right">Margen</span></div>';
+    data.forEach(function(r){
+      var ea=r.m===hoy.getMonth()+1,pct=Math.round((r.v/maxV)*80)||0;
+      h+='<div class="brow" style="grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 60px">';
+      h+='<span class="bmes'+(ea?' act':'')+'">'+(ea?'▶ ':'')+MS[r.m-1]+'</span>';
+      h+='<span class="bnum'+(r.v?'':' m')+'">'+fmt(r.v)+'</span>';
+      h+='<span class="bnum'+(r.co?' neg':' m')+'">'+fmt(r.co)+'</span>';
+      h+='<span class="bnum'+(r.su?' neg':' m')+'">'+fmt(r.su)+'</span>';
+      h+='<span class="bnum'+(r.gf?' neg':' m')+'">'+fmt(r.gf)+'</span>';
+      h+='<span class="bnum'+(r.u>0?' pos':r.u<0?' neg':' m')+'">'+fmt(r.u)+'</span>';
+      h+='<span class="bnum'+(r.mar>0?' pos':r.mar<0?' neg':' m')+'">'+(r.td?(r.mar>0?'+':'')+r.mar+'%':'')+'</span>';
+      h+='</div>';
+      if(r.td)h+='<div class="bmini"><div class="bmini-f'+(r.u<0?' neg':'')+'" style="width:'+pct+'%"></div></div>';
+    });
+    h+='<div class="brow" style="grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 60px;background:var(--g50);font-weight:600;border-top:2px solid var(--g200)">';
+    h+='<span class="bmes">Total</span><span class="bnum pos">'+fmt(tV)+'</span><span class="bnum neg">'+fmt(tC)+'</span><span class="bnum neg">'+fmt(tS)+'</span><span class="bnum neg">'+fmt(tG)+'</span><span class="bnum'+(tU>=0?' pos':' neg')+'">'+fmt(tU)+'</span><span class="bnum'+(tM>=0?' pos':' neg')+'">'+(tM>0?'+':'')+tM+'%</span></div>';
     el.innerHTML=h+'</div>';
   }catch(ex){el.innerHTML='<div class="ld">Error: '+ex.message+'</div>';}
 }
