@@ -22,20 +22,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--g100);color:var(--g900);m
 .lb{width:100%;height:48px;background:var(--v);color:white;border:none;border-radius:var(--rad);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:.5rem}
 .lb:hover{background:var(--vd)}
 .lerr{background:var(--rl);border:1.5px solid #ffc9c9;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--r);margin-top:1rem;display:none}
-#p-cel{display:none;min-height:100vh;background:var(--g100);display:flex;flex-direction:column}
+#p-cel{display:none;min-height:100vh;background:var(--g100)}
 .ch{background:var(--v);padding:1rem 1rem 1.25rem;display:flex;justify-content:space-between;align-items:flex-start}
 .ch-neg{font-size:17px;font-weight:600;color:white}
 .ch-fecha{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
 .ch-out{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:white;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
-.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:1rem}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:1rem;padding-bottom:130px}
 .cmod{background:white;border-radius:14px;padding:1.1rem 1rem;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-shadow:var(--sh)}
 .cmod:active{transform:scale(.96)}
 .cmod-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center}
 .cmod-icon svg{width:22px;height:22px}
 .cmod-name{font-size:13px;font-weight:600;color:var(--g900);line-height:1.3}
-.cbot{background:white;border-top:1px solid var(--g200);display:flex;position:sticky;bottom:0}
+.cbot{background:white;border-top:1px solid var(--g200);display:flex;position:fixed;bottom:0;left:0;right:0;z-index:20;padding-bottom:env(safe-area-inset-bottom)}
 .ctab{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--g500);cursor:pointer;border-top:2px solid transparent}
 .ctab.active{color:var(--v);border-top-color:var(--v)}
+#btn-sync{position:fixed;bottom:58px;left:0;right:0;z-index:19;height:44px;background:var(--v);border:none;font-size:14px;font-weight:600;color:white;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
 .ctab svg{width:20px;height:20px}
 .cscreen{display:none;flex-direction:column;min-height:100vh}
 .cscreen.vis{display:flex}
@@ -249,7 +250,8 @@ tr:hover td{background:var(--g50)}
       <div class="cmod" onclick="abrirScreen('rep')"><div class="cmod-icon" style="background:#f3f0ff"><svg fill="none" stroke="#7048e8" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="cmod-name">Reporte mensual</div></div>
       <div class="cmod" onclick="abrirScreen('bal')"><div class="cmod-icon" style="background:#e8f7f2"><svg fill="none" stroke="#0d9e6e" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="cmod-name">Balance anual</div></div>
     </div>
-    <button onclick="actualizarCel()" id="btn-sync" style="width:100%;height:48px;background:var(--v);border:none;font-size:15px;font-weight:600;color:white;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0">🔄 Sincronizar</button>
+    
+    <button onclick="actualizarCel()" id="btn-sync">🔄 Sincronizar</button>
     <div class="cbot">
       <div class="ctab active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</div>
       <div class="ctab"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Buscar</div>
