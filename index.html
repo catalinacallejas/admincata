@@ -942,47 +942,96 @@ async function loadB(){
   var el=document.getElementById('bc');el.innerHTML='<div class="ld">Calculando...</div>';
   var a=hoy.getFullYear();
   try{
-    var [rC,rF,rP,rG]=await Promise.all([fetch(SU+'/rest/v1/cierres_caja?select=fecha,total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/facturas?select=fecha,total&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/pagos_personal?select=fecha,monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),fetch(SU+'/rest/v1/gastos_fijos?select=mes,total&cliente_id=eq.'+cli.id+'&anio=eq.'+a,{headers:H()})]);
-    var c=await rC.json(),f=await rF.json(),p=await rP.json(),g=await rG.json();
+    var res=await Promise.all([
+      fetch(SU+'/rest/v1/cierres_caja?select=fecha,total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),
+      fetch(SU+'/rest/v1/facturas?select=fecha,total&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),
+      fetch(SU+'/rest/v1/pagos_personal?select=fecha,monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+a+'-01-01&fecha=lt.'+(a+1)+'-01-01&limit=500',{headers:H()}),
+      fetch(SU+'/rest/v1/gastos_fijos?select=mes,total&cliente_id=eq.'+cli.id+'&anio=eq.'+a,{headers:H()})
+    ]);
+    var c=await res[0].json(),f=await res[1].json(),p=await res[2].json(),g=await res[3].json();
     var data=[],maxV=0;
     for(var m=1;m<=12;m++){
       var pf=a+'-'+String(m).padStart(2,'0');
       var vv=c.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.total_z||0);},0);
       var co=f.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.total||0);},0);
       var su=p.filter(function(r){return r.fecha&&r.fecha.startsWith(pf);}).reduce(function(s,r){return s+(r.monto||0);},0);
-      var gf=(g.find(function(r){return r.mes===m;})||{}).total||0,eg=co+su+gf,u=vv-eg;
-      var mar=vv>0?Math.round((u/vv)*100):0;
-      if(vv>maxV)maxV=vv;data.push({m,v:vv,co,su,gf,eg,u,mar,td:vv>0||eg>0});
+      var gf=(g.find(function(r){return r.mes===m;})||{}).total||0;
+      var eg=co+su+gf,u=vv-eg;
+      if(vv>maxV)maxV=vv;
+      data.push({m:m,v:vv,co:co,su:su,gf:gf,eg:eg,u:u,td:vv>0||eg>0});
     }
     if(!maxV)maxV=1;
-    var tV=data.reduce(function(s,r){return s+r.v;},0),tC=data.reduce(function(s,r){return s+r.co;},0),tS=data.reduce(function(s,r){return s+r.su;},0),tG=data.reduce(function(s,r){return s+r.gf;},0),tU=tV-tC-tS-tG,tM=tV>0?Math.round((tU/tV)*100):0;
+    var tV=data.reduce(function(s,r){return s+r.v;},0);
+    var tC=data.reduce(function(s,r){return s+r.co;},0);
+    var tS=data.reduce(function(s,r){return s+r.su;},0);
+    var tG=data.reduce(function(s,r){return s+r.gf;},0);
+    var tU=tV-tC-tS-tG,tM=tV>0?Math.round((tU/tV)*100):0;
+
+    // KPIs
     var h='<div class="kgrid" style="grid-template-columns:repeat(5,1fr);margin-bottom:1.5rem">';
     h+='<div class="kpi v"><div class="kl">Ventas '+a+'</div><div class="kv">'+fmt(tV)+'</div></div>';
     h+='<div class="kpi c"><div class="kl">Compras</div><div class="kv">'+fmt(tC)+'</div></div>';
     h+='<div class="kpi g"><div class="kl">Sueldos</div><div class="kv">'+fmt(tS)+'</div></div>';
     h+='<div class="kpi c"><div class="kl">Gastos fijos</div><div class="kv">'+fmt(tG)+'</div></div>';
-    h+='<div class="kpi '+(tU>=0?'v':'c')+'"><div class="kl">Resultado</div><div class="kv">'+fmt(tU)+'</div><div class="ks">Margen '+tM+'%</div></div></div>';
-    h+='<div class="cc2"><div class="cc2-t">Ventas por mes — '+a+'</div><div class="bchart">';
-    data.forEach(function(r){var pct=Math.round((r.v/maxV)*100)||0,ea=r.m===hoy.getMonth()+1;h+='<div class="bcol"><div class="bv2">'+(r.td?fmtK(r.v):'')+'</div><div class="bf'+(ea?' act':'')+'" style="height:'+pct+'%"></div><div class="bl2'+(ea?' act':'')+'">'+MC[r.m-1]+'</div></div>';});
-    h+='</div></div>';
-    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Balance por mes</span></div>';
-    h+='<div class="brow bh" style="grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 60px"><span>Mes</span><span style="text-align:right">Ventas</span><span style="text-align:right">Compras</span><span style="text-align:right">Sueldos</span><span style="text-align:right">Gastos</span><span style="text-align:right">Resultado</span><span style="text-align:right">Margen</span></div>';
+    h+='<div class="kpi '+(tU>=0?'v':'c')+'"><div class="kl">Resultado</div><div class="kv">'+fmt(tU)+'</div><div class="ks">Margen '+(tM>0?'+':'')+tM+'%</div></div>';
+    h+='</div>';
+
+    // Gráfico mejorado
+    h+='<div class="cc2" style="margin-bottom:1.25rem">';
+    h+='<div class="cc2-t">Ventas vs Compras vs Resultado — '+a+'</div>';
+    h+='<div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px">';
+    h+='<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:var(--v);display:inline-block"></span>Ventas</span>';
+    h+='<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:#ffc9c9;display:inline-block"></span>Compras</span>';
+    h+='<span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:var(--az);display:inline-block"></span>Resultado</span>';
+    h+='</div>';
+    h+='<div style="display:flex;align-items:flex-end;gap:4px;height:200px;padding-bottom:24px;position:relative">';
+
+    // Línea de cero
+    h+='<div style="position:absolute;bottom:24px;left:0;right:0;border-top:1px dashed var(--g300)"></div>';
+
     data.forEach(function(r){
-      var ea=r.m===hoy.getMonth()+1,pct=Math.round((r.v/maxV)*80)||0;
-      h+='<div class="brow" style="grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 60px">';
-      h+='<span class="bmes'+(ea?' act':'')+'">'+(ea?'▶ ':'')+MS[r.m-1]+'</span>';
-      h+='<span class="bnum'+(r.v?'':' m')+'">'+fmt(r.v)+'</span>';
-      h+='<span class="bnum'+(r.co?' neg':' m')+'">'+fmt(r.co)+'</span>';
-      h+='<span class="bnum'+(r.su?' neg':' m')+'">'+fmt(r.su)+'</span>';
-      h+='<span class="bnum'+(r.gf?' neg':' m')+'">'+fmt(r.gf)+'</span>';
-      h+='<span class="bnum'+(r.u>0?' pos':r.u<0?' neg':' m')+'">'+fmt(r.u)+'</span>';
-      h+='<span class="bnum'+(r.mar>0?' pos':r.mar<0?' neg':' m')+'">'+(r.td?(r.mar>0?'+':'')+r.mar+'%':'')+'</span>';
+      var ea=r.m===hoy.getMonth()+1;
+      var pctV=Math.round((r.v/maxV)*160)||0;
+      var pctC=Math.round((r.eg/maxV)*160)||0;
+      var pctU=r.u>0?Math.round((r.u/maxV)*160):0;
+      h+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end">';
+      h+='<div style="font-size:9px;color:var(--g500);margin-bottom:2px">'+(r.td?fmtK(r.v):'')+'</div>';
+      h+='<div style="width:100%;display:flex;gap:1px;align-items:flex-end;height:160px">';
+      h+='<div style="flex:1;height:'+pctV+'px;background:'+(ea?'var(--v)':'var(--vm)')+';border-radius:3px 3px 0 0"></div>';
+      h+='<div style="flex:1;height:'+pctC+'px;background:'+(ea?'#ffc9c9':'#ffe3e3')+';border-radius:3px 3px 0 0"></div>';
+      h+='<div style="flex:1;height:'+pctU+'px;background:'+(ea?'var(--az)':'var(--azl)')+';border-radius:3px 3px 0 0"></div>';
       h+='</div>';
-      if(r.td)h+='<div class="bmini"><div class="bmini-f'+(r.u<0?' neg':'')+'" style="width:'+pct+'%"></div></div>';
+      h+='<div style="font-size:10px;font-weight:'+(ea?'700':'500')+';color:'+(ea?'var(--vd)':'var(--g500)')+'">'+MC[r.m-1]+'</div>';
+      h+='</div>';
     });
-    h+='<div class="brow" style="grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 60px;background:var(--g50);font-weight:600;border-top:2px solid var(--g200)">';
-    h+='<span class="bmes">Total</span><span class="bnum pos">'+fmt(tV)+'</span><span class="bnum neg">'+fmt(tC)+'</span><span class="bnum neg">'+fmt(tS)+'</span><span class="bnum neg">'+fmt(tG)+'</span><span class="bnum'+(tU>=0?' pos':' neg')+'">'+fmt(tU)+'</span><span class="bnum'+(tM>=0?' pos':' neg')+'">'+(tM>0?'+':'')+tM+'%</span></div>';
-    el.innerHTML=h+'</div>';
+    h+='</div></div>';
+
+    // Tabla detalle
+    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Detalle por mes</span></div>';
+    h+='<table><tr><th>Mes</th><th style="text-align:right">Ventas</th><th style="text-align:right">Compras</th><th style="text-align:right">Sueldos</th><th style="text-align:right">Gastos fijos</th><th style="text-align:right">Resultado</th><th style="text-align:right">Margen</th></tr>';
+    data.forEach(function(r){
+      var ea=r.m===hoy.getMonth()+1;
+      var mar=r.v>0?Math.round((r.u/r.v)*100):0;
+      h+='<tr style="'+(ea?'background:var(--vl);':'')+'">';
+      h+='<td style="font-weight:'+(ea?'700':'500')+'">'+(ea?'▶ ':'')+MS[r.m-1]+'</td>';
+      h+='<td style="text-align:right;color:var(--vd);font-weight:600">'+fmt(r.v)+'</td>';
+      h+='<td style="text-align:right">'+fmt(r.co)+'</td>';
+      h+='<td style="text-align:right">'+fmt(r.su)+'</td>';
+      h+='<td style="text-align:right">'+fmt(r.gf)+'</td>';
+      h+='<td style="text-align:right;font-weight:600;color:'+(r.u>=0?'var(--vd)':'var(--r)')+'">'+fmt(r.u)+'</td>';
+      h+='<td style="text-align:right;font-weight:600;color:'+(mar>=0?'var(--vd)':'var(--r)')+'">'+(r.td?(mar>0?'+':'')+mar+'%':'')+'</td>';
+      h+='</tr>';
+    });
+    h+='<tr style="background:var(--g50);font-weight:700;border-top:2px solid var(--g200)">';
+    h+='<td>Total</td><td style="text-align:right;color:var(--vd)">'+fmt(tV)+'</td>';
+    h+='<td style="text-align:right">'+fmt(tC)+'</td>';
+    h+='<td style="text-align:right">'+fmt(tS)+'</td>';
+    h+='<td style="text-align:right">'+fmt(tG)+'</td>';
+    h+='<td style="text-align:right;color:'+(tU>=0?'var(--vd)':'var(--r)')+'">'+fmt(tU)+'</td>';
+    h+='<td style="text-align:right;color:'+(tM>=0?'var(--vd)':'var(--r)')+'">'+(tM>0?'+':'')+tM+'%</td></tr>';
+    h+='</table></div>';
+
+    el.innerHTML=h;
   }catch(ex){el.innerHTML='<div class="ld">Error: '+ex.message+'</div>';}
 }
 
