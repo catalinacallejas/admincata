@@ -1126,7 +1126,7 @@ async function loadB(anioSel){
       h+='<div style="font-size:9px;color:var(--g500);margin-bottom:2px">'+(r.td?fmtK(r.v):'')+'</div>';
       h+='<div style="width:100%;display:flex;gap:1px;align-items:flex-end;height:160px">';
       h+='<div style="flex:1;height:'+pctV+'px;background:'+(ea?'var(--v)':'var(--vm)')+';border-radius:3px 3px 0 0"></div>';
-      h+='<div style="flex:1;height:'+pctC+'px;background:'+(ea?'var(--r)':'#e57373')+';border-radius:3px 3px 0 0"></div>';
+      h+='<div style="flex:1;height:'+pctC+'px;background:'+(ea?'#c0392b':'#e74c3c')+';border-radius:3px 3px 0 0"></div>';
       h+='<div style="flex:1;height:'+pctU+'px;background:'+(ea?'var(--az)':'var(--azl)')+';border-radius:3px 3px 0 0"></div>';
       h+='</div>';
       h+='<div style="font-size:10px;font-weight:'+(ea?'700':'500')+';color:'+(ea?'var(--vd)':'var(--g500)')+'">'+MC[r.m-1]+'</div>';
@@ -1422,7 +1422,7 @@ async function loadFacturasDash(){
       var pct=Math.min(Math.round((total/maxM)*150),150)||0;
       h+='<div class="fact-bar-col" data-mes="'+k+'" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;cursor:pointer" onclick="mostrarFactMes(this.dataset.mes)">';
       h+='<div style="font-size:9px;color:var(--g500)">'+fmtK(total)+'</div>';
-      h+='<div style="width:100%;height:'+pct+'px;background:'+(isActual?'var(--r)':'#ffc9c9')+';border-radius:4px 4px 0 0;transition:opacity .2s" onmouseover="this.style.opacity=.7" onmouseout="this.style.opacity=1"></div>';
+      h+='<div style="width:100%;height:'+pct+'px;background:'+(isActual?'#c0392b':'#e74c3c')+';border-radius:4px 4px 0 0;transition:opacity .2s" onmouseover="this.style.opacity=.7" onmouseout="this.style.opacity=1"></div>';
       h+='<div style="font-size:10px;font-weight:'+(isActual?'700':'500')+';color:'+(isActual?'var(--r)':'var(--g500)')+'">'+label+'</div>';
       h+='</div>';
     });
