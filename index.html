@@ -892,8 +892,8 @@ function renderCajaHist(d){
     var mid='chist-'+k.replace('-','');
     h+='<div style="border:1px solid '+(isActual?'var(--v)':nMal>0?'var(--r)':'var(--g200)')+';border-radius:10px;margin-bottom:8px;overflow:hidden">';
     h+='<div data-target="'+mid+'" class="bal-toggle" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:'+(isActual?'var(--vl)':nMal>0?'var(--rl)':'white')+';cursor:pointer">';
-    h+='<div><span style="font-size:14px;font-weight:600;color:'+(isActual?'var(--vd)':nMal>0?'var(--r)':'var(--g900)')+'">'+label+'</span>';
-    if(nMal>0)h+=' <span style="font-size:11px;color:var(--r)">⚠️ '+nMal+' descuadre'+(nMal>1?'s':'')+'</span>';
+    h+='<div><span style="font-size:14px;font-weight:600;color:'+(isActual?'var(--vd)':nMal>0?'var(--r)':'var(--g900)')+'">'+label+(nMal>0?' ⚠️':'')+'</span>';
+    if(nMal>0)h+='<br><span style="font-size:11px;color:var(--r)">'+nMal+' descuadre'+(nMal>1?'s':'')+'</span>';
     h+='</div>';
     h+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;color:var(--vd);font-weight:600">'+fmt(totalZ)+'</span><span style="color:var(--g500)">'+(isActual?'▲':'▼')+'</span></div></div>';
     h+='<div id="'+mid+'" style="display:'+(isActual?'block':'none')+'">';
