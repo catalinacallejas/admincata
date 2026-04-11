@@ -867,7 +867,7 @@ async function guardarGF(){
 
 async function loadHist(tabla,elId,renderFn){
   var el=document.getElementById(elId);el.innerHTML='<div class="ld">Cargando...</div>';
-  try{var r=await fetch(SU+'/rest/v1/'+tabla+'?select=*&cliente_id=eq.'+cli.id+'&order=fecha.desc&limit=30',{headers:H()});var d=await r.json();
+  try{var r=await fetch(SU+'/rest/v1/'+tabla+'?select=*&cliente_id=eq.'+cli.id+'&order=fecha.desc&limit=500',{headers:H()});var d=await r.json();
     if(!d||!d.length){el.innerHTML='<div class="empty">Sin registros</div>';return;}
     el.innerHTML=renderFn(d);}
   catch(ex){el.innerHTML='<div class="empty">Error al cargar</div>';}
