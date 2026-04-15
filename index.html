@@ -649,14 +649,41 @@ async function loadR(){
     var al=nMal>0?'<div class="alerta err"><span>⚠️</span><span><strong>'+nMal+' cierre'+(nMal>1?'s':'')+' con descuadre</strong></span></div>':'<div class="alerta ok"><span>✓</span><span>Todos los cierres cuadran</span></div>';
     if(c.length>0){
       var tZ=0,tDif=0;c.forEach(function(r){tZ+=(r.total_z||0);tDif+=(r.diferencia||0);});
+      // Generar pills de semanas del mes seleccionado
+      var semanasDelMes=[];
+      (function(){
+        var anio=anioSel,mes=mesSel;
+        var primerDia=new Date(anio,mes-1,1);
+        var ultimoDia=new Date(anio,mes,0);
+        var cur=new Date(primerDia);
+        var dow=cur.getDay()===0?6:cur.getDay()-1;
+        cur.setDate(cur.getDate()-dow); // retroceder al lunes
+        while(cur<=ultimoDia){
+          var lun=new Date(cur);
+          var dom=new Date(cur);dom.setDate(dom.getDate()+6);
+          var lunStr=lun.toISOString().substring(0,10);
+          var domStr=dom.toISOString().substring(0,10);
+          // Solo incluir semanas que tengan al menos un día en el mes
+          if(dom>=primerDia&&lun<=ultimoDia){
+            var fD=function(dt){return dt.toLocaleDateString('es-CL',{day:'numeric',month:'short'});};
+            semanasDelMes.push({lun:lunStr,dom:domStr,label:fD(lun)+' – '+fD(dom)});
+          }
+          cur.setDate(cur.getDate()+7);
+        }
+      })();
+      var semPills=semanasDelMes.map(function(s,i){
+        return '<button class="pill rdb-sem-pill" data-lun="'+s.lun+'" data-dom="'+s.dom+'" onclick="setRdbSemana(this)">'+s.label+'</button>';
+      }).join('');
       var hoy2=hoy.toISOString().substring(0,10);
-      h+=al+'<div class="tc"><div class="tc-h" style="flex-wrap:wrap;gap:8px"><span class="tc-t">Cierres de caja</span>'
-        +'<div style="display:flex;align-items:center;gap:6px">'
+      h+=al+'<div class="tc">'
+        +'<div class="tc-h" style="flex-wrap:wrap;gap:8px"><span class="tc-t">Cierres de caja</span>'
+        +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
         +'<button class="pill active" id="rdb-mes" onclick="setRdbFiltro(&quot;mes&quot;)">Todo el mes</button>'
-        +'<button class="pill" id="rdb-sem" onclick="setRdbFiltro(&quot;semana&quot;)">Por semana</button>'
+        +'<button class="pill" id="rdb-sem-btn" onclick="setRdbFiltro(&quot;semanas&quot;)">Por semana</button>'
         +'<button class="pill" id="rdb-dia" onclick="setRdbFiltro(&quot;dia&quot;)">Por día</button>'
-        +'<input type="date" id="rdb-fecha" value="'+hoy2+'" max="'+hoy2+'" onchange="aplicarRdbFiltro()" style="display:none;height:30px;padding:0 8px;border:1.5px solid var(--g200);border-radius:8px;font-size:12px;font-family:inherit;color:var(--g900)">'
+        +'<input type="date" id="rdb-fecha" value="'+hoy2+'" max="'+hoy2+'" onchange="aplicarRdbFiltroDia()" style="display:none;height:30px;padding:0 8px;border:1.5px solid var(--g200);border-radius:8px;font-size:12px;font-family:inherit;color:var(--g900)">'
         +'</div></div>'
+        +'<div id="rdb-semanas" style="display:none;padding:8px 1.25rem 0;display:none"><div style="font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Selecciona una semana</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+semPills+'</div></div>'
         +'<div id="rdb-body"><table><tr><th>Fecha</th><th>Total Z</th><th>Retiros</th><th>Diferencia</th></tr>';
       c.forEach(function(r){var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'});var dif=r.diferencia||0;h+='<tr data-fecha="'+r.fecha+'" style="'+(dif!==0?'background:#fff8f8;':'')+'"><td>'+fd+'</td><td>'+fmt(r.total_z)+'</td><td>'+fmt(r.retiros)+'</td><td class="'+(dif<0?'tneg':dif>0?'tpos':'')+'" style="font-weight:600">'+fmt(dif)+(dif!==0?' ⚠':'')+'</td></tr>';});
       h+='<tr id="rdb-total" style="background:var(--g50);font-weight:600;border-top:2px solid var(--g200)"><td>Total mes</td><td>'+fmt(tZ)+'</td><td></td><td class="'+(tDif<0?'tneg':tDif>0?'tpos':'')+'">'+fmt(tDif)+'</td></tr>'
@@ -669,70 +696,83 @@ async function loadR(){
   }catch(ex){el.innerHTML='<div class="ld">Error: '+ex.message+'</div>';}
 }
 function setRdbFiltro(f){
-  var btns={mes:'rdb-mes',semana:'rdb-sem',dia:'rdb-dia'};
-  Object.keys(btns).forEach(function(k){
-    var b=document.getElementById(btns[k]);
-    if(!b)return;
-    b.classList.toggle('active',k===f);
+  // Desactivar todas las pills principales
+  ['rdb-mes','rdb-sem-btn','rdb-dia'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b)b.classList.remove('active');
   });
+  document.querySelectorAll('.rdb-sem-pill').forEach(function(b){b.classList.remove('active');});
+
   var inp=document.getElementById('rdb-fecha');
-  if(inp)inp.style.display=f!=='mes'?'inline-block':'none';
+  var semDiv=document.getElementById('rdb-semanas');
+
+  if(f==='mes'){
+    var b=document.getElementById('rdb-mes');if(b)b.classList.add('active');
+    if(inp)inp.style.display='none';
+    if(semDiv)semDiv.style.display='none';
+    aplicarRdbFilas(window._rdbData||[]);
+    actualizarRdbTotal(window._rdbData||[],'Total mes');
+  } else if(f==='dia'){
+    var b=document.getElementById('rdb-dia');if(b)b.classList.add('active');
+    if(inp)inp.style.display='inline-block';
+    if(semDiv)semDiv.style.display='none';
+    aplicarRdbFiltroDia();
+  } else if(f==='semanas'){
+    var b=document.getElementById('rdb-sem-btn');if(b)b.classList.add('active');
+    if(inp)inp.style.display='none';
+    if(semDiv){semDiv.style.display='block';}
+    // No filtrar hasta que elijan semana
+    aplicarRdbFilas([]);
+    var totalRow=document.getElementById('rdb-total');
+    if(totalRow)totalRow.style.display='none';
+    var emptyEl=document.getElementById('rdb-empty');
+    if(emptyEl)emptyEl.style.display='none';
+  }
   window._rdbFiltro=f;
-  aplicarRdbFiltro();
 }
 
-function aplicarRdbFiltro(){
-  var f=window._rdbFiltro||'mes';
+function setRdbSemana(btn){
+  // Activar pill semana seleccionada y desactivar resto
+  document.querySelectorAll('.rdb-sem-pill').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var lunStr=btn.dataset.lun;
+  var domStr=btn.dataset.dom;
   var data=window._rdbData||[];
+  var rows=data.filter(function(r){return r.fecha>=lunStr&&r.fecha<=domStr;});
+  aplicarRdbFilas(rows);
+  actualizarRdbTotal(rows,'Total semana');
+}
+
+function aplicarRdbFiltroDia(){
+  var fechaSel=document.getElementById('rdb-fecha')&&document.getElementById('rdb-fecha').value;
+  var data=window._rdbData||[];
+  var rows=fechaSel?data.filter(function(r){return r.fecha===fechaSel;}):[];
+  aplicarRdbFilas(rows);
+  actualizarRdbTotal(rows,'Total día');
+}
+
+function aplicarRdbFilas(rows){
   var body=document.getElementById('rdb-body');
   var emptyEl=document.getElementById('rdb-empty');
-  var totalRow=document.getElementById('rdb-total');
   if(!body)return;
-
-  var rows;
-  if(f==='dia'){
-    var fechaSel=document.getElementById('rdb-fecha')&&document.getElementById('rdb-fecha').value;
-    rows=fechaSel?data.filter(function(r){return r.fecha===fechaSel;}):[];
-  } else if(f==='semana'){
-    var fechaSel=document.getElementById('rdb-fecha')&&document.getElementById('rdb-fecha').value;
-    if(!fechaSel){rows=[];}else{
-      var dt=new Date(fechaSel+'T12:00:00');
-      var dow=dt.getDay()===0?6:dt.getDay()-1;
-      var lun=new Date(dt);lun.setDate(dt.getDate()-dow);
-      var dom=new Date(lun);dom.setDate(lun.getDate()+6);
-      var lunStr=lun.toISOString().substring(0,10);
-      var domStr=dom.toISOString().substring(0,10);
-      rows=data.filter(function(r){return r.fecha>=lunStr&&r.fecha<=domStr;});
-    }
-  } else {
-    rows=data;
-  }
-
-  // Mostrar/ocultar filas de la tabla
   var allRows=body.querySelectorAll('tr[data-fecha]');
+  var mostrarTodos=rows===window._rdbData;
   allRows.forEach(function(tr){
-    var mostrar=rows.some(function(r){return r.fecha===tr.dataset.fecha;});
-    tr.style.display=mostrar?'':'none';
+    tr.style.display=(mostrarTodos||rows.some(function(r){return r.fecha===tr.dataset.fecha;}))?'':'none';
   });
+  if(emptyEl)emptyEl.style.display=rows.length===0?'block':'none';
+}
 
-  // Fila total
-  if(totalRow){
-    if(f==='mes'){
-      totalRow.style.display='';
-    } else {
-      var tZ=rows.reduce(function(s,r){return s+(r.total_z||0);},0);
-      var tDif=rows.reduce(function(s,r){return s+(r.diferencia||0);},0);
-      var label=f==='dia'?'Total día':'Total semana';
-      totalRow.cells[0].textContent=label;
-      totalRow.cells[1].textContent=fmt(tZ);
-      totalRow.cells[3].textContent=fmt(tDif);
-      totalRow.cells[3].className=tDif<0?'tneg':tDif>0?'tpos':'';
-      totalRow.style.display='';
-    }
-  }
-
-  // Mensaje vacío
-  if(emptyEl){emptyEl.style.display=rows.length===0&&f!=='mes'?'block':'none';}
+function actualizarRdbTotal(rows,label){
+  var totalRow=document.getElementById('rdb-total');
+  if(!totalRow)return;
+  var tZ=rows.reduce(function(s,r){return s+(r.total_z||0);},0);
+  var tDif=rows.reduce(function(s,r){return s+(r.diferencia||0);},0);
+  totalRow.cells[0].textContent=label;
+  totalRow.cells[1].textContent=fmt(tZ);
+  totalRow.cells[3].textContent=fmt(tDif);
+  totalRow.cells[3].className=tDif<0?'tneg':tDif>0?'tpos':'';
+  totalRow.style.display=rows.length?'':'none';
 }
 
 function inicCel(){
