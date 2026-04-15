@@ -650,6 +650,8 @@ async function loadR(){
     if(c.length>0){
       var tZ=0,tDif=0;c.forEach(function(r){tZ+=(r.total_z||0);tDif+=(r.diferencia||0);});
       // Generar pills de semanas del mes seleccionado
+      var primerDiaMes=anioSel+'-'+String(mesSel).padStart(2,'0')+'-01';
+      var ultimoDiaMes=anioSel+'-'+String(mesSel).padStart(2,'0')+'-'+String(new Date(anioSel,mesSel,0).getDate()).padStart(2,'0');
       var semanasDelMes=[];
       (function(){
         var anio=anioSel,mes=mesSel;
@@ -681,9 +683,9 @@ async function loadR(){
         +'<button class="pill active" id="rdb-mes" onclick="setRdbFiltro(&quot;mes&quot;)">Todo el mes</button>'
         +'<button class="pill" id="rdb-sem-btn" onclick="setRdbFiltro(&quot;semanas&quot;)">Por semana</button>'
         +'<button class="pill" id="rdb-dia" onclick="setRdbFiltro(&quot;dia&quot;)">Por día</button>'
-        +'<input type="date" id="rdb-fecha" value="'+hoy2+'" max="'+hoy2+'" onchange="aplicarRdbFiltroDia()" style="display:none;height:30px;padding:0 8px;border:1.5px solid var(--g200);border-radius:8px;font-size:12px;font-family:inherit;color:var(--g900)">'
+        +'<input type="date" id="rdb-fecha" value="'+primerDiaMes+'" min="'+primerDiaMes+'" max="'+ultimoDiaMes+'" onchange="aplicarRdbFiltroDia()" style="display:none;height:30px;padding:0 8px;border:1.5px solid var(--g200);border-radius:8px;font-size:12px;font-family:inherit;color:var(--g900)">'
         +'</div></div>'
-        +'<div id="rdb-semanas" style="display:none;padding:8px 1.25rem 0;display:none"><div style="font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Selecciona una semana</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+semPills+'</div></div>'
+        +'<div id="rdb-semanas" style="display:none;padding:8px 1.25rem 0"><div style="font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Selecciona una semana</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+semPills+'</div></div>'
         +'<div id="rdb-body"><table><tr><th>Fecha</th><th>Total Z</th><th>Retiros</th><th>Diferencia</th></tr>';
       c.forEach(function(r){var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'});var dif=r.diferencia||0;h+='<tr data-fecha="'+r.fecha+'" style="'+(dif!==0?'background:#fff8f8;':'')+'"><td>'+fd+'</td><td>'+fmt(r.total_z)+'</td><td>'+fmt(r.retiros)+'</td><td class="'+(dif<0?'tneg':dif>0?'tpos':'')+'" style="font-weight:600">'+fmt(dif)+(dif!==0?' ⚠':'')+'</td></tr>';});
       h+='<tr id="rdb-total" style="background:var(--g50);font-weight:600;border-top:2px solid var(--g200)"><td>Total mes</td><td>'+fmt(tZ)+'</td><td></td><td class="'+(tDif<0?'tneg':tDif>0?'tpos':'')+'">'+fmt(tDif)+'</td></tr>'
