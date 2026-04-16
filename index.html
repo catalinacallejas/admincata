@@ -1822,55 +1822,43 @@ async function loadFacturasDash(){
     var r=await fetch(SU+'/rest/v1/facturas?select=*&cliente_id=eq.'+cli.id+'&order=fecha.desc&limit=500',{headers:H()});
     var d=await r.json();
     if(!d||!d.length){el.innerHTML='<div class="empty">Sin facturas registradas.</div>';return;}
-
-    // Agrupar por mes
     var meses={};
-    d.forEach(function(r){
-      var key=r.fecha?r.fecha.substring(0,7):'';
-      if(!meses[key])meses[key]=[];
-      meses[key].push(r);
-    });
+    d.forEach(function(r){var key=r.fecha?r.fecha.substring(0,7):'';if(!meses[key])meses[key]=[];meses[key].push(r);});
     var keys=Object.keys(meses).sort().reverse();
     var mesActual=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0');
-
-    // Totales generales
     var tT=d.reduce(function(s,r){return s+(r.total||0);},0);
     var tI=d.reduce(function(s,r){return s+(r.iva||0);},0);
-    var tIM=d.reduce(function(s,r){return s+(r.impuesto||0);},0);
-    var tN=d.reduce(function(s,r){return s+(r.monto_neto||0);},0);
-
     // KPIs
-    var h='<div class="rcards" style="margin-bottom:1.25rem">';
-    h+='<div class="rcard"><div class="rcard-l">Total compras</div><div class="rcard-v" style="color:var(--r)">'+fmt(tT)+'</div></div>';
-    h+='<div class="rcard"><div class="rcard-l">IVA total</div><div class="rcard-v" style="color:var(--a)">'+fmt(tI)+'</div></div>';
-    h+='<div class="rcard"><div class="rcard-l">Facturas</div><div class="rcard-v" style="color:var(--az)">'+d.length+'</div></div>';
+    var h='<div class="kgrid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.25rem">';
+    h+='<div class="kpi c"><div class="kl">Total compras</div><div class="kv">'+fmt(tT)+'</div><div class="ks">acumulado histórico</div></div>';
+    h+='<div class="kpi g"><div class="kl">IVA total</div><div class="kv">'+fmt(tI)+'</div><div class="ks">acumulado histórico</div></div>';
+    h+='<div class="kpi u"><div class="kl">Facturas</div><div class="kv">'+d.length+'</div><div class="ks">registradas</div></div>';
     h+='</div>';
-
-    // Gráfico por mes
+    // Gráfico barras verticales
     var maxM=0;
     keys.forEach(function(k){var t=meses[k].reduce(function(s,r){return s+(r.total||0);},0);if(t>maxM)maxM=t;});
     if(!maxM)maxM=1;
-
+    var BAR_H=160,BAR_W=40;
     h+='<div class="cc2" style="margin-bottom:1.25rem">';
-    h+='<div class="cc2-t">Compras por mes — click en barra para ver facturas</div>';
-    h+='<div style="display:flex;align-items:flex-end;gap:6px;height:180px;padding-bottom:24px;position:relative">';
+    h+='<div class="cc2-t" style="margin-bottom:12px">Compras por mes — clic en barra para ver facturas</div>';
+    h+='<div style="overflow-x:auto"><div style="display:flex;align-items:flex-end;gap:12px;height:'+(BAR_H+44)+'px;padding-bottom:22px;position:relative;min-width:max-content">';
+    h+='<div style="position:absolute;bottom:22px;left:0;right:0;border-top:1px solid var(--g200)"></div>';
+    h+='<div style="position:absolute;bottom:'+Math.round(22+BAR_H*0.5)+'px;left:0;right:0;border-top:1px dashed #e9ecef"></div>';
+    h+='<div style="position:absolute;bottom:'+Math.round(22+BAR_H*0.75)+'px;left:0;right:0;border-top:1px dashed #e9ecef"></div>';
     keys.slice(0,12).reverse().forEach(function(k){
       var total=meses[k].reduce(function(s,r){return s+(r.total||0);},0);
       var parts=k.split('-');
-      var label=MC[parseInt(parts[1])-1];
+      var label=MC[parseInt(parts[1])-1]+' '+parts[0].substring(2);
       var isActual=k===mesActual;
-      var pct=Math.min(Math.round((total/maxM)*150),150)||0;
-      h+='<div class="fact-bar-col" data-mes="'+k+'" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;cursor:pointer" onclick="mostrarFactMes(this.dataset.mes)">';
-      h+='<div style="font-size:9px;color:var(--g500)">'+fmtK(total)+'</div>';
-      h+='<div style="width:100%;height:'+pct+'px;background:'+(isActual?'#c0392b':'#e74c3c')+';border-radius:4px 4px 0 0;transition:opacity .2s" onmouseover="this.style.opacity=.7" onmouseout="this.style.opacity=1"></div>';
-      h+='<div style="font-size:10px;font-weight:'+(isActual?'700':'500')+';color:'+(isActual?'var(--r)':'var(--g500)')+'">'+label+'</div>';
+      var bh=Math.max(Math.round((total/maxM)*BAR_H),3)||0;
+      h+='<div class="fact-bar-col" data-mes="'+k+'" style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="mostrarFactMes(this.dataset.mes)">';
+      h+='<div style="font-size:11px;color:var(--g500);margin-bottom:2px">'+fmtK(total)+'</div>';
+      h+='<div style="width:'+BAR_W+'px;height:'+bh+'px;background:'+(isActual?'#c0392b':'#e74c3c')+';border-radius:4px 4px 0 0;opacity:'+(isActual?'1':'0.6')+'" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6"></div>';
+      h+='<div style="font-size:11px;font-weight:'+(isActual?'600':'400')+';color:'+(isActual?'var(--r)':'var(--g500)')+'">'+label+'</div>';
       h+='</div>';
     });
-    h+='</div></div>';
-
-    // Contenedor del listado por mes
+    h+='</div></div></div>';
     h+='<div id="df-mes-detail"></div>';
-
     // Desplegables por mes
     h+='<div id="df-meses">';
     keys.forEach(function(k){
@@ -1879,31 +1867,35 @@ async function loadFacturasDash(){
       var isActual=k===mesActual;
       var totalMes=meses[k].reduce(function(s,r){return s+(r.total||0);},0);
       var mid='dfm-'+k.replace('-','');
-      h+='<div style="border:1px solid '+(isActual?'var(--r)':'var(--g200)')+';border-radius:10px;margin-bottom:8px;overflow:hidden">';
-      h+='<div data-mid="'+mid+'" style="display:flex;justify-content:space-between;align-items:center;padding:10px 1.25rem;background:'+(isActual?'#fff0f0':'var(--g50)')+';cursor:pointer" onclick="toggleMesFact(this.dataset.mid,this)">';
+      h+='<div style="background:white;border:1px solid '+(isActual?'var(--r)':'var(--g200)')+';border-radius:8px;margin-bottom:8px;overflow:hidden">';
+      h+='<div data-mid="'+mid+'" style="display:flex;justify-content:space-between;align-items:center;padding:10px 1.25rem;background:'+(isActual?'#fff0f0':'var(--g50)')+';cursor:pointer;border-bottom:1px solid '+(isActual?'#ffc9c9':'var(--g200)')+'" onclick="toggleMesFact(this.dataset.mid,this)">';
       h+='<span style="font-size:13px;font-weight:500;color:'+(isActual?'var(--r)':'var(--g900)')+'">'+label+'</span>';
-      h+='<div style="display:flex;align-items:center;gap:8px"><span style="color:var(--r);font-weight:500">'+fmt(totalMes)+'</span><span style="color:var(--g500);font-size:11px">'+(meses[k].length+' facturas')+'</span><span id="arr-'+mid+'">'+(isActual?'▲':'▼')+'</span></div></div>';
+      h+='<div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--g500)">'+meses[k].length+' factura'+(meses[k].length>1?'s':'')+'</span><span style="font-size:13px;font-weight:500;color:var(--r)">'+fmt(totalMes)+'</span><span id="arr-'+mid+'" style="color:var(--g500)">'+(isActual?'▲':'▼')+'</span></div></div>';
       h+='<div id="'+mid+'" style="display:'+(isActual?'block':'none')+'">';
-      h+='<table style="width:100%;border-collapse:collapse"><tr><th style="font-size:11px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;background:var(--g50)">N°</th><th style="font-size:11px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;background:var(--g50)">Proveedor</th><th style="font-size:11px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;background:var(--g50);text-align:right">Total</th><th style="font-size:11px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;background:var(--g50)">Estado</th><th style="font-size:11px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;background:var(--g50)"></th></tr>';
-      meses[k].forEach(function(r){
-        h+='<tr style="border-bottom:1px solid var(--g50)'+(r.pagado?'':'background:#fffbf0;')+'">';
-        h+='<td style="padding:8px 1.25rem;font-size:13px;color:var(--g500)">'+(r.numero_factura||'—')+'</td>';
-        h+='<td style="padding:8px 1.25rem;font-size:13px;font-weight:500">'+r.proveedor+'</td>';
-        h+='<td style="padding:8px 1.25rem;font-size:13px;font-weight:500;text-align:right;color:var(--r)">'+fmt(r.total)+'</td>';
-        h+='<td style="padding:8px 1.25rem"><button data-fid="'+r.id+'" data-pag="'+r.pagado+'" onclick="togglePagado(this.dataset.fid,this.dataset.pag===\'true\')" style="border:none;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;background:'+(r.pagado?'var(--vl)':'var(--al)')+';color:'+(r.pagado?'var(--vd)':'var(--a)')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</button></td>';
-        h+='<td style="padding:8px 1.25rem;white-space:nowrap"><button class="btn-edit" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="editFact(JSON.parse(decodeURIComponent(this.dataset.rec)))">✏️</button><button class="btn-del" data-id="'+r.id+'" onclick="eliminarFact(this.dataset.id)">🗑️</button></td>';
+      h+='<table style="width:100%;border-collapse:collapse"><tr style="background:var(--g50)">';
+      h+='<th style="font-size:10px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid var(--g200)">N°</th>';
+      h+='<th style="font-size:10px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid var(--g200)">Proveedor</th>';
+      h+='<th style="font-size:10px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid var(--g200);text-align:right">Total</th>';
+      h+='<th style="font-size:10px;font-weight:500;text-transform:uppercase;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid var(--g200)">Estado</th>';
+      h+='<th style="border-bottom:1px solid var(--g200);padding:8px 1.25rem"></th></tr>';
+      meses[k].forEach(function(r,i){
+        var last=i===meses[k].length-1;
+        var tdB=last?'':'border-bottom:1px solid var(--g100);';
+        h+='<tr style="'+(r.pagado?'':'background:#fffbf0;')+'">';
+        h+='<td style="padding:9px 1.25rem;font-size:13px;color:var(--g500);'+tdB+'">'+(r.numero_factura||'—')+'</td>';
+        h+='<td style="padding:9px 1.25rem;font-size:13px;font-weight:500;'+tdB+'">'+r.proveedor+'</td>';
+        h+='<td style="padding:9px 1.25rem;font-size:13px;font-weight:500;text-align:right;color:var(--r);'+tdB+'">'+fmt(r.total)+'</td>';
+        h+='<td style="padding:9px 1.25rem;'+tdB+'"><button data-fid="'+r.id+'" data-pag="'+r.pagado+'" onclick="togglePagado(this.dataset.fid,this.dataset.pag===&quot;true&quot;)" style="border:none;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;background:'+(r.pagado?'var(--vl)':'var(--al)')+';color:'+(r.pagado?'var(--vd)':'var(--a)')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</button></td>';
+        h+='<td style="padding:9px 1.25rem;white-space:nowrap;'+tdB+'"><button class="btn-edit" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="editFact(JSON.parse(decodeURIComponent(this.dataset.rec)))">✏️</button><button class="btn-del" data-id="'+r.id+'" onclick="eliminarFact(this.dataset.id)">🗑️</button></td>';
         h+='</tr>';
       });
       h+='</table></div></div>';
     });
     h+='</div>';
-
     el.innerHTML=h;
-    // Marcar barra activa
     setTimeout(function(){mostrarFactMes(mesActual);},100);
   }catch(ex){el.innerHTML='<div class="ld">Error: '+ex.message+'</div>';}
 }
-
 function toggleMesFact(mid,header){
   var div=document.getElementById(mid);
   var arr=document.getElementById('arr-'+mid);
