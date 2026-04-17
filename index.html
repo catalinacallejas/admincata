@@ -989,7 +989,6 @@ function renderCajaHist(d){
   return h;
 }
 function renderFactHist(d){
-  // Agrupar por mes
   var meses={};
   d.forEach(function(r){
     var key=r.fecha?r.fecha.substring(0,7):'';
@@ -1005,17 +1004,22 @@ function renderFactHist(d){
     var isActual=k===mesActual;
     var total=meses[k].reduce(function(s,r){return s+(r.total||0);},0);
     var mid='fhist-'+k.replace('-','');
-    h+='<div style="border:1px solid '+(isActual?'var(--v)':'var(--g200)')+';border-radius:10px;margin-bottom:8px;overflow:hidden">';
-    h+='<div data-target="'+mid+'" class="bal-toggle" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:'+(isActual?'var(--vl)':'white')+';cursor:pointer">';
-    h+='<span style="font-size:14px;font-weight:500;color:'+(isActual?'var(--vd)':'var(--g900)')+'">'+label+'</span>';
+    h+='<div style="background:white;border:1px solid '+(isActual?'var(--v)':'var(--g200)')+';border-radius:8px;margin-bottom:8px;overflow:hidden">';
+    h+='<div data-target="'+mid+'" class="bal-toggle" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:'+(isActual?'var(--vl)':'var(--g50)')+';cursor:pointer;border-bottom:1px solid '+(isActual?'var(--vm)':'var(--g200)')+'">';
+    h+='<span style="font-size:13px;font-weight:500;color:'+(isActual?'var(--vd)':'var(--g900)')+'">'+label+'</span>';
     h+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;color:var(--r);font-weight:500">'+fmt(total)+'</span><span style="color:var(--g500)">'+(isActual?'▲':'▼')+'</span></div></div>';
     h+='<div id="'+mid+'" style="display:'+(isActual?'block':'none')+'">';
-    meses[k].forEach(function(r){
+    meses[k].forEach(function(r,i){
       var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-      h+='<div class="hitem" style="border-radius:0;border-left:none;border-right:none;border-top:none">';
-      h+='<div class="htop"><span class="hfecha">'+r.proveedor+'</span><span class="hval neg">'+fmt(r.total)+'</span></div>';
-      h+='<div class="hrow"><span>'+fd+' · N°'+(r.numero_factura||'—')+'</span><span><span class="bdg '+(r.pagado?'quincena':'adelanto')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</span></span></div>';
-      h+='</div>';
+      var last=i===meses[k].length-1;
+      h+='<div style="padding:10px 12px;'+(last?'':'border-bottom:1px solid var(--g100);')+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">';
+      h+='<span style="font-size:13px;font-weight:500;color:var(--g900)">'+r.proveedor+'</span>';
+      h+='<span style="font-size:13px;font-weight:500;color:var(--r)">'+fmt(r.total)+'</span></div>';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      h+='<span style="font-size:11px;color:var(--g500)">'+fd+' · N°'+(r.numero_factura||'—')+'</span>';
+      h+='<span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:'+(r.pagado?'var(--vl)':'var(--al)')+';color:'+(r.pagado?'var(--vd)':'var(--a)')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</span>';
+      h+='</div></div>';
     });
     h+='</div></div>';
   });
