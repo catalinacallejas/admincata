@@ -722,6 +722,66 @@ async function loadR(){
     el.innerHTML=h;
   }catch(ex){el.innerHTML='<div class="ld">Error: '+ex.message+'</div>';}
 }
+function setRdbFiltro(tipo){
+  // Activar pill correspondiente
+  document.querySelectorAll('#rdb-mes,#rdb-sem-btn,#rdb-dia').forEach(function(b){b.classList.remove('active');});
+  if(tipo==='mes')document.getElementById('rdb-mes').classList.add('active');
+  else if(tipo==='semanas')document.getElementById('rdb-sem-btn').classList.add('active');
+  else if(tipo==='dia')document.getElementById('rdb-dia').classList.add('active');
+  // Mostrar/ocultar controles
+  var semDiv=document.getElementById('rdb-semanas');
+  var diaInput=document.getElementById('rdb-fecha');
+  semDiv.style.display=tipo==='semanas'?'block':'none';
+  diaInput.style.display=tipo==='dia'?'inline-block':'none';
+  // Aplicar filtro
+  if(tipo==='mes'){
+    renderRdbTabla(window._rdbData);
+  } else if(tipo==='dia'){
+    var val=diaInput.value;
+    if(val)aplicarRdbFiltroDia();
+  }
+}
+function setRdbSemana(btn){
+  document.querySelectorAll('.rdb-sem-pill').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var lun=btn.dataset.lun;
+  var dom=btn.dataset.dom;
+  var filtrado=(window._rdbData||[]).filter(function(r){return r.fecha>=lun&&r.fecha<=dom;});
+  renderRdbTabla(filtrado);
+}
+function aplicarRdbFiltroDia(){
+  var fecha=document.getElementById('rdb-fecha').value;
+  var filtrado=(window._rdbData||[]).filter(function(r){return r.fecha===fecha;});
+  renderRdbTabla(filtrado);
+}
+function renderRdbTabla(datos){
+  var body=document.getElementById('rdb-body');
+  var empty=document.getElementById('rdb-empty');
+  var totalRow=document.getElementById('rdb-total');
+  if(!body)return;
+  if(!datos||!datos.length){
+    body.style.display='none';
+    if(totalRow)totalRow.style.display='none';
+    if(empty)empty.style.display='block';
+    return;
+  }
+  if(empty)empty.style.display='none';
+  body.style.display='';
+  // Mostrar solo filas del período filtrado
+  var allRows=body.querySelectorAll('tr[data-fecha]');
+  var fechas=datos.map(function(r){return r.fecha;});
+  allRows.forEach(function(tr){
+    tr.style.display=fechas.indexOf(tr.dataset.fecha)!==-1?'':'none';
+  });
+  // Actualizar total
+  if(totalRow){
+    var tZ=datos.reduce(function(s,r){return s+(r.total_z||0);},0);
+    var tDif=datos.reduce(function(s,r){return s+(r.diferencia||0);},0);
+    var cells=totalRow.querySelectorAll('td');
+    if(cells[1])cells[1].textContent=tZ.toLocaleString('es-CL',{style:'currency',currency:'CLP',minimumFractionDigits:0});
+    if(cells[3]){cells[3].textContent=tDif!==0?tDif.toLocaleString('es-CL',{style:'currency',currency:'CLP',minimumFractionDigits:0}):'$0';cells[3].className=tDif<0?'tneg':tDif>0?'tpos':'';}
+  }
+}
 function inicCel(){
   document.getElementById('p-cel').style.display='block';
   document.getElementById('cel-neg').textContent=cli.nombre_negocio;
