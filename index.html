@@ -701,25 +701,18 @@ async function loadR(){
     var Vp=cp.reduce(function(s,r){return s+(r.total_z||0);},0),Cp=fp.reduce(function(s,r){return s+(r.total||0);},0),Pp=pp.reduce(function(s,r){return s+(r.monto||0);},0),GFp=gp.length>0?(gp[0].total||0):0,Gp=Pp+GFp,Up=Vp-Cp-Gp,Mp=Vp>0?Math.round((Up/Vp)*100):0;
     var diasMes=new Date(a,mesSel,0).getDate(),sinReg=diasMes-c.length;
     var h='<div class="kgrid"><div class="kpi v"><div class="kl">Ventas</div><div class="kv">'+fmt(V)+'</div><div class="ks">'+c.length+' días registrados</div></div><div class="kpi c"><div class="kl">Compras</div><div class="kv">'+fmt(C)+'</div><div class="ks">'+f.length+' facturas</div></div><div class="kpi g"><div class="kl">Gastos</div><div class="kv">'+fmt(G)+'</div><div class="ks">Personal + fijos</div></div><div class="kpi u"><div class="kl">Días sin registrar</div><div class="kv">'+sinReg+'</div><div class="ks">de '+diasMes+' días</div></div></div>';
-    // ── Alertas inteligentes ──
-    var alertas='';
-    // 1. Margen vs mes anterior
+    // ── Alerta margen vs mes anterior ──
     if(V>0&&Vp>0){
       var diffM=M-Mp;
-      var arrow=diffM>=0?'↑':'↓';
-      var color=diffM>=0?'var(--vd)':'var(--r)';
-      var bgColor=diffM>=0?'var(--vl)':'var(--rl)';
-      var borderColor=diffM>=0?'var(--vm)':'#F09595';
-      alertas+='<div class="alerta" style="background:'+bgColor+';border-color:'+borderColor+';color:'+color+'">';
-      alertas+='<span style="font-size:16px">'+arrow+'</span>';
-      alertas+='<span>Margen '+MS[mesSel-1]+': <strong>'+M+'%</strong> — '+MS[mesPrev-1]+' fue <strong>'+Mp+'%</strong> ('+( diffM>=0?'+':'')+diffM+'%)</span>';
-      alertas+='</div>';
+      var subio=diffM>=0;
+      h+='<div style="border-radius:8px;padding:12px 16px;margin-bottom:1.25rem;display:flex;align-items:center;gap:14px;border:1px solid '+(subio?'var(--vm)':'#F09595')+';background:'+(subio?'var(--vl)':'var(--rl)')+'">';
+      h+='<div style="width:44px;height:44px;border-radius:8px;background:'+(subio?'var(--v)':'var(--r)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+      h+='<span style="font-size:22px;color:white">'+(subio?'↑':'↓')+'</span></div>';
+      h+='<div>';
+      h+='<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:'+(subio?'var(--vd)':'var(--r)')+'">Margen '+MS[mesSel-1]+' vs '+MS[mesPrev-1]+'</div>';
+      h+='<div style="font-size:18px;font-weight:500;color:'+(subio?'var(--vd)':'var(--r)')+'">'+M+'% <span style="font-size:13px;font-weight:400;color:'+(subio?'var(--vd)':'var(--r)')+'">'+(subio?'+':'')+diffM+'% vs mes anterior ('+Mp+'%)</span></div>';
+      h+='</div></div>';
     }
-    // 2. Personal sin pagos en el mes actual (solo si es mes actual)
-    if(mesSel===hoy.getMonth()+1&&a===hoy.getFullYear()&&p.length===0){
-      alertas+='<div class="alerta err"><span>⚠️</span><span>No hay pagos de personal registrados en '+MS[mesSel-1]+'</span></div>';
-    }
-    h+=alertas;
     h+='<div class="ubanner '+(U>=0?'pos':'neg')+'"><div><div class="ub-l">Utilidad neta — '+MS[mesSel-1]+'</div><div class="ub-v">'+fmt(U)+'</div></div><div style="text-align:right"><div class="ub-ml">Margen</div><div class="ub-mv">'+M+'%</div></div></div>';
     var nMal=c.filter(function(r){return(r.diferencia||0)!==0;}).length;
     var al=nMal>0?'<div class="alerta err"><span>⚠️</span><span><strong>'+nMal+' cierre'+(nMal>1?'s':'')+' con descuadre</strong></span></div>':'<div class="alerta ok"><span>✓</span><span>Todos los cierres cuadran</span></div>';
@@ -919,18 +912,28 @@ async function loadDashCelResumen(mesParam,anioParam){
   var mf=mes===12?1:mes+1,af=mes===12?a+1:a;
   var h2=af+'-'+String(mf).padStart(2,'0')+'-01';
   try{
-    var [rC,rF,rP,rG]=await Promise.all([
+    var mesPrev=mes===1?12:mes-1,aPrev=mes===1?a-1:a;
+    var dPrev=aPrev+'-'+String(mesPrev).padStart(2,'0')+'-01';
+    var mfPrev=mesPrev===12?1:mesPrev+1,afPrev=mesPrev===12?aPrev+1:aPrev;
+    var h2Prev=afPrev+'-'+String(mfPrev).padStart(2,'0')+'-01';
+    var [rC,rF,rP,rG,rCp,rFp,rPp,rGp]=await Promise.all([
       fetch(SU+'/rest/v1/cierres_caja?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+d+'&fecha=lt.'+h2+'&order=fecha.desc',{headers:H()}),
       fetch(SU+'/rest/v1/facturas?select=total&cliente_id=eq.'+cli.id+'&fecha=gte.'+d+'&fecha=lt.'+h2,{headers:H()}),
       fetch(SU+'/rest/v1/pagos_personal?select=monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+d+'&fecha=lt.'+h2,{headers:H()}),
-      fetch(SU+'/rest/v1/gastos_fijos?select=total&cliente_id=eq.'+cli.id+'&mes=eq.'+mes+'&anio=eq.'+a,{headers:H()})
+      fetch(SU+'/rest/v1/gastos_fijos?select=total&cliente_id=eq.'+cli.id+'&mes=eq.'+mes+'&anio=eq.'+a,{headers:H()}),
+      fetch(SU+'/rest/v1/cierres_caja?select=total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+dPrev+'&fecha=lt.'+h2Prev,{headers:H()}),
+      fetch(SU+'/rest/v1/facturas?select=total&cliente_id=eq.'+cli.id+'&fecha=gte.'+dPrev+'&fecha=lt.'+h2Prev,{headers:H()}),
+      fetch(SU+'/rest/v1/pagos_personal?select=monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+dPrev+'&fecha=lt.'+h2Prev,{headers:H()}),
+      fetch(SU+'/rest/v1/gastos_fijos?select=total&cliente_id=eq.'+cli.id+'&mes=eq.'+mesPrev+'&anio=eq.'+aPrev,{headers:H()})
     ]);
     var c=await rC.json(),f=await rF.json(),p=await rP.json(),g=await rG.json();
+    var cp=await rCp.json(),fp=await rFp.json(),pp=await rPp.json(),gp=await rGp.json();
     var V=c.reduce(function(s,r){return s+(r.total_z||0);},0);
     var C=f.reduce(function(s,r){return s+(r.total||0);},0);
     var P=p.reduce(function(s,r){return s+(r.monto||0);},0);
     var GF=g.length>0?(g[0].total||0):0;
     var G=P+GF,U=V-C-G,M=V>0?Math.round((U/V)*100):0;
+    var Vp=cp.reduce(function(s,r){return s+(r.total_z||0);},0),Cp=fp.reduce(function(s,r){return s+(r.total||0);},0),Pp=pp.reduce(function(s,r){return s+(r.monto||0);},0),GFp=gp.length>0?(gp[0].total||0):0,Up=Vp-Cp-Pp-GFp,Mp=Vp>0?Math.round((Up/Vp)*100):0;
     var diasMes=new Date(a,mes,0).getDate(),sinReg=diasMes-c.length;
     var nMal=c.filter(function(r){return (r.diferencia||0)!==0;}).length;
     var h='<select id="dash-mes-sel" style="width:100%;height:34px;background:white;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;color:#212529;margin-bottom:9px;font-family:inherit" onchange="dashCelCambiarMes(this.value)">';
@@ -945,6 +948,17 @@ async function loadDashCelResumen(mesParam,anioParam){
     h+='<div style="background:white;border:1px solid #c1c7cd;border-radius:8px;padding:8px 10px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#e67700"></div><div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:#adb5bd;margin-bottom:2px">Gastos</div><div style="font-size:15px;font-weight:500;color:#b45309">'+fmtK(G)+'</div><div style="font-size:10px;color:#adb5bd;margin-top:1px">Personal + fijos</div></div>';
     h+='<div style="background:white;border:1px solid #c1c7cd;border-radius:8px;padding:8px 10px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#1971c2"></div><div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:#adb5bd;margin-bottom:2px">Sin registrar</div><div style="font-size:15px;font-weight:500;color:#1971c2">'+sinReg+' días</div><div style="font-size:10px;color:#adb5bd;margin-top:1px">de '+diasMes+' días</div></div>';
     h+='</div>';
+    // Alerta margen vs mes anterior
+    if(V>0&&Vp>0){
+      var diffM=M-Mp,subio=diffM>=0;
+      h+='<div style="border-radius:8px;padding:10px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;border:1px solid '+(subio?'var(--vm)':'#F09595')+';background:'+(subio?'var(--vl)':'var(--rl)')+'">';
+      h+='<div style="width:36px;height:36px;border-radius:6px;background:'+(subio?'var(--v)':'var(--r)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+      h+='<span style="font-size:18px;color:white">'+(subio?'↑':'↓')+'</span></div>';
+      h+='<div>';
+      h+='<div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:'+(subio?'var(--vd)':'var(--r)')+'">Margen '+MS[mes-1]+' vs '+MS[mesPrev-1]+'</div>';
+      h+='<div style="font-size:15px;font-weight:500;color:'+(subio?'var(--vd)':'var(--r)')+'">'+M+'% <span style="font-size:11px;font-weight:400">'+(subio?'+':'')+diffM+'% (ant. '+Mp+'%)</span></div>';
+      h+='</div></div>';
+    }
     h+='<div style="background:#0d9e6e;border-radius:8px;padding:10px 12px">';
     h+='<div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.75);margin-bottom:2px">Utilidad neta — '+MS[mes-1]+'</div>';
     h+='<div style="font-size:22px;font-weight:500;color:white">'+fmt(U)+'</div>';
