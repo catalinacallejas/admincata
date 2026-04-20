@@ -1158,30 +1158,48 @@ function agregarProductoCel(nombre,cantidad,unidad,precio,warn){
   var lista=document.getElementById('ft-productos-lista');
   var row=document.createElement('div');
   row.className='prod-item-cel';
-  row.style.cssText='background:white;border:1px solid '+(warn?'#e67700':'#c1c7cd')+';border-radius:8px;padding:8px 10px;margin-bottom:7px;'+(warn?'background:#fffdf5;':'');
-  var warnStyle=warn?'border:2px solid #e67700;background:#FAEEDA;':'border:1px solid #c1c7cd;background:white;';
+  // calcular total
+  var total=cantidad&&precio?Math.round(cantidad*precio):'';
+  var borderColor=warn?'#e67700':'#c1c7cd';
+  var bgColor=warn?'#fffdf5':'white';
+  row.style.cssText='background:'+bgColor+';border:1px solid '+borderColor+';border-radius:8px;padding:10px 12px;margin-bottom:8px';
+  var warnB='border:2px solid #e67700;background:#FAEEDA;';
+  var okB='border:1px solid #c1c7cd;background:white;';
+  var nombreWarn=warn&&!nombre;
+  var precioWarn=warn&&!precio;
   row.innerHTML=
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    +'<span style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:'+(warn?'#e67700':'#adb5bd')+'">Producto'+(warn?' ⚠':'')+'</span>'
-    +'<button type="button" onclick="this.closest(&quot;.prod-item-cel&quot;).remove()" style="width:22px;height:22px;border:1px solid #F09595;border-radius:4px;background:white;color:#e03131;font-size:14px;cursor:pointer;line-height:1;padding:0">×</button>'
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<span style="font-size:11px;font-weight:500;color:'+(warn?'#e67700':'#0d9e6e')+'">'+( warn?'⚠ Completa los campos en amarillo':'✓ Producto detectado')+'</span>'
+    +'<button type="button" onclick="this.closest(&quot;.prod-item-cel&quot;).remove()" style="width:24px;height:24px;border:1px solid #F09595;border-radius:6px;background:white;color:#e03131;font-size:16px;cursor:pointer;line-height:1;padding:0">×</button>'
     +'</div>'
-    +'<input class="fi" type="text" placeholder="Nombre del producto" value="'+(nombre||'')+'" style="margin-bottom:5px;height:36px;font-size:13px;'+(warn&&!nombre?warnStyle:'')+'">'
-    +'<div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:5px">'
-    +'<input class="fi" type="number" placeholder="Cant." value="'+(cantidad||'')+'" style="height:36px;font-size:13px">'
-    +'<input class="fi" type="text" placeholder="ud" value="'+(unidad||'')+'" style="height:36px;font-size:13px;text-align:center">'
-    +'<input class="fi" type="number" placeholder="Precio unit." value="'+(precio||'')+'" style="height:36px;font-size:13px;'+(warn&&!precio?warnStyle:'')+'">'
+    // Nombre
+    +'<div style="font-size:11px;font-weight:500;color:'+(nombreWarn?'#e67700':'#495057')+';margin-bottom:3px">Nombre del producto'+(nombreWarn?' ⚠':'')+'</div>'
+    +'<input class="fi prod-nombre" type="text" placeholder="Ej: Lomo de res, Cerveza Austral..." value="'+(nombre||'')+'" style="margin-bottom:8px;height:40px;font-size:13px;'+(nombreWarn?warnB:okB)+'">'
+    // Fila cantidad + unidad + precio unitario
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'
+    +'<div>'
+    +'<div style="font-size:11px;font-weight:500;color:#495057;margin-bottom:3px">Cantidad</div>'
+    +'<input class="fi prod-cantidad" type="number" placeholder="Ej: 25" value="'+(cantidad||'')+'" style="height:40px;font-size:13px;'+okB+'">'
+    +'</div>'
+    +'<div>'
+    +'<div style="font-size:11px;font-weight:500;color:#495057;margin-bottom:3px">Unidad</div>'
+    +'<input class="fi prod-unidad" type="text" placeholder="kg, lt, ud..." value="'+(unidad||'')+'" style="height:40px;font-size:13px;text-align:center;'+okB+'">'
+    +'</div>'
+    +'<div>'
+    +'<div style="font-size:11px;font-weight:500;color:'+(precioWarn?'#e67700':'#495057')+';margin-bottom:3px">Precio/unit'+(precioWarn?' ⚠':'')+'</div>'
+    +'<input class="fi prod-precio" type="number" placeholder="$0" value="'+(precio||'')+'" style="height:40px;font-size:13px;'+(precioWarn?warnB:okB)+'">'
+    +'</div>'
     +'</div>';
   lista.appendChild(row);
 }
 function obtenerProductosCel(){
   var items=[];
   document.querySelectorAll('.prod-item-cel').forEach(function(row){
-    var inputs=row.querySelectorAll('input[type="text"],input[type="number"]');
-    var nombre=inputs[0]?inputs[0].value.trim():'';
-    var cantidad=parseFloat(inputs[1]?inputs[1].value:0)||null;
-    var unidad=inputs[2]?inputs[2].value.trim():'';
-    var precio=parseFloat(inputs[3]?inputs[3].value:0)||null;
-    if(nombre)items.push({nombre,cantidad,unidad,precio});
+    var nombre=(row.querySelector('.prod-nombre')||{}).value||'';nombre=nombre.trim();
+    var cantidad=parseFloat((row.querySelector('.prod-cantidad')||{}).value)||null;
+    var unidad=((row.querySelector('.prod-unidad')||{}).value||'').trim();
+    var precio=parseFloat((row.querySelector('.prod-precio')||{}).value)||null;
+    if(nombre)items.push({nombre,cantidad,unidad,precio:precio});
   });
   return items;
 }
