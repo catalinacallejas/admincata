@@ -2243,10 +2243,12 @@ function renderPersonalTabla(d){
   });
   var h='<div class="ecards">';
   Object.keys(pe).forEach(function(n){
-    h+='<div class="ecard" style="position:relative">'
+    h+='<div class="ecard">'
       +'<div class="ecard-n">'+n+'</div>'
-      +'<div class="ecard-v">'+fmt(pe[n])+'</div>'
-      +'<button data-emp="'+encodeURIComponent(n)+'" data-fecha="'+peFecha[n]+'" onclick="generarPDFPersCompleto(decodeURIComponent(this.dataset.emp),this.dataset.fecha)" style="position:absolute;top:8px;right:8px;border:1px solid #9FE1CB;border-radius:6px;background:#e8f7f2;color:#087a55;font-size:11px;padding:2px 7px;cursor:pointer;font-weight:500">📄 PDF</button>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">'
+      +'<div class="ecard-v" style="margin:0">'+fmt(pe[n])+'</div>'
+      +'<button data-emp="'+encodeURIComponent(n)+'" data-fecha="'+peFecha[n]+'" onclick="generarPDFPersCompleto(decodeURIComponent(this.dataset.emp),this.dataset.fecha)" style="border:1px solid #9FE1CB;border-radius:6px;background:#e8f7f2;color:#087a55;font-size:11px;padding:3px 8px;cursor:pointer;font-weight:500;font-family:inherit">📄 PDF</button>'
+      +'</div>'
       +'</div>';
   });
   h+='<div class="ecard tot"><div class="ecard-n">Total</div><div class="ecard-v">'+fmt(tT)+'</div></div></div>';
