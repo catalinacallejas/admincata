@@ -1593,22 +1593,16 @@ async function guardarFact(){
       var factData=await r.json();
       var factId=factData&&factData[0]?factData[0].id:null;
       // Guardar productos si hay
-      // Debug: ver qué trae factData
-      console.log('factData:',JSON.stringify(factData));
-      console.log('factId:',factId);
       var prods=obtenerProductosCel();
-      console.log('prods encontrados:',prods.length,JSON.stringify(prods));
+      alert('DEBUG — factId: '+(factId||'NULL')+' | productos: '+prods.length);
       if(factId&&prods.length){
         var fechaProd=document.getElementById('ft-f').value;
         var pvProd=document.getElementById('ft-pv').value.trim();
         var prodsPayload=prods.map(function(p){return {factura_id:factId,cliente_id:cli.id,nombre:p.nombre,cantidad:p.cantidad||null,unidad:p.unidad||null,precio_unitario:p.precio||null,total:p.cantidad&&p.precio?Math.round(p.cantidad*p.precio):null,fecha:fechaProd,proveedor:pvProd};});
-        console.log('prodsPayload:',JSON.stringify(prodsPayload));
         var rp=await fetch(SU+'/rest/v1/productos_factura',{method:'POST',headers:HJ(),body:JSON.stringify(prodsPayload)});
         var rpTxt=await rp.text();
-        console.log('respuesta productos_factura:',rp.status,rpTxt);
-        if(!rp.ok)alert('Error guardando productos: '+rpTxt);
-      } else if(!factId){
-        console.error('Sin factId — factData:',JSON.stringify(factData));
+        alert('Productos guardados: '+rp.status+' — '+rpTxt.substring(0,100));
+        if(!rp.ok)alert('Error: '+rpTxt);
       }
       document.getElementById('ft-ok').style.display='block';btn.textContent='✓ Guardada';
       setTimeout(function(){
