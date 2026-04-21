@@ -2236,12 +2236,22 @@ function swPersonalTab(tab){
 }
 
 function renderPersonalTabla(d){
-  var tm={Quincena:'quincena',Adelanto:'adelanto',Sueldo:'sueldo',Otro:'otro'},pe={},tT=0;
-  d.forEach(function(r){if(!pe[r.empleado])pe[r.empleado]=0;pe[r.empleado]+=(r.monto||0);tT+=(r.monto||0);});
-  var h='<div class="ecards">';Object.keys(pe).forEach(function(n){h+='<div class="ecard"><div class="ecard-n">'+n+'</div><div class="ecard-v">'+fmt(pe[n])+'</div></div>';});
+  var tm={Quincena:'quincena',Adelanto:'adelanto',Sueldo:'sueldo',Otro:'otro'},pe={},peFecha={},tT=0;
+  d.forEach(function(r){
+    if(!pe[r.empleado]){pe[r.empleado]=0;peFecha[r.empleado]=r.fecha;}
+    pe[r.empleado]+=(r.monto||0);tT+=(r.monto||0);
+  });
+  var h='<div class="ecards">';
+  Object.keys(pe).forEach(function(n){
+    h+='<div class="ecard" style="position:relative">'
+      +'<div class="ecard-n">'+n+'</div>'
+      +'<div class="ecard-v">'+fmt(pe[n])+'</div>'
+      +'<button data-emp="'+encodeURIComponent(n)+'" data-fecha="'+peFecha[n]+'" onclick="generarPDFPersCompleto(decodeURIComponent(this.dataset.emp),this.dataset.fecha)" style="position:absolute;top:8px;right:8px;border:1px solid #9FE1CB;border-radius:6px;background:#e8f7f2;color:#087a55;font-size:11px;padding:2px 7px;cursor:pointer;font-weight:500">📄 PDF</button>'
+      +'</div>';
+  });
   h+='<div class="ecard tot"><div class="ecard-n">Total</div><div class="ecard-v">'+fmt(tT)+'</div></div></div>';
   h+='<div class="tc"><div class="tc-h"><span class="tc-t">Pagos a personal</span><span class="tc-c">'+d.length+'</span></div><table><tr style="background:var(--g50)"><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Fecha</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Empleado</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Tipo</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Monto</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Observación</th><th style="background:var(--g50);border-bottom:1px solid #c1c7cd;padding:8px 1.25rem"></th></tr>';
-  d.forEach(function(r){var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});h+='<tr><td>'+fd+'</td><td style="font-weight:500">'+r.empleado+'</td><td><span class="bdg '+(tm[r.tipo]||'otro')+'">'+r.tipo+'</span></td><td style="font-weight:500">'+fmt(r.monto)+'</td><td style="color:var(--g500)">'+(r.observacion||'—')+'</td><td style="white-space:nowrap"><button class="btn-edit" onclick=\'editPers('+JSON.stringify(r)+')\'>✏️</button><button class="btn-del" onclick="eliminarPers(\''+r.id+'\')">🗑️</button><button class="btn-edit" style="color:#0d9e6e;margin-left:4px" data-emp="'+encodeURIComponent(r.empleado)+'" data-fecha="'+r.fecha+'" onclick="generarPDFPersCompleto(decodeURIComponent(this.dataset.emp),this.dataset.fecha)">📄</button></td></tr>';});
+  d.forEach(function(r){var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});h+='<tr><td>'+fd+'</td><td style="font-weight:500">'+r.empleado+'</td><td><span class="bdg '+(tm[r.tipo]||'otro')+'">'+r.tipo+'</span></td><td style="font-weight:500">'+fmt(r.monto)+'</td><td style="color:var(--g500)">'+(r.observacion||'—')+'</td><td style="white-space:nowrap"><button class="btn-edit" onclick=\'editPers('+JSON.stringify(r)+')\'>✏️</button><button class="btn-del" onclick="eliminarPers(\''+r.id+'\')">🗑️</button></td></tr>';});
   return h+'<tr style="background:var(--g50);font-weight:500;border-top:1px solid #c1c7cd"><td colspan="3" style="padding:9px 1.25rem;font-size:13px">Total</td><td style="padding:9px 1.25rem;font-size:13px">'+fmt(tT)+'</td><td></td><td></td></tr></table></div>';
 }
 
