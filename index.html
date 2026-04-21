@@ -2507,8 +2507,10 @@ async function loadCreditosDash(){
       h+='<div><div style="font-size:11px;color:var(--g500)">Cuotas pagadas</div><div style="font-size:14px;font-weight:500">'+c.cuotas_pagadas+' / '+c.total_cuotas+'</div></div>';
       h+='<div><div style="font-size:11px;color:var(--g500)">Termina</div><div style="font-size:14px;font-weight:500">'+fechaFin+'</div></div>';
       h+='</div>';
-      h+='<div style="background:var(--g200);border-radius:4px;height:8px;margin-bottom:4px"><div style="background:var(--r);border-radius:4px;height:8px;width:'+pct+'%"></div></div>';
-      h+='<div style="font-size:11px;color:var(--g500)">'+pct+'% pagado</div>';
+      var barColor=pct>=66?'var(--v)':pct>=33?'var(--a)':'var(--r)';
+      var pctLabel=pct>=66?'var(--vd)':pct>=33?'var(--a)':'var(--r)';
+      h+='<div style="background:var(--g200);border-radius:4px;height:8px;margin-bottom:4px"><div style="background:'+barColor+';border-radius:4px;height:8px;width:'+pct+'%;transition:width .3s"></div></div>';
+      h+='<div style="font-size:11px;color:'+pctLabel+';font-weight:500">'+pct+'% pagado</div>';
       h+='</div>';
     });
     h+='</div>';
