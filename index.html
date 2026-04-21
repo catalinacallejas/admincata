@@ -1569,10 +1569,13 @@ async function guardarFact(){
   var to=v('ft-to');if(!to){alert('Ingresa el total');return;}
   var fecha=document.getElementById('ft-f').value;if(!fecha){alert('Selecciona la fecha');return;}
   var btn=document.getElementById('ft-btn');btn.disabled=true;btn.textContent='Verificando...';
-  // Verificar duplicado
-  if(nm){
+  // Limpiar mensajes anteriores
+  document.getElementById('ft-err').style.display='none';
+  document.getElementById('ft-ok').style.display='none';
+  // Verificar duplicado solo si tiene número de factura
+  if(nm&&nm.trim()){
     try{
-      var chk=await fetch(SU+'/rest/v1/facturas?numero_factura=eq.'+encodeURIComponent(nm)+'&proveedor=eq.'+encodeURIComponent(pv)+'&cliente_id=eq.'+cli.id+'&select=id',{headers:H()});
+      var chk=await fetch(SU+'/rest/v1/facturas?numero_factura=eq.'+encodeURIComponent(nm.trim())+'&proveedor=eq.'+encodeURIComponent(pv.trim())+'&cliente_id=eq.'+cli.id+'&select=id',{headers:H()});
       var dup=await chk.json();
       if(dup&&dup.length>0){
         document.getElementById('ft-err').style.display='block';
