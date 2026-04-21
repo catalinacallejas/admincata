@@ -447,7 +447,6 @@ tr:hover td{background:var(--g50)}
         <div class="sb-item" onclick="dpage('personal',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Personal</div>
         <div class="sb-item" onclick="dpage('gastosfijos',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Gastos fijos</div>
         <div class="sb-item" onclick="dpage('creditos',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Créditos</div>
-        <div class="sb-item" onclick="dpage('precios',this)"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Precios</div>
       </div>
       <div class="sb-foot"><button class="sb-out" onclick="logout()"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar sesión</button></div>
     </div>
@@ -457,7 +456,14 @@ tr:hover td{background:var(--g50)}
         <div class="dp active" id="dp-resumen"><div class="pills" id="pills"></div><div id="rc"><div class="ld">Cargando...</div></div></div>
         <div class="dp" id="dp-balance"><div id="bc"><div class="ld">Cargando...</div></div></div>
         <div class="dp" id="dp-cierres"><div id="dc"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-facturas"><div id="df"><div class="ld">Cargando...</div></div></div>
+        <div class="dp" id="dp-facturas">
+          <div style="display:flex;border-bottom:2px solid #c1c7cd;margin-bottom:1.25rem">
+            <button id="ftab-facturas" onclick="swFactTab('facturas')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--vd);border-bottom:2px solid var(--v);margin-bottom:-2px">Facturas</button>
+            <button id="ftab-precios" onclick="swFactTab('precios')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Precios de compra</button>
+          </div>
+          <div id="dp-fact-facturas"><div id="df"><div class="ld">Cargando...</div></div></div>
+          <div id="dp-fact-precios" style="display:none"><div id="dprecios"><div class="ld">Cargando...</div></div></div>
+        </div>
         <div class="dp" id="dp-personal">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;border-bottom:2px solid #c1c7cd;padding-bottom:0">
             <div style="display:flex">
@@ -476,7 +482,6 @@ tr:hover td{background:var(--g50)}
         </div>
         <div class="dp" id="dp-gastosfijos"><div id="dg"><div class="ld">Cargando...</div></div></div>
         <div class="dp" id="dp-creditos"><div id="dcred"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-precios"><div id="dprecios"><div class="ld">Cargando...</div></div></div>
       </div>
     </div>
   </div>
@@ -1514,6 +1519,17 @@ function generarPDFPers(r){
 }
 
 
+function swFactTab(tab){
+  document.getElementById('dp-fact-facturas').style.display=tab==='facturas'?'':'none';
+  document.getElementById('dp-fact-precios').style.display=tab==='precios'?'':'none';
+  document.getElementById('ftab-facturas').style.color=tab==='facturas'?'var(--vd)':'var(--g500)';
+  document.getElementById('ftab-facturas').style.borderBottom=tab==='facturas'?'2px solid var(--v)':'2px solid transparent';
+  document.getElementById('ftab-precios').style.color=tab==='precios'?'var(--vd)':'var(--g500)';
+  document.getElementById('ftab-precios').style.borderBottom=tab==='precios'?'2px solid var(--v)':'2px solid transparent';
+  if(tab==='precios')loadPreciosDash();
+}
+
+
 function calcCaja(){
   var ci=v('cj-ci'),cf=v('cj-cf'),z=v('cj-z'),rc=v('cj-rc'),cr=v('cj-cr'),ot=v('cj-ot'),tr=v('cj-tr'),nu=v('cj-nu'),re=v('cj-re'),ga=v('cj-ga');
   var dif=-(ci+z-rc-cr-ot-tr-nu-re-cf-ga);
@@ -1594,15 +1610,12 @@ async function guardarFact(){
       var factId=factData&&factData[0]?factData[0].id:null;
       // Guardar productos si hay
       var prods=obtenerProductosCel();
-      alert('DEBUG — factId: '+(factId||'NULL')+' | productos: '+prods.length);
       if(factId&&prods.length){
         var fechaProd=document.getElementById('ft-f').value;
         var pvProd=document.getElementById('ft-pv').value.trim();
         var prodsPayload=prods.map(function(p){return {factura_id:factId,cliente_id:cli.id,nombre:p.nombre,cantidad:p.cantidad||null,unidad:p.unidad||null,precio_unitario:p.precio||null,total:p.cantidad&&p.precio?Math.round(p.cantidad*p.precio):null,fecha:fechaProd,proveedor:pvProd};});
         var rp=await fetch(SU+'/rest/v1/productos_factura',{method:'POST',headers:HJ(),body:JSON.stringify(prodsPayload)});
-        var rpTxt=await rp.text();
-        alert('Productos guardados: '+rp.status+' — '+rpTxt.substring(0,100));
-        if(!rp.ok)alert('Error: '+rpTxt);
+        if(!rp.ok)console.error('Error productos:',await rp.text());
       }
       document.getElementById('ft-ok').style.display='block';btn.textContent='✓ Guardada';
       setTimeout(function(){
@@ -2078,7 +2091,7 @@ function dpage(n,el){
   if(n==='facturas')loadFacturasDash();
   if(n==='gastosfijos')loadGastosFijosDash();
   if(n==='creditos')loadCreditosDash();
-  if(n==='precios')loadPreciosDash();
+
 }
 async function loadGastosFijosDash(){
   var el=document.getElementById('dg');el.innerHTML='<div class="ld">Cargando...</div>';
@@ -2599,7 +2612,7 @@ function toggleMesCaja(mid,header){
 }
 
 async function loadFacturasDash(){
-  var el=document.getElementById('df');el.innerHTML='<div class="ld">Cargando...</div>';
+  var el=document.getElementById('df');if(el)el.innerHTML='<div class="ld">Cargando...</div>';
   try{
     var r=await fetch(SU+'/rest/v1/facturas?select=*&cliente_id=eq.'+cli.id+'&order=fecha.desc&limit=500',{headers:H()});
     var d=await r.json();
