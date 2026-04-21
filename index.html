@@ -652,6 +652,7 @@ var GFC=['pr','su','ar','lu','cr','iv','co','ot'];
 var GFKEYS=['previred','sueldos','arriendo','luz','credito','iva','contabilidad','otros'];
 
 function fmt(n){return '$'+Math.round(n||0).toLocaleString('es-CL');}
+function fmtDeuda(n){return '$'+Math.round(n||0).toLocaleString('es-CL');}
 function fmtK(n){if(Math.abs(n)>=1e6)return '$'+(n/1e6).toFixed(1)+'M';if(Math.abs(n)>=1e3)return '$'+Math.round(n/1e3)+'K';return '$'+Math.round(n||0);}
 function v(id){return parseFloat(document.getElementById(id).value)||0;}
 function H(){return{apikey:SK,Authorization:'Bearer '+SK};}
