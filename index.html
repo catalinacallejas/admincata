@@ -386,7 +386,13 @@ tr:hover td{background:var(--g50)}
       <div class="grow"><span class="gnom">Crédito</span><input class="ginp" type="number" id="gf-cr" placeholder="0" oninput="calcGF()"></div>
       <div class="grow"><span class="gnom">IVA</span><input class="ginp" type="number" id="gf-iv" placeholder="0" oninput="calcGF()"></div>
       <div class="grow"><span class="gnom">Contabilidad</span><input class="ginp" type="number" id="gf-co" placeholder="0" oninput="calcGF()"></div>
-      <div class="grow"><span class="gnom">Otros</span><input class="ginp" type="number" id="gf-ot" placeholder="0" oninput="calcGF()"></div>
+      <div class="grow" style="flex-direction:column;align-items:stretch">
+        <span class="gnom" style="margin-bottom:6px">Otros</span>
+        <div id="gf-otros-lista"></div>
+        <button type="button" onclick="agregarOtroGF()" style="width:100%;height:34px;border:1px dashed #9FE1CB;border-radius:8px;background:white;color:#087a55;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:4px">+ Agregar otro gasto</button>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500;padding:2px 0"><span style="color:#495057">Total otros</span><span id="gf-ot-total" style="color:#e67700">$0</span></div>
+        <input type="hidden" id="gf-ot" value="0">
+      </div>
       <div class="fres ok" id="gf-tb"><div class="fres-l">Total gastos fijos</div><div class="fres-v" id="gf-tv">$0</div></div>
       <div class="fmsg ok" id="gf-ok">✓ Gastos guardados correctamente</div>
       <div class="fmsg err" id="gf-err">Error al guardar</div>
@@ -564,7 +570,13 @@ tr:hover td{background:var(--g50)}
       <div><label class="modal-label">Crédito</label><input class="modal-input" type="number" id="mgf-cr" oninput="calcModalGF()"></div>
       <div><label class="modal-label">IVA</label><input class="modal-input" type="number" id="mgf-iv" oninput="calcModalGF()"></div>
       <div><label class="modal-label">Contabilidad</label><input class="modal-input" type="number" id="mgf-co" oninput="calcModalGF()"></div>
-      <div><label class="modal-label">Otros</label><input class="modal-input" type="number" id="mgf-ot" oninput="calcModalGF()"></div>
+      <div style="grid-column:span 2">
+      <label class="modal-label">Otros</label>
+      <div id="mgf-otros-lista"></div>
+      <button type="button" onclick="agregarOtroGFModal()" style="width:100%;height:32px;border:1px dashed #9FE1CB;border-radius:8px;background:white;color:#087a55;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:4px">+ Agregar otro gasto</button>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500;padding:2px 0"><span style="color:#495057">Total otros</span><span id="mgf-ot-total" style="color:#e67700">$0</span></div>
+      <input type="hidden" id="mgf-ot" value="0">
+    </div>
     </div>
     <div style="margin-top:.75rem;padding:.75rem 1rem;border-radius:8px;border:1px solid #c1c7cd;background:var(--g50)">
       <span style="font-size:12px;color:var(--g500);font-weight:500">TOTAL: </span>
@@ -1787,6 +1799,44 @@ async function guardarPers(){
   }catch(ex){document.getElementById('ps-err').style.display='block';btn.disabled=false;btn.textContent='Registrar pago';}
 }
 
+// ── Gastos fijos — Otros desglosados ──
+function agregarOtroGFItem(listaId,totalId,hiddenId,desc,monto){
+  var lista=document.getElementById(listaId);
+  var row=document.createElement('div');
+  row.className='gf-otro-item';
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
+  row.innerHTML='<input class="gf-otro-desc fi" type="text" placeholder="Descripcion" value="'+(desc||'')+'" style="flex:1;height:34px;font-size:12px" data-lista="'+listaId+'" data-total="'+totalId+'" data-hidden="'+hiddenId+'" oninput="calcTotalOtrosGF(this.dataset.lista,this.dataset.total,this.dataset.hidden)">'
+    +'<input class="gf-otro-monto fi" type="number" placeholder="0" value="'+(monto||'')+'" style="width:100px;height:34px;font-size:12px;text-align:right" data-lista="'+listaId+'" data-total="'+totalId+'" data-hidden="'+hiddenId+'" oninput="calcTotalOtrosGF(this.dataset.lista,this.dataset.total,this.dataset.hidden)">'
+    +'<button type="button" data-lista="'+listaId+'" data-total="'+totalId+'" data-hidden="'+hiddenId+'" onclick="this.parentElement.remove();calcTotalOtrosGF(this.dataset.lista,this.dataset.total,this.dataset.hidden)" style="width:30px;height:30px;border:1px solid #F09595;border-radius:6px;background:white;color:#e03131;font-size:16px;cursor:pointer;font-family:inherit;flex-shrink:0">x</button>';
+  lista.appendChild(row);
+}
+function calcTotalOtrosGF(listaId,totalId,hiddenId){
+  var total=0;
+  document.querySelectorAll('#'+listaId+' .gf-otro-monto').forEach(function(inp){total+=parseFloat(inp.value)||0;});
+  document.getElementById(totalId).textContent=fmt(total);
+  document.getElementById(hiddenId).value=total;
+  calcGF();
+}
+function obtenerOtrosGFLista(listaId){
+  var items=[];
+  document.querySelectorAll('#'+listaId+' .gf-otro-item').forEach(function(row){
+    var desc=(row.querySelector('.gf-otro-desc')||{}).value||'';
+    var monto=parseFloat((row.querySelector('.gf-otro-monto')||{}).value)||0;
+    if(desc||monto)items.push({desc:desc.trim(),monto:monto});
+  });
+  return items;
+}
+function agregarOtroGF(){agregarOtroGFItem('gf-otros-lista','gf-ot-total','gf-ot','',0);}
+function agregarOtroGFModal(){agregarOtroGFItem('mgf-otros-lista','mgf-ot-total','mgf-ot','',0);}
+function cargarOtrosGFEnLista(listaId,totalId,hiddenId,detalle){
+  document.getElementById(listaId).innerHTML='';
+  if(detalle&&detalle.length){
+    detalle.forEach(function(g){agregarOtroGFItem(listaId,totalId,hiddenId,g.desc,g.monto);});
+    calcTotalOtrosGF(listaId,totalId,hiddenId);
+  }
+}
+
+
 function calcGF(){var t=GFC.reduce(function(s,c){return s+v('gf-'+c);},0);document.getElementById('gf-tv').textContent=fmt(t);}
 async function loadGFUltimo(){
   try{var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&order=anio.desc,mes.desc&limit=1',{headers:H()});var d=await r.json();
@@ -1796,12 +1846,13 @@ async function guardarGF(){
   var mes=parseInt(document.getElementById('gf-mes').value),anio=hoy.getFullYear();
   var total=GFC.reduce(function(s,c){return s+v('gf-'+c);},0);
   if(!total){alert('Ingresa al menos un gasto');return;}
-  var payload={mes,anio,total,cliente_id:cli.id};GFC.forEach(function(c,i){payload[GFKEYS[i]]=v('gf-'+c);});
+  var otrosDetalle=obtenerOtrosGFLista('gf-otros-lista');
+  var payload={mes,anio,total,otros_detalle:otrosDetalle,cliente_id:cli.id};GFC.forEach(function(c,i){payload[GFKEYS[i]]=v('gf-'+c);});
   var btn=document.getElementById('gf-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
     await fetch(SU+'/rest/v1/gastos_fijos?mes=eq.'+mes+'&anio=eq.'+anio+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     var r=await fetch(SU+'/rest/v1/gastos_fijos',{method:'POST',headers:HJ(),body:JSON.stringify(payload)});
-    if(r.ok){document.getElementById('gf-ok').style.display='block';btn.textContent='✓ Guardado';setTimeout(function(){btn.disabled=false;btn.textContent='Guardar gastos del mes';document.getElementById('gf-ok').style.display='none';},2500);}
+    if(r.ok){document.getElementById('gf-ok').style.display='block';btn.textContent='✓ Guardado';setTimeout(function(){document.getElementById('gf-otros-lista').innerHTML='';document.getElementById('gf-ot-total').textContent='$0';btn.disabled=false;btn.textContent='Guardar gastos del mes';document.getElementById('gf-ok').style.display='none';},2500);}
     else throw new Error(await r.text());
   }catch(ex){document.getElementById('gf-err').style.display='block';btn.disabled=false;btn.textContent='Guardar gastos del mes';}
 }
@@ -2993,7 +3044,8 @@ function editGF(r){
   document.getElementById('mgf-cr').value=r.credito||0;
   document.getElementById('mgf-iv').value=r.iva||0;
   document.getElementById('mgf-co').value=r.contabilidad||0;
-  document.getElementById('mgf-ot').value=r.otros||0;
+  cargarOtrosGFEnLista('mgf-otros-lista','mgf-ot-total','mgf-ot',r.otros_detalle||[]);
+  if((!r.otros_detalle||!r.otros_detalle.length)&&r.otros){document.getElementById('mgf-ot').value=r.otros||0;}
   // Cargar select de mes
   var sel=document.getElementById('mgf-mes');sel.innerHTML='';
   for(var i=0;i<12;i++){var o=document.createElement('option');o.value=i+1;o.textContent=MS[i]+' '+r.anio;if(i+1===r.mes)o.selected=true;sel.appendChild(o);}
@@ -3009,7 +3061,8 @@ async function guardarEditGF(){
   var ids=['pr','su','ar','lu','cr','iv','co','ot'];
   var keys=['previred','sueldos','arriendo','luz','credito','iva','contabilidad','otros'];
   var total=ids.reduce(function(s,c){return s+mv('mgf-'+c);},0);
-  var payload={total,mes:parseInt(document.getElementById('mgf-mes').value)};
+  var otrosDetalleModal=obtenerOtrosGFLista('mgf-otros-lista');
+  var payload={total,mes:parseInt(document.getElementById('mgf-mes').value),otros_detalle:otrosDetalleModal};
   ids.forEach(function(c,i){payload[keys[i]]=mv('mgf-'+c);});
   var btn=document.getElementById('mgf-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
