@@ -2396,24 +2396,29 @@ function renderPersonalTabla(d){
     if(!empleados[r.empleado]){empleados[r.empleado]=[];peFecha[r.empleado]=r.fecha;}
     empleados[r.empleado].push(r);tT+=(r.monto||0);
   });
-  var h='<div class="ecards">';
-  Object.keys(empleados).forEach(function(n){
-    var tot=empleados[n].reduce(function(s,p){return s+(p.monto||0);},0);
-    h+='<div class="ecard"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div class="ecard-n" style="margin:0">'+n+'</div>'
-      +'<button data-emp="'+encodeURIComponent(n)+'" data-fecha="'+peFecha[n]+'" onclick="generarPDFPersCompleto(decodeURIComponent(this.dataset.emp),this.dataset.fecha)" style="border:1px solid #9FE1CB;border-radius:6px;background:#e8f7f2;color:#087a55;font-size:11px;padding:3px 8px;cursor:pointer;font-weight:500;font-family:inherit">&#128196; PDF</button>'
-      +'</div><div class="ecard-v">'+fmt(tot)+'</div></div>';
-  });
-  h+='<div class="ecard tot"><div class="ecard-n">Total</div><div class="ecard-v">'+fmt(tT)+'</div></div></div>';
+  // Solo total general — sin tarjetas por empleado
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid #c1c7cd;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:1.25rem">';
+  h+='<span style="font-size:13px;font-weight:500;color:#212529">Total pagado — '+Object.keys(empleados).length+' empleados</span>';
+  h+='<span style="font-size:16px;font-weight:500;color:#e67700">'+fmt(tT)+'</span></div>';
+  // Bloques por empleado
   Object.keys(empleados).forEach(function(n){
     var pagos=empleados[n];
     var tot=pagos.reduce(function(s,p){return s+(p.monto||0);},0);
-    h+='<div class="tc" style="margin-bottom:1rem"><div class="tc-h"><span class="tc-t">'+n+'</span><span style="font-size:13px;font-weight:500;color:#e67700">'+fmt(tot)+'</span></div>';
+    h+='<div class="tc" style="margin-bottom:1rem">';
+    // Header con nombre grande + total + botón PDF pequeño
+    h+='<div class="tc-h" style="display:flex;justify-content:space-between;align-items:center">';
+    h+='<div style="display:flex;align-items:center;gap:10px">';
+    h+='<span style="font-size:14px;font-weight:500;color:#212529">'+n+'</span>';
+    h+='<button data-emp="'+encodeURIComponent(n)+'" data-fecha="'+peFecha[n]+'" onclick="generarPDFPersCompleto(decodeURIComponent(this.dataset.emp),this.dataset.fecha)" style="border:1px solid #9FE1CB;border-radius:6px;background:#e8f7f2;color:#087a55;font-size:11px;padding:2px 7px;cursor:pointer;font-weight:500;font-family:inherit">&#128196; PDF</button>';
+    h+='</div>';
+    h+='<span style="font-size:14px;font-weight:500;color:#e67700">'+fmt(tot)+'</span>';
+    h+='</div>';
     h+='<table><tr style="background:var(--g50)"><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Fecha</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Tipo</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Monto</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Observacion</th><th style="background:var(--g50);border-bottom:1px solid #c1c7cd;padding:8px 1.25rem"></th></tr>';
     pagos.forEach(function(r){
       var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});
       h+='<tr><td>'+fd+'</td><td><span class="bdg '+(tm[r.tipo]||'otro')+'">'+r.tipo+'</span></td><td style="font-weight:500">'+fmt(r.monto)+'</td><td style="color:var(--g500)">'+(r.observacion||'&#8212;')+'</td><td style="white-space:nowrap"><button class="btn-edit" onclick=\'editPers('+JSON.stringify(r)+')\'>&#9998;</button><button class="btn-del" onclick="eliminarPers(\''+r.id+'\')">&#128465;</button></td></tr>';
     });
-    h+='<tr style="background:var(--g50);font-weight:500;border-top:1px solid #c1c7cd"><td colspan="2" style="padding:9px 1.25rem;font-size:13px">Total '+n+'</td><td style="padding:9px 1.25rem;font-size:13px">'+fmt(tot)+'</td><td></td><td></td></tr></table></div>';
+    h+='</table></div>';
   });
   return h;
 }
