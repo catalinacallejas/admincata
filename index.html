@@ -2605,8 +2605,7 @@ async function loadCreditosDash(){
     h+='<div class="kpi '+(pendientes>0?'g':'v')+'"><div class="kl">Pendientes '+MS[mesA-1]+'</div><div class="kv">'+pendientes+'</div><div class="ks">'+(pendientes>0?'sin confirmar':'todos pagados')+'</div></div>';
     h+='</div>';
 
-    // Tabla créditos
-    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Créditos activos</span><span class="tc-c">'+d.length+'</span></div>';
+    // Tabla créditos — estilo coordinado con dashboard y celular
     d.forEach(function(c){
       var pagado=pagos.find(function(p){return p.credito_id===c.id&&p.pagado;});
       var pct=c.total_cuotas>0?Math.round((c.cuotas_pagadas/c.total_cuotas)*100):0;
@@ -2616,29 +2615,30 @@ async function loadCreditosDash(){
         d2.setMonth(d2.getMonth()+(c.total_cuotas||0));
         return d2.toLocaleDateString('es-CL',{month:'short',year:'numeric'});
       })():'—';
-      h+='<div style="padding:1rem 1.25rem;border-bottom:1px solid #c1c7cd">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
-      h+='<div><div style="font-size:14px;font-weight:500;color:var(--g900)">'+c.nombre+'</div>';
-      if(c.banco)h+='<div style="font-size:12px;color:var(--g500)">'+c.banco+'</div></div>';
-      else h+='</div>';
-      h+='<div style="display:flex;align-items:center;gap:8px">';
-      h+='<span style="font-size:11px;font-weight:500;padding:3px 10px;border-radius:10px;background:'+(pagado?'var(--vl)':'var(--al)')+';color:'+(pagado?'var(--vd)':'var(--a)')+'">'+( pagado?'✓ Pagado '+MS[mesA-1]:'Pendiente '+MS[mesA-1])+'</span>';
-      if(!pagado)h+='<button onclick="abrirPagoCreditoPC(&quot;'+c.id+'&quot;,&quot;'+c.nombre+'&quot;,'+c.cuota_mensual+')" style="padding:4px 12px;background:var(--v);color:white;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">Registrar pago</button>';
-      h+='<button onclick="editCreditoPC('+encodeURIComponent(JSON.stringify(c)).replace(/'/g,"&#39;")+')" style="padding:4px 8px;background:none;border:1px solid #c1c7cd;border-radius:6px;font-size:12px;color:var(--az);cursor:pointer">✏️</button>';
-      h+='</div></div>';
-      h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px">';
-      h+='<div><div style="font-size:11px;color:var(--g500)">Cuota mensual</div><div style="font-size:14px;font-weight:500">'+fmtDeuda(c.cuota_mensual)+'</div></div>';
-      h+='<div><div style="font-size:11px;color:var(--g500)">Deuda restante</div><div style="font-size:14px;font-weight:500;color:var(--r)">'+fmtDeuda(deudaRest)+'</div></div>';
-      h+='<div><div style="font-size:11px;color:var(--g500)">Cuotas pagadas</div><div style="font-size:14px;font-weight:500">'+c.cuotas_pagadas+' / '+c.total_cuotas+'</div></div>';
-      h+='<div><div style="font-size:11px;color:var(--g500)">Termina</div><div style="font-size:14px;font-weight:500">'+fechaFin+'</div></div>';
-      h+='</div>';
       var barColor=pct>=66?'var(--v)':pct>=33?'var(--a)':'var(--r)';
       var pctLabel=pct>=66?'var(--vd)':pct>=33?'var(--a)':'var(--r)';
-      h+='<div style="background:var(--g200);border-radius:4px;height:8px;margin-bottom:4px"><div style="background:'+barColor+';border-radius:4px;height:8px;width:'+pct+'%;transition:width .3s"></div></div>';
-      h+='<div style="font-size:11px;color:'+pctLabel+';font-weight:500">'+pct+'% pagado</div>';
+      h+='<div style="border:1px solid #1971c2;border-radius:8px;overflow:hidden;margin-bottom:12px">';
+      // Header azul
+      h+='<div style="background:#e8f0fb;border-bottom:1px solid #B5D4F4;padding:10px 1.25rem;display:flex;justify-content:space-between;align-items:center">';
+      h+='<div><div style="font-size:14px;font-weight:500;color:#0C447C">'+c.nombre+'</div>';
+      h+='<div style="font-size:12px;color:#adb5bd">'+(c.banco||'')+' · '+fmtDeuda(c.cuota_mensual)+'/mes</div></div>';
+      h+='<div style="display:flex;align-items:center;gap:8px">';
+      h+='<span style="font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:'+(pagado?'#e8f7f2':'#FAEEDA')+';color:'+(pagado?'#087a55':'#b45309')+'">'+(pagado?'✓ Pagado '+MS[mesA-1]:'⏳ Pendiente '+MS[mesA-1])+'</span>';
+      if(!pagado)h+='<button onclick="abrirPagoCreditoPC(&quot;'+c.id+'&quot;,&quot;'+c.nombre+'&quot;,'+c.cuota_mensual+')" style="padding:4px 12px;background:#1971c2;color:white;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">Registrar pago</button>';
+      h+='<button onclick="editCreditoPC('+encodeURIComponent(JSON.stringify(c)).replace(/'/g,"&#39;")+')" style="padding:4px 8px;background:white;border:1px solid #B5D4F4;border-radius:6px;font-size:12px;color:#1971c2;cursor:pointer">✏️</button>';
+      h+='</div></div>';
+      // Datos del crédito
+      h+='<div style="background:white;padding:12px 1.25rem">';
+      h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px">';
+      h+='<div><div style="font-size:11px;color:#adb5bd;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Cuota mensual</div><div style="font-size:14px;font-weight:500;color:#212529">'+fmtDeuda(c.cuota_mensual)+'</div></div>';
+      h+='<div><div style="font-size:11px;color:#adb5bd;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Deuda restante</div><div style="font-size:14px;font-weight:500;color:#e03131">'+fmtDeuda(deudaRest)+'</div></div>';
+      h+='<div><div style="font-size:11px;color:#adb5bd;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Cuotas pagadas</div><div style="font-size:14px;font-weight:500;color:#212529">'+c.cuotas_pagadas+' / '+c.total_cuotas+'</div></div>';
+      h+='<div><div style="font-size:11px;color:#adb5bd;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Termina</div><div style="font-size:14px;font-weight:500;color:#212529">'+fechaFin+'</div></div>';
       h+='</div>';
+      h+='<div style="background:#e9ecef;border-radius:4px;height:6px;margin-bottom:4px"><div style="background:'+barColor+';border-radius:4px;height:6px;width:'+pct+'%;transition:width .3s"></div></div>';
+      h+='<div style="font-size:11px;color:'+pctLabel+';font-weight:500">'+pct+'% pagado</div>';
+      h+='</div></div>';
     });
-    h+='</div>';
     el.innerHTML=h;
   }catch(ex){el.innerHTML='<div class="ld">Error: '+ex.message+'</div>';}
 }
