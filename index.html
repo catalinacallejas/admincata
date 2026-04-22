@@ -1642,7 +1642,7 @@ async function toggleFactProds(elId, factId){
   el.style.display='block';
   if(el.dataset.loaded)return;
   try{
-    var r=await fetch(SU+'/rest/v1/productos_factura?select=*&factura_id=eq.'+factId+'&orden=created_at.asc',{headers:H()});
+    var r=await fetch(SU+'/rest/v1/productos_factura?select=*&factura_id=eq.'+factId+'&order=created_at.asc',{headers:H()});
     var prods=await r.json();
     if(!prods||!prods.length){el.innerHTML='<span style="font-size:11px;color:#adb5bd">Sin productos registrados</span>';el.dataset.loaded='1';return;}
     var h='<div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:#adb5bd;margin-bottom:5px">Productos</div>';
