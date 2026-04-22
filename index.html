@@ -2024,8 +2024,35 @@ function renderFactHist(d){
 }
 function renderPersHist(d){
   var tm={Quincena:'quincena',Adelanto:'adelanto',Sueldo:'sueldo',Otro:'otro'};
-  return d.map(function(r){var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-    return '<div class="hitem"><div class="htop"><span class="hfecha">'+r.empleado+'</span><span class="hval neg">'+fmt(r.monto)+'</span></div><div class="hrow"><span>'+fd+'</span><span><span class="bdg '+(tm[r.tipo]||'otro')+'">'+r.tipo+'</span></span></div></div>';}).join('');
+  // Agrupar por empleado
+  var empleados={};
+  d.forEach(function(r){
+    if(!empleados[r.empleado])empleados[r.empleado]=[];
+    empleados[r.empleado].push(r);
+  });
+  var h='';
+  Object.keys(empleados).forEach(function(emp){
+    var pagos=empleados[emp];
+    var total=pagos.reduce(function(s,p){return s+(p.monto||0);},0);
+    h+='<div style="background:white;border:1px solid #c1c7cd;border-radius:8px;overflow:hidden;margin-bottom:10px">';
+    h+='<div style="background:#f8f9fa;border-bottom:1px solid #c1c7cd;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">';
+    h+='<span style="font-size:13px;font-weight:500;color:#212529">'+emp+'</span>';
+    h+='<span style="font-size:13px;font-weight:500;color:#e67700">'+fmt(total)+'</span>';
+    h+='</div>';
+    pagos.forEach(function(r){
+      var fd=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #e9ecef">';
+      h+='<div><span style="font-size:12px;color:#adb5bd">'+fd+'</span>';
+      if(r.observacion)h+=' <span style="font-size:11px;color:#adb5bd">— '+r.observacion+'</span>';
+      h+='</div>';
+      h+='<div style="display:flex;align-items:center;gap:6px">';
+      h+='<span class="bdg '+(tm[r.tipo]||'otro')+'">'+r.tipo+'</span>';
+      h+='<span style="font-size:13px;font-weight:500;color:#e03131">'+fmt(r.monto)+'</span>';
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  return h;
 }
 
 async function loadReporte(){
