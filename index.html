@@ -2033,7 +2033,7 @@ async function loadBalCel(){
       var clrAno=tR>=0?'var(--vd)':'var(--r)';
       html+='<div style="border:1px solid '+(abierto?'var(--v)':'#c1c7cd')+';border-radius:8px;margin-bottom:12px;overflow:hidden">';
       html+='<div class="bal-toggle" data-target="'+anoId+'" style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:'+(abierto?'var(--vl)':'white')+';cursor:pointer">';
-      html+='<span style="font-size:16px;font-weight:500;color:'+(abierto?'var(--vd)':'var(--g900)')+'">'+a+(abierto?' (actual)':'')+'</span>';
+      html+='<span style="font-size:16px;font-weight:500;color:'+(abierto?'var(--vd)':'var(--g900)')+'">'+a+(abierto?' ('+MS[hoy.getMonth()]+')':'')+'</span>';
       html+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:500;color:'+clrAno+'">'+fmt(tR)+'</span><span style="color:var(--g500)">'+(abierto?'▲':'▼')+'</span></div></div>';
       html+='<div id="'+anoId+'" style="display:'+(abierto?'block':'none')+';padding:10px">';
       html+='<div class="hitem" style="margin-bottom:8px">';
