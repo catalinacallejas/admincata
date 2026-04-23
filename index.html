@@ -620,14 +620,56 @@ tr:hover td{background:var(--g50)}
     <button onclick="logout()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:inherit">Salir</button>
   </div>
   <div style="padding:1.5rem;max-width:900px;margin:0 auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-      <div>
-        <div style="font-size:20px;font-weight:500;color:var(--g900)">Clientes</div>
-        <div style="font-size:13px;color:var(--g500);margin-top:2px">Gestiona los negocios del sistema</div>
-      </div>
-      <button onclick="abrirNuevoCliente()" style="padding:10px 20px;background:var(--v);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">+ Nuevo cliente</button>
+    <!-- Tabs admin -->
+    <div style="display:flex;border-bottom:2px solid #c1c7cd;margin-bottom:1.5rem">
+      <button id="atab-clientes" onclick="swAdminTab('clientes')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--vd);border-bottom:2px solid var(--v);margin-bottom:-2px">Clientes</button>
+      <button id="atab-usuarios" onclick="swAdminTab('usuarios')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Usuarios</button>
     </div>
-    <div id="admin-clientes"><div class="ld">Cargando...</div></div>
+    <!-- Panel clientes -->
+    <div id="admin-panel-clientes">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <div>
+          <div style="font-size:20px;font-weight:500;color:var(--g900)">Clientes</div>
+          <div style="font-size:13px;color:var(--g500);margin-top:2px">Gestiona los negocios del sistema</div>
+        </div>
+        <button onclick="abrirNuevoCliente()" style="padding:10px 20px;background:var(--v);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">+ Nuevo cliente</button>
+      </div>
+      <div id="admin-clientes"><div class="ld">Cargando...</div></div>
+    </div>
+    <!-- Panel usuarios -->
+    <div id="admin-panel-usuarios" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <div>
+          <div style="font-size:20px;font-weight:500;color:var(--g900)">Usuarios</div>
+          <div style="font-size:13px;color:var(--g500);margin-top:2px">Gestiona los accesos por negocio</div>
+        </div>
+        <button onclick="abrirNuevoUsuario()" style="padding:10px 20px;background:var(--v);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">+ Agregar usuario</button>
+      </div>
+      <div id="admin-usuarios-lista"><div class="ld">Cargando...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO/EDITAR USUARIO -->
+<div class="modal-bg" id="modal-usuario">
+  <div class="modal">
+    <div class="modal-t"><span id="musr-titulo">Agregar usuario</span><button class="modal-x" onclick="cerrarModal('usuario')">×</button></div>
+    <input type="hidden" id="musr-id">
+    <label class="modal-label">Nombre</label>
+    <input class="modal-input" type="text" id="musr-nombre" placeholder="Ej: Pedro Soto">
+    <label class="modal-label">Email</label>
+    <input class="modal-input" type="email" id="musr-email" placeholder="pedro@negocio.cl">
+    <label class="modal-label">Contraseña</label>
+    <input class="modal-input" type="text" id="musr-pass" placeholder="Contraseña inicial">
+    <label class="modal-label">Negocio</label>
+    <select class="modal-select" id="musr-cliente"></select>
+    <label class="modal-label">Rol</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      <button id="musr-rol-jefe" onclick="selRolUsuario('jefe_local')" style="height:52px;border:1px solid #9FE1CB;border-radius:8px;background:#e8f7f2;color:#087a55;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">👤 Jefe de local<br><span style="font-size:10px;font-weight:400;color:#087a55">Acceso limitado</span></button>
+      <button id="musr-rol-admin" onclick="selRolUsuario('admin')" style="height:52px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#495057;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">🔑 Administrador<br><span style="font-size:10px;font-weight:400;color:#adb5bd">Acceso total</span></button>
+    </div>
+    <input type="hidden" id="musr-rol" value="jefe_local">
+    <div class="modal-btns"><button class="modal-cancel" onclick="cerrarModal('usuario')">Cancelar</button><button class="modal-save" id="musr-btn" onclick="guardarUsuario()">Crear usuario</button></div>
   </div>
 </div>
 
@@ -679,15 +721,38 @@ async function entrar(){
   var e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
   if(!e||!p){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Ingresa email y contraseña';return;}
   try{
+    // 1. Buscar en clientes (dueño/admin)
     var r=await fetch(SU+'/rest/v1/clientes?email=eq.'+encodeURIComponent(e)+'&password=eq.'+encodeURIComponent(p)+'&activo=eq.true&select=*',{headers:H()});
     var d=await r.json();
-    if(!d||!d.length){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Email o contraseña incorrectos';return;}
-    cli=d[0];
-    document.getElementById('lerr').style.display='none';
-    document.getElementById('p-login').style.display='none';
-    if(cli.rol==='admin')inicAdmin();
-    else if(window.innerWidth<768)inicCel();
-    else inicDash();
+    if(d&&d.length){
+      cli=d[0];
+      document.getElementById('lerr').style.display='none';
+      document.getElementById('p-login').style.display='none';
+      if(cli.rol==='admin')inicAdmin();
+      else if(window.innerWidth<768)inicCel();
+      else inicDash();
+      return;
+    }
+    // 2. Buscar en usuarios_negocio (jefe de local)
+    var r2=await fetch(SU+'/rest/v1/usuarios_negocio?email=eq.'+encodeURIComponent(e)+'&password_hash=eq.'+encodeURIComponent(p)+'&activo=eq.true&select=*',{headers:H()});
+    var d2=await r2.json();
+    if(d2&&d2.length){
+      var usr=d2[0];
+      // Cargar datos del negocio
+      var r3=await fetch(SU+'/rest/v1/clientes?id=eq.'+usr.cliente_id+'&select=*',{headers:H()});
+      var d3=await r3.json();
+      if(!d3||!d3.length){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Negocio no encontrado';return;}
+      cli=d3[0];
+      cli.rol_usuario=usr.rol; // jefe_local
+      cli.nombre_usuario=usr.nombre;
+      document.getElementById('lerr').style.display='none';
+      document.getElementById('p-login').style.display='none';
+      if(window.innerWidth<768)inicCelJefe();
+      else inicDashJefe();
+      return;
+    }
+    document.getElementById('lerr').style.display='block';
+    document.getElementById('lerr').textContent='Email o contraseña incorrectos';
   }catch(ex){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Error: '+ex.message;}
 }
 
@@ -696,6 +761,45 @@ function logout(){
   ['p-login','p-cel','p-dash','p-admin'].forEach(function(id){document.getElementById(id).style.display=id==='p-login'?'flex':'none';});
   document.getElementById('le').value='';document.getElementById('lp').value='';
 }
+
+function inicDashJefe(){
+  document.getElementById('p-dash').style.display='block';
+  document.getElementById('sb-neg').textContent=cli.nombre_negocio;
+  document.getElementById('tbn').textContent=cli.nombre_negocio;
+  var ini=cli.nombre_negocio.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  document.getElementById('tbav').textContent=ini;
+  // Ocultar módulos no permitidos para jefe_local
+  var modOcultar=['resumen','balance','gastosfijos','creditos','precios'];
+  document.querySelectorAll('.sb-item').forEach(function(el){
+    var oc=el.getAttribute('onclick')||'';
+    modOcultar.forEach(function(m){
+      if(oc.indexOf("'"+m+"'")>-1||oc.indexOf('"'+m+'"')>-1)el.style.display='none';
+    });
+    // Ocultar también admin y usuarios
+    if(oc.indexOf("'admin'")>-1||oc.indexOf("'usuarios'")>-1)el.style.display='none';
+  });
+  // Ir directo a cierres
+  var ciItem=document.querySelector('.sb-item');
+  if(ciItem)dpage('cierres',ciItem);
+}
+
+function inicCelJefe(){
+  document.getElementById('p-cel').style.display='block';
+  document.getElementById('cel-neg').textContent=cli.nombre_negocio;
+  // Ocultar módulos no permitidos en celular
+  var ocultar=['sc-dash','btn-dash'];
+  document.querySelectorAll('.cmenu-item').forEach(function(el){
+    var onclick=el.getAttribute('onclick')||'';
+    var txt=el.textContent||'';
+    if(onclick.indexOf('sc-dash')>-1||txt.indexOf('Dashboard')>-1||txt.indexOf('Balance')>-1||txt.indexOf('Gastos fijos')>-1||txt.indexOf('Créditos')>-1){
+      el.style.display='none';
+    }
+  });
+  // Ocultar tab dashboard en barra inferior
+  var tabDash=document.getElementById('ctab-dash');
+  if(tabDash)tabDash.style.display='none';
+}
+
 
 function inicDash(){
   document.getElementById('p-dash').style.display='block';
@@ -1741,6 +1845,130 @@ async function generarPDFPersonalCompleto(){
 }
 
 
+// ── Gestión de usuarios ──
+function swAdminTab(tab){
+  document.getElementById('admin-panel-clientes').style.display=tab==='clientes'?'':'none';
+  document.getElementById('admin-panel-usuarios').style.display=tab==='usuarios'?'':'none';
+  document.getElementById('atab-clientes').style.color=tab==='clientes'?'var(--vd)':'var(--g500)';
+  document.getElementById('atab-clientes').style.borderBottom=tab==='clientes'?'2px solid var(--v)':'2px solid transparent';
+  document.getElementById('atab-usuarios').style.color=tab==='usuarios'?'var(--vd)':'var(--g500)';
+  document.getElementById('atab-usuarios').style.borderBottom=tab==='usuarios'?'2px solid var(--v)':'2px solid transparent';
+  if(tab==='usuarios')loadUsuariosAdmin();
+}
+
+function selRolUsuario(rol){
+  document.getElementById('musr-rol').value=rol;
+  var esJefe=rol==='jefe_local';
+  document.getElementById('musr-rol-jefe').style.border=esJefe?'1px solid #9FE1CB':'1px solid #c1c7cd';
+  document.getElementById('musr-rol-jefe').style.background=esJefe?'#e8f7f2':'white';
+  document.getElementById('musr-rol-jefe').style.color=esJefe?'#087a55':'#495057';
+  document.getElementById('musr-rol-admin').style.border=!esJefe?'1px solid #9FE1CB':'1px solid #c1c7cd';
+  document.getElementById('musr-rol-admin').style.background=!esJefe?'#e8f7f2':'white';
+  document.getElementById('musr-rol-admin').style.color=!esJefe?'#087a55':'#495057';
+}
+
+async function loadUsuariosAdmin(){
+  var el=document.getElementById('admin-usuarios-lista');
+  el.innerHTML='<div class="ld">Cargando...</div>';
+  try{
+    var [rU,rC]=await Promise.all([
+      fetch(SU+'/rest/v1/usuarios_negocio?select=*&order=created_at.desc',{headers:H()}),
+      fetch(SU+'/rest/v1/clientes?select=id,nombre_negocio&order=nombre_negocio.asc',{headers:H()})
+    ]);
+    var usuarios=await rU.json(),clientes=await rC.json();
+    var cliMap={};clientes.forEach(function(c){cliMap[c.id]=c.nombre_negocio;});
+    if(!usuarios||!usuarios.length){el.innerHTML='<div class="empty">No hay usuarios registrados</div>';return;}
+    var h='<div class="tc"><div class="tc-h"><span class="tc-t">Usuarios registrados</span><span class="tc-c">'+usuarios.length+'</span></div>';
+    h+='<table><tr style="background:var(--g50)"><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Nombre</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Email</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Negocio</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Rol</th><th style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);padding:8px 1.25rem;border-bottom:1px solid #c1c7cd">Estado</th><th style="background:var(--g50);border-bottom:1px solid #c1c7cd;padding:8px 1.25rem"></th></tr>';
+    usuarios.forEach(function(u){
+      var esJefe=u.rol==='jefe_local';
+      h+='<tr>'
+        +'<td style="font-weight:500">'+u.nombre+'</td>'
+        +'<td style="color:var(--g500)">'+u.email+'</td>'
+        +'<td style="color:var(--g500)">'+(cliMap[u.cliente_id]||'—')+'</td>'
+        +'<td><span style="font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;background:'+(esJefe?'#e8f7f2':'#e8f0fb')+';color:'+(esJefe?'#087a55':'#1971c2')+'">'+(esJefe?'👤 Jefe de local':'🔑 Admin')+'</span></td>'
+        +'<td><span style="font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;background:'+(u.activo?'#e8f7f2':'#f4f5f6')+';color:'+(u.activo?'#087a55':'#adb5bd')+'">'+(u.activo?'Activo':'Inactivo')+'</span></td>'
+        +'<td style="white-space:nowrap">'
+        +'<button class="btn-edit" data-uid="'+u.id+'" onclick="editarUsuario(this.dataset.uid)">✏️</button>'
+        +'<button class="'+(u.activo?'btn-del':'btn-edit')+'" data-uid="'+u.id+'" data-activo="'+u.activo+'" onclick="toggleUsuario(this.dataset.uid,this.dataset.activo===&quot;true&quot;)">'+(u.activo?'🚫':'✅')+'</button>'
+        +'</td></tr>';
+    });
+    h+='</table></div>';
+    el.innerHTML=h;
+  }catch(ex){el.innerHTML='<div class="empty">Error: '+ex.message+'</div>';}
+}
+
+async function abrirNuevoUsuario(){
+  document.getElementById('musr-titulo').textContent='Agregar usuario';
+  document.getElementById('musr-id').value='';
+  document.getElementById('musr-nombre').value='';
+  document.getElementById('musr-email').value='';
+  document.getElementById('musr-pass').value='';
+  document.getElementById('musr-rol').value='jefe_local';
+  selRolUsuario('jefe_local');
+  // Cargar select de clientes
+  var r=await fetch(SU+'/rest/v1/clientes?select=id,nombre_negocio&order=nombre_negocio.asc&activo=eq.true',{headers:H()});
+  var clientes=await r.json();
+  var sel=document.getElementById('musr-cliente');
+  sel.innerHTML='';
+  clientes.forEach(function(c){var o=document.createElement('option');o.value=c.id;o.textContent=c.nombre_negocio;sel.appendChild(o);});
+  abrirModal('usuario');
+}
+
+async function editarUsuario(id){
+  var r=await fetch(SU+'/rest/v1/usuarios_negocio?id=eq.'+id,{headers:H()});
+  var d=await r.json();
+  if(!d||!d.length)return;
+  var u=d[0];
+  document.getElementById('musr-titulo').textContent='Editar usuario';
+  document.getElementById('musr-id').value=u.id;
+  document.getElementById('musr-nombre').value=u.nombre||'';
+  document.getElementById('musr-email').value=u.email||'';
+  document.getElementById('musr-pass').value=u.password_hash||'';
+  await abrirNuevoUsuario();
+  document.getElementById('musr-nombre').value=u.nombre||'';
+  document.getElementById('musr-email').value=u.email||'';
+  document.getElementById('musr-pass').value=u.password_hash||'';
+  document.getElementById('musr-id').value=u.id;
+  document.getElementById('musr-cliente').value=u.cliente_id;
+  selRolUsuario(u.rol);
+  document.getElementById('musr-btn').textContent='Guardar cambios';
+}
+
+async function guardarUsuario(){
+  var nombre=document.getElementById('musr-nombre').value.trim();
+  var email=document.getElementById('musr-email').value.trim();
+  var pass=document.getElementById('musr-pass').value.trim();
+  var clienteId=document.getElementById('musr-cliente').value;
+  var rol=document.getElementById('musr-rol').value;
+  var id=document.getElementById('musr-id').value;
+  if(!nombre||!email||!pass||!clienteId){alert('Completa todos los campos');return;}
+  var btn=document.getElementById('musr-btn');btn.disabled=true;btn.textContent='Guardando...';
+  try{
+    var payload={nombre,email,password_hash:pass,cliente_id:clienteId,rol,activo:true};
+    var r;
+    if(id){
+      r=await fetch(SU+'/rest/v1/usuarios_negocio?id=eq.'+id,{method:'PATCH',headers:HJ(),body:JSON.stringify(payload)});
+    }else{
+      // Verificar que no exista el email
+      var chk=await fetch(SU+'/rest/v1/usuarios_negocio?email=eq.'+encodeURIComponent(email)+'&select=id',{headers:H()});
+      var dup=await chk.json();
+      if(dup&&dup.length){alert('Ya existe un usuario con ese email');btn.disabled=false;btn.textContent='Crear usuario';return;}
+      r=await fetch(SU+'/rest/v1/usuarios_negocio',{method:'POST',headers:HJ(),body:JSON.stringify(payload)});
+    }
+    if(r.ok){cerrarModal('usuario');loadUsuariosAdmin();}
+    else throw new Error(await r.text());
+  }catch(ex){alert('Error: '+ex.message);}
+  btn.disabled=false;btn.textContent=id?'Guardar cambios':'Crear usuario';
+}
+
+async function toggleUsuario(id,activo){
+  if(!confirm(activo?'¿Desactivar este usuario?':'¿Activar este usuario?'))return;
+  var r=await fetch(SU+'/rest/v1/usuarios_negocio?id=eq.'+id,{method:'PATCH',headers:HJ(),body:JSON.stringify({activo:!activo})});
+  if(r.ok)loadUsuariosAdmin();
+}
+
+
 function calcCaja(){
   var ci=v('cj-ci'),cf=v('cj-cf'),z=v('cj-z'),rc=v('cj-rc'),cr=v('cj-cr'),ot=v('cj-ot'),tr=v('cj-tr'),nu=v('cj-nu'),re=v('cj-re'),ga=v('cj-ga');
   var dif=-(ci+z-rc-cr-ot-tr-nu-re-cf-ga);
@@ -2370,11 +2598,18 @@ function dpage(n,el){
   document.querySelectorAll('.dp').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.sb-item').forEach(function(s){s.classList.remove('active');});
   document.getElementById('dp-'+n).classList.add('active');el.classList.add('active');
-  var t={resumen:'Dashboard',balance:'Balance anual',cierres:'Cierres de caja',facturas:'Facturas',personal:'Personal',gastosfijos:'Gastos fijos',creditos:'Créditos',precios:'Precios de compra'};
+  var t={resumen:'Dashboard',balance:'Balance anual',cierres:'Cierres de caja',facturas:'Facturas',personal:'Personal',gastosfijos:'Gastos fijos',creditos:'Créditos',precios:'Precios de compra',admin:'Admin clientes',usuarios:'Usuarios'};
   document.getElementById('tbt').textContent=t[n]||n;
   if(n==='balance')loadB();
   if(n==='personal'){loadTD('pagos_personal','dpe',renderPersonalTabla);inicSelectMesPersonal();}
-  if(n==='cierres')loadCierresDash();
+  if(n==='cierres'){
+    if(cli.rol_usuario==='jefe_local'){
+      // Solo mostrar formulario celular de cierre, no historial
+      document.getElementById('dp-cierres').innerHTML='<div class="empty" style="text-align:center;padding:3rem"><div style="font-size:48px;margin-bottom:1rem">🔒</div><div style="font-size:15px;font-weight:500;color:var(--g900)">Acceso restringido</div><div style="font-size:13px;color:var(--g500);margin-top:6px">El historial de cierres solo está disponible para administradores</div></div>';
+      return;
+    }
+    loadCierresDash();
+  }
   if(n==='facturas')loadFacturasDash();
   if(n==='gastosfijos')loadGastosFijosDash();
   if(n==='creditos')loadCreditosDash();
