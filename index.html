@@ -350,8 +350,8 @@ tr:hover td{background:var(--g50)}
 
   <!-- PERSONAL -->
   <div class="cscreen" id="sc-pers">
-    <div class="csh"><button class="csh-back" onclick="cerrarScreen()"><svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="csh-t">Control de personal</span></div>
-    <div class="tabbar"><button class="tabbtn active" onclick="swTab('pers','form',this)">Registrar pago</button><button class="tabbtn" onclick="swTab('pers','hist',this);loadHist('pagos_personal','ps-hc',renderPersHist)">Historial</button></div>
+    <div class="csh"><button class="csh-back" onclick="cerrarScreen()"><svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="csh-t">Registrar personal</span></div>
+    <div class="tabbar"><button class="tabbtn active" onclick="swTab('pers','form',this)">Registrar</button><button class="tabbtn" onclick="swTab('pers','hist',this);loadHist('pagos_personal','ps-hc',renderPersHist)">Historial</button></div>
     <div class="csb">
       <div id="pers-form">
         <label class="fl">Fecha</label><input class="fi" type="date" id="ps-f">
@@ -364,11 +364,11 @@ tr:hover td{background:var(--g50)}
           <button class="tbtn" onclick="selTipo('Sueldo',this)">📅 Sueldo</button>
           <button class="tbtn" onclick="selTipo('Otro',this)">📝 Otro</button>
         </div>
-        <label class="fl">Monto</label><input class="fi" type="number" id="ps-mo" placeholder="0">
+        <label class="fl">Monto <span style="font-size:10px;color:#adb5bd;font-weight:400;text-transform:none">(dejar en 0 si es solo observación)</span></label><input class="fi" type="number" id="ps-mo" placeholder="0">
         <label class="fl">Observación (opcional)</label><input class="fi" type="text" id="ps-ob" placeholder="Ej: anticipo semana 2">
         <div class="fmsg ok" id="ps-ok">✓ Pago registrado correctamente</div>
         <div class="fmsg err" id="ps-err">Error al guardar</div>
-        <button class="fbtn" id="ps-btn" onclick="guardarPers()">Registrar pago</button>
+        <button class="fbtn" id="ps-btn" onclick="guardarPers()">Guardar</button>
         <div style="height:1rem"></div>
       </div>
       <div id="pers-hist" style="display:none"><div id="ps-hc" class="ld">Cargando...</div></div>
@@ -1870,15 +1870,15 @@ function selTipo(t,el){tipoSel=t;document.querySelectorAll('.tbtn').forEach(func
 async function guardarPers(){
   if(!empSel){alert('Selecciona un empleado');return;}
   if(!tipoSel){alert('Selecciona el tipo de pago');return;}
-  var mo=v('ps-mo');if(!mo){alert('Ingresa el monto');return;}
+  var mo=v('ps-mo');if(!mo&&tipoSel!=='Otro'){alert('Ingresa el monto');return;}
   var fecha=document.getElementById('ps-f').value;
   var btn=document.getElementById('ps-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
     var r=await fetch(SU+'/rest/v1/pagos_personal',{method:'POST',headers:HJ(),body:JSON.stringify({fecha,empleado:empSel,tipo:tipoSel,monto:mo,observacion:document.getElementById('ps-ob').value,cliente_id:cli.id})});
     if(r.ok){document.getElementById('ps-ok').style.display='block';btn.textContent='✓ Registrado';
-      setTimeout(function(){document.getElementById('ps-mo').value='';document.getElementById('ps-ob').value='';btn.disabled=false;btn.textContent='Registrar pago';document.getElementById('ps-ok').style.display='none';},2000);}
+      setTimeout(function(){document.getElementById('ps-mo').value='';document.getElementById('ps-ob').value='';btn.disabled=false;btn.textContent='Guardar';document.getElementById('ps-ok').style.display='none';},2000);}
     else throw new Error(await r.text());
-  }catch(ex){document.getElementById('ps-err').style.display='block';btn.disabled=false;btn.textContent='Registrar pago';}
+  }catch(ex){document.getElementById('ps-err').style.display='block';btn.disabled=false;btn.textContent='Guardar';}
 }
 
 // ── Gastos fijos — Otros desglosados ──
