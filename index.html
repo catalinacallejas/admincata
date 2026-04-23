@@ -271,7 +271,7 @@ tr:hover td{background:var(--g50)}
   <!-- CIERRE CAJA -->
   <div class="cscreen" id="sc-caja">
     <div class="csh"><button class="csh-back" onclick="cerrarScreen()"><svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="csh-t">Cierre de caja</span></div>
-    <div class="tabbar"><button class="tabbtn active" onclick="swTab('caja','form',this)">Ingresar</button><button class="tabbtn" onclick="swTab('caja','hist',this);loadHist('cierres_caja','cj-hc',renderCajaHist)">Historial</button></div>
+    <div class="tabbar"><button class="tabbtn active" onclick="swTab('caja','form',this)">Ingresar</button><button class="tabbtn" onclick="if(cli.rol_usuario==='jefe_local'){alert('El historial solo está disponible para administradores');return;}swTab('caja','hist',this);loadHist('cierres_caja','cj-hc',renderCajaHist)">Historial</button></div>
     <div class="csb">
       <div id="caja-form">
         <label class="fl">Fecha</label><input class="fi" type="date" id="cj-f">
@@ -827,18 +827,19 @@ function inicDashJefe(){
 function inicCelJefe(){
   document.getElementById('p-cel').style.display='block';
   document.getElementById('cel-neg').textContent=cli.nombre_negocio;
-  // Ocultar módulos no permitidos en celular
-  var ocultar=['sc-dash','btn-dash'];
-  document.querySelectorAll('.cmenu-item').forEach(function(el){
-    var onclick=el.getAttribute('onclick')||'';
-    var txt=el.textContent||'';
-    if(onclick.indexOf('sc-dash')>-1||txt.indexOf('Dashboard')>-1||txt.indexOf('Balance')>-1||txt.indexOf('Gastos fijos')>-1||txt.indexOf('Créditos')>-1){
-      el.style.display='none';
-    }
+  // Módulos no permitidos para jefe_local
+  var modOcultar=['gf','rep','bal','cred'];
+  document.querySelectorAll('.cmod').forEach(function(el){
+    var oc=el.getAttribute('onclick')||'';
+    modOcultar.forEach(function(m){
+      if(oc.indexOf("'"+m+"'")>-1||oc.indexOf('"'+m+'"')>-1)el.style.display='none';
+    });
   });
   // Ocultar tab dashboard en barra inferior
   var tabDash=document.getElementById('ctab-dash');
   if(tabDash)tabDash.style.display='none';
+  // En cierre de caja: ocultar tab historial
+  // Se maneja al abrir la pantalla verificando rol_usuario
 }
 
 
