@@ -1619,7 +1619,7 @@ async function generarReportePersonal(){
       });
       html+='<div class="liq-tot"><span>Total recibido</span><span>'+f2(tot)+'</span></div></div>';
     });
-    html+='<div class="footer">AdminF&aacute;cil &middot; Reporte generado autom&aacute;ticamente</div></div></body></html>';
+    html+='<div class="footer">EZadmin &middot; Reporte generado autom&aacute;ticamente</div></div></body></html>';
     var win=window.open('','_blank');
     if(win){win.document.write(html);win.document.close();setTimeout(function(){win.print();},500);}
   }catch(ex){alert('Error al generar reporte: '+ex.message);}
@@ -1727,7 +1727,7 @@ async function generarPDFPersCompleto(empleado, fechaRef){
         +'</div></div>';
     });
     html+='<div class="tot"><span>Total recibido en '+periodo+'</span><span>'+f2(total)+'</span></div>'
-      +'<div class="footer">AdminF&aacute;cil &middot; Comprobante generado autom&aacute;ticamente</div>'
+      +'<div class="footer">EZadmin &middot; Comprobante generado autom&aacute;ticamente</div>'
       +'</div></body></html>';
     var win=window.open('','_blank');
     if(win){win.document.write(html);win.document.close();setTimeout(function(){win.print();},500);}
@@ -1899,7 +1899,7 @@ async function generarPDFPersonalCompleto(){
       html+='<tr class="tot-row"><td colspan="2">Total '+emp+'</td><td>'+f2(tot)+'</td><td></td></tr>'
         +'</table></div>';
     });
-    html+='<div class="footer">AdminF&aacute;cil &middot; Informe generado autom&aacute;ticamente para uso del contador</div>'
+    html+='<div class="footer">EZadmin &middot; Informe generado autom&aacute;ticamente para uso del contador</div>'
       +'</div></body></html>';
     var win=window.open('','_blank');
     if(win){win.document.write(html);win.document.close();setTimeout(function(){win.print();},500);}
