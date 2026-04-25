@@ -807,7 +807,7 @@ async function entrar(){
     }
     document.getElementById('lerr').style.display='block';
     document.getElementById('lerr').textContent='Email o contraseña incorrectos';
-  }catch(ex){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Error: '+ex.message;}
+  }catch(ex){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent=mensajeError(ex);}
 }
 
 function logout(){
@@ -1732,7 +1732,7 @@ async function generarPDFPersCompleto(empleado, fechaRef){
       +'</div></body></html>';
     var win=window.open('','_blank');
     if(win){win.document.write(html);win.document.close();setTimeout(function(){win.print();},500);}
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 
@@ -1800,7 +1800,7 @@ async function registrarPagoCreditoCel(creditoId,monto){
       await fetch(SU+'/rest/v1/creditos?id=eq.'+creditoId+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({cuotas_pagadas:undefined})});
       loadCreditosCel();
     }else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 
@@ -1904,7 +1904,7 @@ async function generarPDFPersonalCompleto(){
       +'</div></body></html>';
     var win=window.open('','_blank');
     if(win){win.document.write(html);win.document.close();setTimeout(function(){win.print();},500);}
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 
@@ -2022,7 +2022,7 @@ async function guardarUsuario(){
     }
     if(r.ok){cerrarModal('usuario');loadUsuariosAdmin();}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent=id?'Guardar cambios':'Crear usuario';
 }
 
@@ -2128,7 +2128,7 @@ async function guardarUsuarioDueno(){
     }
     if(r.ok){cerrarModal('usuario-dueno');loadConfigUsuarios();}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent=id?'Guardar cambios':'Crear usuario';
 }
 
@@ -2165,7 +2165,7 @@ async function cambiarPassword(){
       loadR();
     }else throw new Error(await r.text());
   }catch(ex){
-    msg.style.display='block';msg.style.color='#e03131';msg.textContent='Error: '+ex.message;
+    msg.style.display='block';msg.style.color='#e03131';msg.textContent=mensajeError(ex);
   }
 }
 
@@ -2200,7 +2200,7 @@ async function guardarCaja(){
     if(r.ok){document.getElementById('cj-ok').style.display='block';btn.textContent='✓ Guardado';
       setTimeout(function(){['cj-ci','cj-cf','cj-z','cj-rc','cj-cr','cj-ot','cj-tr','cj-nu','cj-re','cj-ga'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('cj-gastos-lista').innerHTML='';document.getElementById('cj-ga-total').textContent='$0';calcCaja();btn.disabled=false;btn.textContent='Guardar cierre del día';document.getElementById('cj-ok').style.display='none';},2500);}
     else throw new Error(await r.text());
-  }catch(ex){document.getElementById('cj-err').style.display='block';document.getElementById('cj-err').textContent='Error: '+ex.message;btn.disabled=false;btn.textContent='Guardar cierre del día';}
+  }catch(ex){document.getElementById('cj-err').style.display='block';document.getElementById('cj-err').textContent=mensajeError(ex);btn.disabled=false;btn.textContent='Guardar cierre del día';}
 }
 
 function selPago(pagado){
@@ -2219,7 +2219,7 @@ async function togglePagado(id,actual){
     var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({pagado:!actual})});
     if(r.ok)dpage('facturas',document.querySelector('.sb-item.active'));
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 
@@ -2451,6 +2451,21 @@ function cargarOtrosGFEnLista(listaId,totalId,hiddenId,detalle){
 async function hashPassword(pass){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+
+function mensajeError(ex){
+  if(!navigator.onLine) return 'Sin conexión a internet. Verifica tu red e intenta de nuevo.';
+  if(ex && ex.message){
+    var m = ex.message;
+    if(m.indexOf('Failed to fetch')>-1 || m.indexOf('NetworkError')>-1) return 'Sin conexión a internet. Verifica tu red e intenta de nuevo.';
+    if(m.indexOf('23505')>-1 || m.indexOf('already exists')>-1) return 'Ya existe un registro con esos datos.';
+    if(m.indexOf('23503')>-1 || m.indexOf('foreign key')>-1) return 'No se puede eliminar porque tiene registros asociados.';
+    if(m.indexOf('timeout')>-1 || m.indexOf('AbortError')>-1) return 'La operación tardó demasiado. Intenta de nuevo.';
+    if(m.indexOf('JWT')>-1 || m.indexOf('token')>-1 || m.indexOf('401')>-1) return 'Sesión expirada. Por favor recarga la página.';
+    if(m.indexOf('42')>-1) return 'Error en la base de datos. Contacta al soporte.';
+  }
+  return 'Ocurrió un error inesperado. Intenta de nuevo.';
 }
 
 
@@ -3125,7 +3140,7 @@ async function guardarCliente(){
     }
     if(r.ok){cerrarModal('cliente');cargarClientes();}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent=document.getElementById('mcli-id').value?'Guardar cambios':'Crear cliente';
 }
 
@@ -3136,7 +3151,7 @@ async function toggleCliente(id,activo,nombre){
     var r=await fetch(SU+'/rest/v1/clientes?id=eq.'+id,{method:'PATCH',headers:HJ(),body:JSON.stringify({activo:!activo})});
     if(r.ok)cargarClientes();
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 async function eliminarCliente(id,nombre){
@@ -3145,7 +3160,7 @@ async function eliminarCliente(id,nombre){
     var r=await fetch(SU+'/rest/v1/clientes?id=eq.'+id,{method:'DELETE',headers:H()});
     if(r.ok)cargarClientes();
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 function abrirNuevoCreditoCel(){
@@ -3199,7 +3214,7 @@ async function registrarPagoCel(creditoId,nombre,cuota){
       await fetch(SU+'/rest/v1/creditos?id=eq.'+creditoId,{method:'PATCH',headers:HJ(),body:JSON.stringify({cuotas_pagadas:(cred[0].cuotas_pagadas||0)+1})});
     }
     loadCreditosCel();
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 // ── PC: cargar página créditos ──
@@ -3313,7 +3328,7 @@ async function guardarCreditoPC(){
     }
     if(r.ok){cerrarModal('cred');loadCreditosDash();}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent=document.getElementById('mcred-id').value?'Guardar cambios':'Guardar crédito';
 }
 
@@ -3350,7 +3365,7 @@ async function guardarPagoCreditoPC(){
       await fetch(SU+'/rest/v1/creditos?id=eq.'+creditoId,{method:'PATCH',headers:HJ(),body:JSON.stringify({cuotas_pagadas:(cred[0].cuotas_pagadas||0)+1})});
     }
     cerrarModal('pagocred');loadCreditosDash();
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Confirmar pago';
 }
 
@@ -3584,7 +3599,7 @@ async function guardarEmp(){
       loadEmpleados();
       cargarEmps(); // refrescar lista en celular también
     }else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent=id?'Guardar cambios':'Agregar';
 }
 
@@ -3594,7 +3609,7 @@ async function desactivarEmp(id,nombre){
     var r=await fetch(SU+'/rest/v1/empleados?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({activo:false})});
     if(r.ok){loadEmpleados();cargarEmps();}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 function mv(id){return parseFloat(document.getElementById(id).value)||0;}
@@ -3636,7 +3651,7 @@ async function guardarEditCaja(){
     var r=await fetch(SU+'/rest/v1/cierres_caja?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({fecha:document.getElementById('mcj-f').value,caja_inicial:ci,caja_final:cf,total_z:z,redcompra:rc,creditos_redbanc:cr,otro_redbanc:ot,transferencias:tr,nulos:nu,retiros:re,gastos:ga,gastos_detalle:gastosDetalle,diferencia:dif})});
     if(r.ok){cerrarModal('caja');dpage('cierres',document.querySelector('.sb-item.active'));}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al guardar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
 async function eliminarCaja(id){
@@ -3645,7 +3660,7 @@ async function eliminarCaja(id){
     var r=await fetch(SU+'/rest/v1/cierres_caja?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('cierres',document.querySelector('.sb-item.active'));
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al eliminar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 // — FACTURAS —
@@ -3672,7 +3687,7 @@ async function guardarEditFact(){
     var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({proveedor:document.getElementById('mft-pv').value,numero_factura:document.getElementById('mft-nm').value,monto_neto:mv('mft-ne'),iva:mv('mft-iv'),impuesto:mv('mft-im'),total:mv('mft-to'),pagado:document.getElementById('mft-pagado').value==='true'})});
     if(r.ok){cerrarModal('fact');dpage('facturas',document.querySelector('.sb-item.active'));}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al guardar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
 async function eliminarFact(id){
@@ -3681,7 +3696,7 @@ async function eliminarFact(id){
     var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('facturas',document.querySelector('.sb-item.active'));
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al eliminar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 // — PERSONAL —
@@ -3701,7 +3716,7 @@ async function guardarEditPers(){
     var r=await fetch(SU+'/rest/v1/pagos_personal?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({fecha:document.getElementById('mps-f').value,empleado:document.getElementById('mps-em').value,tipo:document.getElementById('mps-tp').value,monto:mv('mps-mo'),observacion:document.getElementById('mps-ob').value})});
     if(r.ok){cerrarModal('pers');dpage('personal',document.querySelector('.sb-item.active'));}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al guardar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
 async function eliminarPers(id){
@@ -3710,7 +3725,7 @@ async function eliminarPers(id){
     var r=await fetch(SU+'/rest/v1/pagos_personal?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('personal',document.querySelector('.sb-item.active'));
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al eliminar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 // — GASTOS FIJOS —
@@ -3748,7 +3763,7 @@ async function guardarEditGF(){
     var r=await fetch(SU+'/rest/v1/gastos_fijos?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify(payload)});
     if(r.ok){cerrarModal('gf');dpage('gastosfijos',document.querySelector('.sb-item.active'));}
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al guardar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
 async function eliminarGF(id){
@@ -3757,7 +3772,7 @@ async function eliminarGF(id){
     var r=await fetch(SU+'/rest/v1/gastos_fijos?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('gastosfijos',document.querySelector('.sb-item.active'));
     else throw new Error(await r.text());
-  }catch(ex){alert('Error al eliminar: '+ex.message);}
+  }catch(ex){alert(mensajeError(ex));}
 }
 
 
