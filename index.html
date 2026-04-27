@@ -2630,14 +2630,8 @@ function f2(n){return '$'+Math.round(n||0).toLocaleString('es-CL');}
 
 // ── 1. Reporte Cierres de caja ──
 async function reporteCierres(){
-  var anio=document.getElementById('yanio')?parseInt(document.getElementById('yanio').querySelector('.active')||0):new Date().getFullYear();
-  var mes=document.getElementById('ymes')?parseInt(document.getElementById('ymes').querySelector('.active')||0):new Date().getMonth()+1;
-  // Obtener año y mes del selector activo
-  var btnAnio=document.querySelector('#yanio .active');
-  var btnMes=document.querySelector('#ymes .active');
-  if(!btnAnio||!btnMes){alert('Selecciona un mes para generar el reporte');return;}
-  anio=parseInt(btnAnio.textContent);
-  mes=parseInt(btnMes.dataset.m||btnMes.textContent==='Ene'?1:btnMes.textContent==='Feb'?2:btnMes.textContent==='Mar'?3:btnMes.textContent==='Abr'?4:btnMes.textContent==='May'?5:btnMes.textContent==='Jun'?6:btnMes.textContent==='Jul'?7:btnMes.textContent==='Ago'?8:btnMes.textContent==='Sep'?9:btnMes.textContent==='Oct'?10:btnMes.textContent==='Nov'?11:12);
+  var anio=anioSel||new Date().getFullYear();
+  var mes=mesSel||new Date().getMonth()+1;
   var desde=anio+'-'+String(mes).padStart(2,'0')+'-01';
   var hasta=anio+'-'+String(mes).padStart(2,'0')+'-31';
   var r=await fetch(SU+'/rest/v1/cierres_caja?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+desde+'&fecha=lte.'+hasta+'&order=fecha.asc',{headers:H()});
@@ -2667,13 +2661,8 @@ async function reporteCierres(){
 
 // ── 2. Reporte Facturas de compra ──
 async function reporteFactCompra(){
-  var btnAnio=document.querySelector('#yanio .active');
-  var btnMes=document.querySelector('#ymes .active');
-  if(!btnAnio||!btnMes){alert('Selecciona un mes para generar el reporte');return;}
-  var anio=parseInt(btnAnio.textContent);
-  var mesNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  var mes=mesNames.indexOf(btnMes.textContent)+1;
-  if(mes<=0)mes=new Date().getMonth()+1;
+  var anio=anioSel||new Date().getFullYear();
+  var mes=mesSel||new Date().getMonth()+1;
   var desde=anio+'-'+String(mes).padStart(2,'0')+'-01';
   var hasta=anio+'-'+String(mes).padStart(2,'0')+'-31';
   var r=await fetch(SU+'/rest/v1/facturas?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+desde+'&fecha=lte.'+hasta+'&order=fecha.asc',{headers:H()});
@@ -2702,13 +2691,8 @@ async function reporteFactCompra(){
 
 // ── 3. Reporte Facturas de venta ──
 async function reporteFactVenta(){
-  var btnAnio=document.querySelector('#yanio .active');
-  var btnMes=document.querySelector('#ymes .active');
-  if(!btnAnio||!btnMes){alert('Selecciona un mes para generar el reporte');return;}
-  var anio=parseInt(btnAnio.textContent);
-  var mesNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  var mes=mesNames.indexOf(btnMes.textContent)+1;
-  if(mes<=0)mes=new Date().getMonth()+1;
+  var anio=anioSel||new Date().getFullYear();
+  var mes=mesSel||new Date().getMonth()+1;
   var desde=anio+'-'+String(mes).padStart(2,'0')+'-01';
   var hasta=anio+'-'+String(mes).padStart(2,'0')+'-31';
   var r=await fetch(SU+'/rest/v1/facturas_venta?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+desde+'&fecha=lte.'+hasta+'&order=fecha.asc',{headers:H()});
@@ -2740,13 +2724,8 @@ async function reporteFactVenta(){
 
 // ── 4. Reporte Gastos fijos ──
 async function reporteGastosFijos(){
-  var btnAnio=document.querySelector('#yanio .active');
-  var btnMes=document.querySelector('#ymes .active');
-  if(!btnAnio||!btnMes){alert('Selecciona un mes para generar el reporte');return;}
-  var anio=parseInt(btnAnio.textContent);
-  var mesNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  var mes=mesNames.indexOf(btnMes.textContent)+1;
-  if(mes<=0)mes=new Date().getMonth()+1;
+  var anio=anioSel||new Date().getFullYear();
+  var mes=mesSel||new Date().getMonth()+1;
   var desde=anio+'-'+String(mes).padStart(2,'0')+'-01';
   var hasta=anio+'-'+String(mes).padStart(2,'0')+'-31';
   var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&mes=gte.'+desde+'&mes=lte.'+hasta,{headers:H()});
@@ -2801,8 +2780,7 @@ async function reporteCreditos(){
 
 // ── 6. Reporte Balance anual ──
 async function reporteBalance(){
-  var btnAnio=document.querySelector('#ba-yr .active')||document.querySelector('#yanio .active');
-  var anio=btnAnio?parseInt(btnAnio.textContent):new Date().getFullYear();
+  var anio=anioSel||new Date().getFullYear();
   var r=await fetch(SU+'/rest/v1/rpc/balance_anual?cliente_id='+cli.id+'&anio='+anio,{headers:H()}).catch(function(){return null;});
   // Fallback: construir desde tablas
   var desde=anio+'-01-01';var hasta=anio+'-12-31';
