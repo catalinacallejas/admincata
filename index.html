@@ -243,11 +243,12 @@ tr:hover td{background:var(--g50)}
     </div>
     <div class="cgrid">
       <div class="cmod" onclick="abrirScreen('caja')"><div class="cmod-icon" style="background:#e8f7f2"><svg fill="none" stroke="#0d9e6e" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div class="cmod-name">Cierre de caja</div></div>
-      <div class="cmod" onclick="abrirScreen('fact')"><div class="cmod-icon" style="background:#e8f0fb"><svg fill="none" stroke="#1971c2" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></div><div class="cmod-name">Registrar factura</div></div>
+      <div class="cmod" onclick="abrirScreen('fact')"><div class="cmod-icon" style="background:#e8f0fb"><svg fill="none" stroke="#1971c2" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></div><div class="cmod-name">Factura de compra</div></div>
       <div class="cmod" onclick="abrirScreen('pers')"><div class="cmod-icon" style="background:#fff8e6"><svg fill="none" stroke="#e67700" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="cmod-name">Personal</div></div>
       <div class="cmod" onclick="abrirScreen('gf')"><div class="cmod-icon" style="background:#fff0f0"><svg fill="none" stroke="#e03131" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="cmod-name">Gastos fijos</div></div>
       <div class="cmod" onclick="abrirScreen('rep')"><div class="cmod-icon" style="background:#f3f0ff"><svg fill="none" stroke="#7048e8" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="cmod-name">Reporte mensual</div></div>
       <div class="cmod" onclick="abrirScreen('bal')"><div class="cmod-icon" style="background:#e8f7f2"><svg fill="none" stroke="#0d9e6e" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="cmod-name">Balance anual</div></div>
+      <div class="cmod" onclick="abrirScreen('factv')"><div class="cmod-icon" style="background:#e8f7f2"><svg fill="none" stroke="#0d9e6e" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="12" y1="10" x2="12" y2="16"/></svg></div><div class="cmod-name">Factura de venta</div></div>
       <div class="cmod" onclick="abrirScreen('cred')"><div class="cmod-icon" style="background:#fff0f0"><svg fill="none" stroke="#e03131" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div class="cmod-name">Créditos</div></div>
     </div>
     
@@ -303,6 +304,50 @@ tr:hover td{background:var(--g50)}
   </div>
 
   <!-- FACTURAS -->
+  <div class="cscreen" id="sc-factv">
+    <div class="csh"><button class="csh-back" onclick="cerrarScreen()"><svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="csh-t">Factura de venta</span></div>
+    <div class="tabbar">
+      <button class="tabbtn active" onclick="swTab('factv','form',this)">Registrar</button>
+      <button class="tabbtn" onclick="swTab('factv','hist',this);loadHistFactVentas()">Historial</button>
+    </div>
+    <div id="factv-form">
+      <div class="csb">
+        <label class="fl">Fecha</label>
+        <input class="fi" type="date" id="fvc-fecha">
+        <label class="fl">N° Factura</label>
+        <input class="fi" type="text" id="fvc-num" placeholder="Ej: 001245">
+        <label class="fl">Cliente</label>
+        <input class="fi" type="text" id="fvc-cliente" placeholder="Nombre del cliente">
+        <label class="fl">RUT cliente</label>
+        <input class="fi" type="text" id="fvc-rut" placeholder="Ej: 76.543.210-9">
+        <div class="frow">
+          <div class="fhalf">
+            <label class="fl">Monto neto</label>
+            <input class="fi" type="number" id="fvc-neto" placeholder="0" oninput="calcFVC()">
+          </div>
+          <div class="fhalf">
+            <label class="fl">IVA</label>
+            <input class="fi" type="number" id="fvc-iva" placeholder="0" oninput="calcFVC()">
+          </div>
+        </div>
+        <label class="fl">Total</label>
+        <input class="fi" type="number" id="fvc-total" placeholder="0" readonly style="background:var(--g50)">
+        <label class="fl">Fecha vencimiento</label>
+        <input class="fi" type="date" id="fvc-venc">
+        <label class="fl">Estado</label>
+        <div class="tgrid" style="margin-bottom:1rem">
+          <button class="tbtn sel" id="fvc-pend" onclick="setEstadoFVC('pendiente')">⏳ Pendiente</button>
+          <button class="tbtn" id="fvc-pag" onclick="setEstadoFVC('pagado')">✓ Pagado</button>
+        </div>
+        <input type="hidden" id="fvc-estado" value="pendiente">
+        <div class="fmsg err" id="fvc-err" style="display:none">Error al guardar</div>
+        <div class="fmsg ok" id="fvc-ok" style="display:none">✓ Guardado</div>
+        <button class="fbtn" id="fvc-btn" onclick="guardarFactVentaCel()">Guardar factura</button>
+      </div>
+    </div>
+    <div id="factv-hist" style="display:none"><div id="fvh-c" class="ld">Cargando...</div></div>
+  </div>
+
   <div class="cscreen" id="sc-fact">
     <div class="csh"><button class="csh-back" onclick="cerrarScreen()"><svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="csh-t">Registrar factura</span></div>
     <div class="tabbar"><button class="tabbtn active" onclick="swTab('fact','form',this)">Ingresar</button><button class="tabbtn" onclick="swTab('fact','hist',this);loadHist('facturas','ft-hc',renderFactHist)">Historial</button></div>
@@ -896,7 +941,7 @@ function inicCelJefe(){
   document.getElementById('p-cel').style.display='block';
   document.getElementById('cel-neg').textContent=cli.nombre_negocio;
   // Módulos no permitidos para jefe_local
-  var modOcultar=['gf','rep','bal','cred'];
+  var modOcultar=['gf','rep','bal','cred','factv'];
   document.querySelectorAll('.cmod').forEach(function(el){
     var oc=el.getAttribute('onclick')||'';
     modOcultar.forEach(function(m){
@@ -1126,6 +1171,7 @@ function actualizarCel(){
   screens.forEach(function(s){if(document.getElementById('sc-'+s).classList.contains('vis'))abierta=s;});
   if(abierta==='caja'){loadHist('cierres_caja','cj-hc',renderCajaHist);}
   else if(abierta==='fact'){loadHist('facturas','ft-hc',renderFactHist);}
+  else if(abierta==='factv'){inicFactVCel();}
   else if(abierta==='pers'){loadHist('pagos_personal','ps-hc',renderPersHist);}
   else if(abierta==='rep'){loadReporte();}
   else if(abierta==='bal'){loadBalCel();}
@@ -2429,6 +2475,117 @@ async function eliminarFactVenta(id){
   var r=await fetch(SU+'/rest/v1/facturas_venta?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
   if(r.ok)loadFactVentasDash();
   else alert(mensajeError(new Error(await r.text())));
+}
+
+
+// ── Facturas de venta celular ──
+function calcFVC(){
+  var n=parseFloat(document.getElementById('fvc-neto').value)||0;
+  var i=parseFloat(document.getElementById('fvc-iva').value)||0;
+  document.getElementById('fvc-total').value=Math.round(n+i)||'';
+}
+
+function setEstadoFVC(estado){
+  document.getElementById('fvc-estado').value=estado;
+  document.getElementById('fvc-pend').classList.toggle('sel', estado==='pendiente');
+  document.getElementById('fvc-pag').classList.toggle('sel', estado==='pagado');
+}
+
+function inicFactVCel(){
+  document.getElementById('fvc-fecha').value=hoy.toISOString().substring(0,10);
+  document.getElementById('fvc-num').value='';
+  document.getElementById('fvc-cliente').value='';
+  document.getElementById('fvc-rut').value='';
+  document.getElementById('fvc-neto').value='';
+  document.getElementById('fvc-iva').value='';
+  document.getElementById('fvc-total').value='';
+  document.getElementById('fvc-venc').value='';
+  setEstadoFVC('pendiente');
+}
+
+async function guardarFactVentaCel(){
+  var fecha=document.getElementById('fvc-fecha').value;
+  var num=document.getElementById('fvc-num').value.trim();
+  var cliente=document.getElementById('fvc-cliente').value.trim();
+  var rut=document.getElementById('fvc-rut').value.trim();
+  var neto=parseFloat(document.getElementById('fvc-neto').value)||0;
+  var iva=parseFloat(document.getElementById('fvc-iva').value)||0;
+  var total=parseFloat(document.getElementById('fvc-total').value)||neto+iva;
+  var venc=document.getElementById('fvc-venc').value;
+  var estado=document.getElementById('fvc-estado').value;
+  var err=document.getElementById('fvc-err');
+  var ok=document.getElementById('fvc-ok');
+  if(!fecha||!cliente||!total){err.style.display='block';err.textContent='Completa cliente, fecha y total';return;}
+  var btn=document.getElementById('fvc-btn');btn.disabled=true;btn.textContent='Guardando...';
+  err.style.display='none';
+  try{
+    var payload={numero_factura:num,fecha,cliente_nombre:cliente,rut_cliente:rut,monto_neto:neto,iva,total,fecha_vencimiento:venc||null,estado,cliente_id:cli.id};
+    var r=await fetch(SU+'/rest/v1/facturas_venta',{method:'POST',headers:HJ(),body:JSON.stringify(payload)});
+    if(r.ok){
+      ok.style.display='block';btn.textContent='✓ Guardado';
+      setTimeout(function(){inicFactVCel();ok.style.display='none';btn.disabled=false;btn.textContent='Guardar factura';},2000);
+    }else throw new Error(await r.text());
+  }catch(ex){err.style.display='block';err.textContent=mensajeError(ex);btn.disabled=false;btn.textContent='Guardar factura';}
+}
+
+async function loadHistFactVentas(){
+  var el=document.getElementById('fvh-c');
+  el.innerHTML='<div class="ld">Cargando...</div>';
+  try{
+    var r=await fetch(SU+'/rest/v1/facturas_venta?select=*&cliente_id=eq.'+cli.id+'&order=fecha.desc&limit=100',{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){el.innerHTML='<div class="empty">Sin facturas de venta registradas</div>';return;}
+    var hoy2=new Date();hoy2.setHours(0,0,0,0);
+    var meses={};
+    d.forEach(function(f){
+      var k=f.fecha.substring(0,7);
+      if(!meses[k])meses[k]=[];
+      meses[k].push(f);
+    });
+    var MC=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var h='';
+    Object.keys(meses).forEach(function(k){
+      var filas=meses[k];
+      var total=filas.reduce(function(s,f){return s+(f.total||0);},0);
+      var parts=k.split('-');
+      var label=MC[parseInt(parts[1])-1]+' '+parts[0];
+      h+='<div style="background:white;border:1px solid #c1c7cd;border-radius:8px;overflow:hidden;margin-bottom:10px">';
+      h+='<div style="background:#f8f9fa;border-bottom:1px solid #c1c7cd;padding:9px 12px;display:flex;justify-content:space-between;align-items:center">';
+      h+='<span style="font-size:13px;font-weight:500;color:#212529">'+label+'</span>';
+      h+='<span style="font-size:13px;font-weight:500;color:#e03131">'+fmt(total)+'</span>';
+      h+='</div>';
+      filas.forEach(function(f){
+        var venc=f.fecha_vencimiento?new Date(f.fecha_vencimiento+'T12:00:00'):null;
+        var isVencida=venc&&venc<hoy2&&f.estado!=='pagado';
+        var badgeBg=f.estado==='pagado'?'#e8f7f2':isVencida?'#FCEBEB':'#FAEEDA';
+        var badgeColor=f.estado==='pagado'?'#087a55':isVencida?'#c0392b':'#b45309';
+        var badgeTxt=f.estado==='pagado'?'✓ Pagado':isVencida?'⚠ Vencida':'⏳ Pendiente';
+        h+='<div style="padding:9px 12px;border-bottom:1px solid #e9ecef">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">';
+        h+='<span style="font-size:13px;font-weight:500;color:#212529">'+(f.cliente_nombre||'—')+'</span>';
+        h+='<span style="font-size:13px;font-weight:500;color:#e03131">'+fmt(f.total)+'</span>';
+        h+='</div>';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center">';
+        h+='<span style="font-size:11px;color:#adb5bd">N°'+(f.numero_factura||'—')+' · '+new Date(f.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'})+'</span>';
+        h+='<span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:'+badgeBg+';color:'+badgeColor+'">'+badgeTxt+'</span>';
+        h+='</div>';
+        if(f.estado!=='pagado'){
+          h+='<button data-fvid="'+f.id+'" onclick="marcarCobradaCel(this.dataset.fvid,this)" style="width:100%;margin-top:6px;height:32px;border:none;border-radius:8px;background:#0d9e6e;color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">Marcar como cobrada</button>';
+        }
+        h+='</div>';
+      });
+      h+='</div>';
+    });
+    el.innerHTML=h;
+  }catch(ex){el.innerHTML='<div class="empty">'+mensajeError(ex)+'</div>';}
+}
+
+async function marcarCobradaCel(id, btn){
+  if(!confirm('¿Marcar como cobrada?'))return;
+  btn.disabled=true;btn.textContent='Guardando...';
+  var r=await fetch(SU+'/rest/v1/facturas_venta?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({estado:'pagado'})});
+  if(r.ok)loadHistFactVentas();
+  else{btn.disabled=false;btn.textContent='Marcar como cobrada';}
 }
 
 
