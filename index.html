@@ -1416,7 +1416,7 @@ function generarPDFCierre(r){
   var gastos=r.gastos_detalle||[];
   var totalGastos=gastos.reduce(function(s,g){return s+(g.monto||0);},0)||r.gastos||0;
   var fecha=new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var f2=function(n){return '$'+Math.round(n||0).toLocaleString('es-CL');};
+  // f2 es función global definida arriba
   var dif=r.diferencia||0;
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cierre '+r.fecha+'</title>'
     +'<style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}body{font-family:Arial,sans-serif;font-size:12px;color:#212529;margin:0;padding:20px;max-width:600px}'
@@ -1648,7 +1648,7 @@ async function generarReportePersonal(){
     var r=await fetch(SU+'/rest/v1/pagos_personal?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+d+'&fecha=lt.'+h2+'&order=empleado.asc,fecha.asc',{headers:H()});
     var pagos=await r.json();
     if(!pagos||!pagos.length){alert('No hay pagos registrados en '+MS[mes-1]+' '+a);return;}
-    var f2=function(n){return '$'+Math.round(n||0).toLocaleString('es-CL');};
+    // f2 es función global definida arriba
     var fd=function(fecha){return new Date(fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});};
     var tipoColor={'Sueldo':'#1971c2','Quincena':'#087a55','Adelanto':'#b45309','Otro':'#495057'};
     var tipoBg={'Sueldo':'#e8f0fb','Quincena':'#e8f7f2','Adelanto':'#FAEEDA','Otro':'#f4f5f6'};
@@ -1791,7 +1791,7 @@ async function generarPDFPersCompleto(empleado, fechaRef){
     var r=await fetch(SU+'/rest/v1/pagos_personal?select=*&cliente_id=eq.'+cli.id+'&empleado=eq.'+encodeURIComponent(empleado)+'&fecha=gte.'+d+'&fecha=lt.'+h2+'&order=fecha.asc',{headers:H()});
     var pagos=await r.json();
     if(!pagos||!pagos.length){alert('Sin pagos para '+empleado+' en '+MS[mes-1]+' '+a);return;}
-    var f2=function(n){return '$'+Math.round(n||0).toLocaleString('es-CL');};
+    // f2 es función global definida arriba
     var fd2=function(f){return new Date(f+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});};
     var total=pagos.reduce(function(s,p){return s+(p.monto||0);},0);
     var periodo=MS[mes-1]+' '+a;
@@ -1939,7 +1939,7 @@ async function generarPDFPersonalCompleto(){
     var r=await fetch(SU+'/rest/v1/pagos_personal?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+d+'&fecha=lt.'+h2+'&order=empleado.asc,fecha.asc',{headers:H()});
     var pagos=await r.json();
     if(!pagos||!pagos.length){alert('Sin registros en '+MS[mes-1]+' '+a);return;}
-    var f2=function(n){return '$'+Math.round(n||0).toLocaleString('es-CL');};
+    // f2 es función global definida arriba
     var fd2=function(f){return new Date(f+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});};
     var periodo=MS[mes-1]+' '+a;
     var tipoBg={'Sueldo':'#e8f0fb','Quincena':'#e8f7f2','Adelanto':'#FAEEDA','Otro':'#f4f5f6'};
@@ -2730,9 +2730,7 @@ async function reporteGastosFijos(){
   var vm=getMesAnioDeSelect('rep-mes-gf');
   if(!vm){alert('Selecciona un período');return;}
   var anio=vm.anio,mes=vm.mes;
-  var desde=anio+'-'+String(mes).padStart(2,'0')+'-01';
-  var hasta=anio+'-'+String(mes).padStart(2,'0')+'-31';
-  var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&mes=gte.'+desde+'&mes=lte.'+hasta,{headers:H()});
+  var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&mes=eq.'+mes+'&anio=eq.'+anio,{headers:H()});
   var d=await r.json();
   if(!d||!d.length){alert('Sin gastos fijos en '+MC2[mes-1]+' '+anio);return;}
   var g=d[0];
@@ -2793,7 +2791,7 @@ async function reporteBalance(){
   var [rC,rF,rG,rP]=await Promise.all([
     fetch(SU+'/rest/v1/cierres_caja?select=fecha,total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+desde+'&fecha=lte.'+hasta,{headers:H()}),
     fetch(SU+'/rest/v1/facturas?select=fecha,total&cliente_id=eq.'+cli.id+'&fecha=gte.'+desde+'&fecha=lte.'+hasta,{headers:H()}),
-    fetch(SU+'/rest/v1/gastos_fijos?select=mes,sueldos,previred,arriendo,luz,credito,iva,contabilidad,otros&cliente_id=eq.'+cli.id+'&mes=gte.'+desde+'&mes=lte.'+hasta,{headers:H()}),
+    fetch(SU+'/rest/v1/gastos_fijos?select=mes,anio,sueldos,previred,arriendo,luz,credito,iva,contabilidad,otros&cliente_id=eq.'+cli.id+'&anio=eq.'+anio,{headers:H()}),
     fetch(SU+'/rest/v1/personal?select=fecha,monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+desde+'&fecha=lte.'+hasta,{headers:H()})
   ]);
   var cierres=await rC.json();
@@ -2807,8 +2805,8 @@ async function reporteBalance(){
   cierres.forEach(function(c){var m=parseInt(c.fecha.substring(5,7));mesesData[m].ventas+=(c.total_z||0);});
   facturas.forEach(function(f){var m=parseInt(f.fecha.substring(5,7));mesesData[m].compras+=(f.total||0);});
   gastos.forEach(function(g){
-    var m=parseInt(g.mes.substring(5,7));
-    mesesData[m].gastosFijos+=(g.sueldos||0)+(g.previred||0)+(g.arriendo||0)+(g.luz||0)+(g.credito||0)+(g.iva||0)+(g.contabilidad||0)+(g.otros||0);
+    var m=g.mes||parseInt((g.mes_fecha||'').substring(5,7));
+    if(m>=1&&m<=12)mesesData[m].gastosFijos+=(g.sueldos||0)+(g.previred||0)+(g.arriendo||0)+(g.luz||0)+(g.credito||0)+(g.iva||0)+(g.contabilidad||0)+(g.otros||0);
   });
   personal.forEach(function(p){var m=parseInt(p.fecha.substring(5,7));mesesData[m].personal+=(p.monto||0);});
 
@@ -2892,7 +2890,7 @@ async function reporteDashboard(){
       fetch(SU+'/rest/v1/cierres_caja?select=total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+dPrev+'&fecha=lt.'+h2Prev,{headers:H()}),
       fetch(SU+'/rest/v1/facturas?select=total&cliente_id=eq.'+cli.id+'&fecha=gte.'+dPrev+'&fecha=lt.'+h2Prev,{headers:H()}),
       fetch(SU+'/rest/v1/pagos_personal?select=monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+dPrev+'&fecha=lt.'+h2Prev,{headers:H()}),
-      fetch(SU+'/rest/v1/gastos_fijos?select=total&cliente_id=eq.'+cli.id+'&mes=eq.'+mesPrev+'&anio=eq.'+aPrev,{headers:H()}),
+      fetch(SU+'/rest/v1/gastos_fijos?select=sueldos,previred,arriendo,luz,credito,iva,contabilidad,otros&cliente_id=eq.'+cli.id+'&mes=eq.'+mesPrev+'&anio=eq.'+aPrev,{headers:H()}),
       fetch(SU+'/rest/v1/facturas_venta?select=total,estado,fecha_vencimiento&cliente_id=eq.'+cli.id+'&fecha=gte.'+d+'&fecha=lt.'+h2,{headers:H()}),
       fetch(SU+'/rest/v1/creditos?select=nombre,cuota_mensual,monto_restante,pagado_mes_actual&cliente_id=eq.'+cli.id,{headers:H()})
     ]);
@@ -3267,6 +3265,8 @@ async function hashPassword(pass){
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
+
+function f2(n){return '$'+Math.round(n||0).toLocaleString('es-CL');}
 
 function mensajeError(ex){
   if(!navigator.onLine) return 'Sin conexión a internet. Verifica tu red e intenta de nuevo.';
