@@ -540,10 +540,10 @@ tr:hover td{background:var(--g50)}
 
       <div class="dcont">
         <div class="dp active" id="dp-resumen"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px"><div class="pills" id="pills"></div><button onclick="reporteDashboard()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="rc"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-balance"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-mes-bal" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteBalance()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte anual</button></div><div id="bc"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-cierres"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-mes-cierres" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteCierres()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="dc"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-factventas"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-mes-factv" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteFactVenta()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="dfv"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-facturas">
+        <div class="dp" id="dp-balance"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-bal" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteBalance()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte anual</button></div><div id="bc"><div class="ld">Cargando...</div></div></div>
+        <div class="dp" id="dp-cierres"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-cierres" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteCierres()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="dc"><div class="ld">Cargando...</div></div></div>
+        <div class="dp" id="dp-factventas"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-factv" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteFactVenta()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="dfv"><div class="ld">Cargando...</div></div></div>
+        <div class="dp" id="dp-facturas"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-factc" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteFactCompra()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div>
           <div style="display:flex;border-bottom:2px solid #c1c7cd;margin-bottom:1.25rem">
             <button id="ftab-facturas" onclick="swFactTab('facturas')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--vd);border-bottom:2px solid var(--v);margin-bottom:-2px">Facturas</button>
             <button id="ftab-precios" onclick="swFactTab('precios')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Precios de compra</button>
@@ -568,8 +568,8 @@ tr:hover td{background:var(--g50)}
           <div id="dp-personal-pagos"><div id="dpe"><div class="ld">Cargando...</div></div><div id="dp-personal-resumen" style="display:none;margin-top:1.25rem"></div></div>
           <div id="dp-personal-emps" style="display:none"><div id="dem"><div class="ld">Cargando...</div></div></div>
         </div>
-        <div class="dp" id="dp-gastosfijos"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-mes-gf" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteGastosFijos()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="dg"><div class="ld">Cargando...</div></div></div>
-        <div class="dp" id="dp-creditos"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-mes-cred" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteCreditos()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte actual</button></div><div id="dcred"><div class="ld">Cargando...</div></div></div>
+        <div class="dp" id="dp-gastosfijos"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-gf" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteGastosFijos()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte del mes</button></div><div id="dg"><div class="ld">Cargando...</div></div></div>
+        <div class="dp" id="dp-creditos"><div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:1rem"><select id="rep-cred" style="height:32px;border:1px solid #c1c7cd;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#212529;background:white"></select><button onclick="reporteCreditos()" style="height:32px;padding:0 14px;border:1px solid #c1c7cd;border-radius:8px;background:white;color:#212529;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">📊 Reporte actual</button></div><div id="dcred"><div class="ld">Cargando...</div></div></div>
       </div>
     </div>
   </div>
@@ -2989,6 +2989,336 @@ async function reporteDashboard(){
 }
 
 
+// ══════════════════════════════════════
+// REPORTES MENSUALES
+// ══════════════════════════════════════
+
+// Función global de formato moneda (igual que fmt pero sin variables externas)
+function fmtR(n){return '$'+Math.round(n||0).toLocaleString('es-CL');}
+
+// Inicializar select de mes (mismo patrón que Personal)
+function inicSelReporte(id){
+  var sel=document.getElementById(id);
+  if(!sel)return;
+  sel.innerHTML='';
+  var a=hoy.getFullYear();
+  for(var y=a;y>=a-1;y--){
+    for(var m=12;m>=1;m--){
+      if(y===a&&m>hoy.getMonth()+1)continue;
+      var opt=document.createElement('option');
+      opt.value=y+'-'+String(m).padStart(2,'0');
+      opt.textContent=MS[m-1]+' '+y;
+      if(y===a&&m===hoy.getMonth()+1)opt.selected=true;
+      sel.appendChild(opt);
+    }
+  }
+}
+
+// Obtener mes y año desde el select
+function getSelMesAnio(id){
+  var sel=document.getElementById(id);
+  if(!sel||!sel.value)return null;
+  var p=sel.value.split('-');
+  return {a:parseInt(p[0]),m:parseInt(p[1]),desde:sel.value+'-01',hasta:null};
+}
+
+// Abrir PDF en ventana nueva
+function abrirPDF(titulo,cuerpo){
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title>'
+    +'<style>*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}body{font-family:Arial,sans-serif;font-size:12px;color:#212529;margin:0;padding:20px;max-width:700px}@media print{.no-print{display:none}}.hdr{background:#0d9e6e!important;color:white!important;padding:16px 20px;border-radius:6px 6px 0 0}.hdr h1{font-size:16px;margin:0 0 4px;font-weight:500;color:white!important}.hdr p{font-size:11px;margin:0;opacity:.85;color:white!important}.body{border:1px solid #c1c7cd;border-top:none;border-radius:0 0 6px 6px;padding:16px 20px}.sec{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.05em;color:#adb5bd;margin:16px 0 8px}.sec:first-child{margin-top:0}.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f3f5;font-size:12px}.row:last-child{border-bottom:none}.tot{font-weight:bold;border-top:2px solid #c1c7cd!important;border-bottom:none!important;padding-top:8px!important}.pos{color:#087a55}.neg{color:#e03131}.pen{color:#b45309}.az{color:#1971c2}.bdg{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}.bdg-v{background:#e8f7f2;color:#087a55}.bdg-a{background:#FAEEDA;color:#b45309}.bdg-r{background:#FCEBEB;color:#c0392b}table{width:100%;border-collapse:collapse;margin-top:6px}th{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.04em;color:#adb5bd;padding:5px 8px;border-bottom:2px solid #c1c7cd;text-align:left}td{font-size:11px;padding:5px 8px;border-bottom:1px solid #f1f3f5}tr:last-child td{border-bottom:none}.footer{text-align:center;font-size:10px;color:#adb5bd;margin-top:16px;padding-top:10px;border-top:1px solid #e9ecef}</style></head><body>'
+    +'<div class="hdr"><h1>'+titulo+'</h1>'
+    +'<p>'+cli.nombre_negocio+' &middot; Generado el '+new Date().toLocaleDateString('es-CL')+'</p></div>'
+    +'<div class="body">'+cuerpo+'</div>'
+    +'<div class="footer">EZadmin &middot; Reporte generado autom&aacute;ticamente</div>'
+    +'</body></html>';
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print();},500);}
+}
+
+// ── 1. Cierres de caja ──
+async function reporteCierres(){
+  var v=getSelMesAnio('rep-cierres');
+  if(!v){alert('Selecciona un período');return;}
+  var a=v.a,m=v.m;
+  var mf=m===12?1:m+1,af=m===12?a+1:a;
+  var d1=a+'-'+String(m).padStart(2,'0')+'-01';
+  var d2=af+'-'+String(mf).padStart(2,'0')+'-01';
+  try{
+    var r=await fetch(SU+'/rest/v1/cierres_caja?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2+'&order=fecha.asc',{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){alert('Sin cierres en '+MS[m-1]+' '+a);return;}
+    var tV=0,tR=0,tG=0,nMal=0;
+    var filas='';
+    d.forEach(function(c){
+      tV+=(c.total_z||0);tR+=(c.retiros||0);
+      var gastos=c.gastos_detalle?c.gastos_detalle.reduce(function(s,g){return s+(g.monto||0);},0):(c.gastos||0);
+      tG+=gastos;
+      if((c.diferencia||0)!==0)nMal++;
+      var fec=new Date(c.fecha+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'});
+      var dif=c.diferencia||0;
+      filas+='<tr><td>'+fec+'</td><td class="pos">'+fmtR(c.total_z)+'</td><td>'+fmtR(c.retiros)+'</td>'
+        +'<td class="'+(dif===0?'pos':'neg')+'">'+fmtR(dif)+'</td><td class="neg">'+fmtR(gastos)+'</td></tr>';
+    });
+    var cuerpo='<div class="sec">Resumen</div>'
+      +'<div class="row"><span>Total ventas</span><span class="pos">'+fmtR(tV)+'</span></div>'
+      +'<div class="row"><span>Total retiros</span><span>'+fmtR(tR)+'</span></div>'
+      +'<div class="row"><span>Total gastos del día</span><span class="neg">'+fmtR(tG)+'</span></div>'
+      +'<div class="row"><span>Días registrados</span><span>'+d.length+'</span></div>'
+      +'<div class="row tot"><span>Cierres con descuadre</span><span class="'+(nMal>0?'neg':'pos')+'">'+nMal+'</span></div>'
+      +'<div class="sec">Detalle por día</div>'
+      +'<table><tr><th>Fecha</th><th>Ventas</th><th>Retiros</th><th>Diferencia</th><th>Gastos</th></tr>'+filas+'</table>';
+    abrirPDF('Cierres de caja — '+MS[m-1]+' '+a, cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+// ── 2. Facturas de compra ──
+async function reporteFactCompra(){
+  var v=getSelMesAnio('rep-factc');
+  if(!v){alert('Selecciona un período');return;}
+  var a=v.a,m=v.m;
+  var mf=m===12?1:m+1,af=m===12?a+1:a;
+  var d1=a+'-'+String(m).padStart(2,'0')+'-01';
+  var d2=af+'-'+String(mf).padStart(2,'0')+'-01';
+  try{
+    var r=await fetch(SU+'/rest/v1/facturas?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2+'&order=fecha.asc',{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){alert('Sin facturas en '+MS[m-1]+' '+a);return;}
+    var tN=0,tI=0,tT=0,nPag=0,nPend=0;
+    var filas='';
+    d.forEach(function(f){
+      tN+=(f.monto_neto||0);tI+=(f.iva||0);tT+=(f.total||0);
+      if(f.estado==='pagado')nPag++;else nPend++;
+      var fec=new Date(f.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      var bdg=f.estado==='pagado'?'<span class="bdg bdg-v">Pagado</span>':'<span class="bdg bdg-a">Pendiente</span>';
+      filas+='<tr><td>'+(f.numero_factura||'—')+'</td><td>'+fec+'</td><td>'+(f.proveedor||'—')+'</td>'
+        +'<td>'+fmtR(f.monto_neto)+'</td><td>'+fmtR(f.iva)+'</td><td class="neg">'+fmtR(f.total)+'</td><td>'+bdg+'</td></tr>';
+    });
+    var cuerpo='<div class="sec">Resumen</div>'
+      +'<div class="row"><span>Total neto</span><span class="neg">'+fmtR(tN)+'</span></div>'
+      +'<div class="row"><span>IVA total</span><span class="pen">'+fmtR(tI)+'</span></div>'
+      +'<div class="row"><span>Total con IVA</span><span class="neg">'+fmtR(tT)+'</span></div>'
+      +'<div class="row"><span>Facturas pagadas</span><span class="pos">'+nPag+'</span></div>'
+      +'<div class="row tot"><span>Facturas pendientes</span><span class="pen">'+nPend+'</span></div>'
+      +'<div class="sec">Detalle</div>'
+      +'<table><tr><th>N°</th><th>Fecha</th><th>Proveedor</th><th>Neto</th><th>IVA</th><th>Total</th><th>Estado</th></tr>'+filas+'</table>';
+    abrirPDF('Facturas de compra — '+MS[m-1]+' '+a, cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+// ── 3. Facturas de venta ──
+async function reporteFactVenta(){
+  var v=getSelMesAnio('rep-factv');
+  if(!v){alert('Selecciona un período');return;}
+  var a=v.a,m=v.m;
+  var mf=m===12?1:m+1,af=m===12?a+1:a;
+  var d1=a+'-'+String(m).padStart(2,'0')+'-01';
+  var d2=af+'-'+String(mf).padStart(2,'0')+'-01';
+  try{
+    var r=await fetch(SU+'/rest/v1/facturas_venta?select=*&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2+'&order=fecha.asc',{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){alert('Sin facturas de venta en '+MS[m-1]+' '+a);return;}
+    var hoy2=new Date();hoy2.setHours(0,0,0,0);
+    var tCob=0,tPend=0,tVenc=0,tTotal=0;
+    var filas='';
+    d.forEach(function(f){
+      tTotal+=(f.total||0);
+      var venc=f.fecha_vencimiento?new Date(f.fecha_vencimiento+'T12:00:00'):null;
+      var isV=venc&&venc<hoy2&&f.estado!=='pagado';
+      if(f.estado==='pagado')tCob+=(f.total||0);
+      else if(isV)tVenc+=(f.total||0);
+      else tPend+=(f.total||0);
+      var fec=new Date(f.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      var bdg=f.estado==='pagado'?'<span class="bdg bdg-v">Cobrado</span>':isV?'<span class="bdg bdg-r">Vencida</span>':'<span class="bdg bdg-a">Pendiente</span>';
+      filas+='<tr><td>'+(f.numero_factura||'—')+'</td><td>'+fec+'</td><td>'+(f.cliente_nombre||'—')+'</td>'
+        +'<td>'+(f.rut_cliente||'—')+'</td><td class="pos">'+fmtR(f.total)+'</td><td>'+bdg+'</td></tr>';
+    });
+    var cuerpo='<div class="sec">Resumen</div>'
+      +'<div class="row"><span>Total emitido</span><span class="az">'+fmtR(tTotal)+'</span></div>'
+      +'<div class="row"><span>Cobrado</span><span class="pos">'+fmtR(tCob)+'</span></div>'
+      +'<div class="row"><span>Por cobrar</span><span class="pen">'+fmtR(tPend)+'</span></div>'
+      +'<div class="row tot"><span>Vencido sin cobrar</span><span class="neg">'+fmtR(tVenc)+'</span></div>'
+      +'<div class="sec">Detalle</div>'
+      +'<table><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>RUT</th><th>Total</th><th>Estado</th></tr>'+filas+'</table>';
+    abrirPDF('Facturas de venta — '+MS[m-1]+' '+a, cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+// ── 4. Gastos fijos ──
+async function reporteGastosFijos(){
+  var v=getSelMesAnio('rep-gf');
+  if(!v){alert('Selecciona un período');return;}
+  var a=v.a,m=v.m;
+  try{
+    var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&mes=eq.'+m+'&anio=eq.'+a,{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){alert('Sin gastos fijos en '+MS[m-1]+' '+a);return;}
+    var g=d[0];
+    var otros=g.otros_detalle&&g.otros_detalle.length?g.otros_detalle.reduce(function(s,o){return s+(o.monto||0);},0):(g.otros||0);
+    var total=(g.previred||0)+(g.sueldos||0)+(g.arriendo||0)+(g.luz||0)+(g.credito||0)+(g.iva||0)+(g.contabilidad||0)+otros;
+    var cuerpo='<div class="sec">Detalle — '+MS[m-1]+' '+a+'</div>'
+      +'<div class="row"><span>Previred</span><span class="neg">'+fmtR(g.previred)+'</span></div>'
+      +'<div class="row"><span>Sueldos</span><span class="neg">'+fmtR(g.sueldos)+'</span></div>'
+      +'<div class="row"><span>Arriendo</span><span class="neg">'+fmtR(g.arriendo)+'</span></div>'
+      +'<div class="row"><span>Luz</span><span class="neg">'+fmtR(g.luz)+'</span></div>'
+      +'<div class="row"><span>Crédito</span><span class="neg">'+fmtR(g.credito)+'</span></div>'
+      +'<div class="row"><span>IVA</span><span class="neg">'+fmtR(g.iva)+'</span></div>'
+      +'<div class="row"><span>Contabilidad</span><span class="neg">'+fmtR(g.contabilidad)+'</span></div>';
+    if(g.otros_detalle&&g.otros_detalle.length){
+      cuerpo+='<div class="sec">Otros gastos</div>';
+      g.otros_detalle.forEach(function(o){
+        cuerpo+='<div class="row"><span>'+o.desc+'</span><span class="neg">'+fmtR(o.monto)+'</span></div>';
+      });
+    }
+    cuerpo+='<div class="row tot"><span>Total gastos fijos</span><span class="neg">'+fmtR(total)+'</span></div>';
+    abrirPDF('Gastos fijos — '+MS[m-1]+' '+a, cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+// ── 5. Créditos ──
+async function reporteCreditos(){
+  try{
+    var r=await fetch(SU+'/rest/v1/creditos?select=*&cliente_id=eq.'+cli.id+'&order=created_at.asc',{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){alert('Sin créditos registrados');return;}
+    var tDeuda=0,tCuota=0;
+    var cuerpo='<div class="sec">Estado actual de créditos</div>';
+    d.forEach(function(c){
+      tDeuda+=(c.monto_restante||0);tCuota+=(c.cuota_mensual||0);
+      var pct=c.total_cuotas?Math.round((c.cuotas_pagadas||0)/c.total_cuotas*100):0;
+      var bdg=c.pagado_mes_actual?'<span class="bdg bdg-v">Pagado</span>':'<span class="bdg bdg-a">Pendiente</span>';
+      var term=c.fecha_termino?new Date(c.fecha_termino).toLocaleDateString('es-CL',{month:'short',year:'numeric'}):'—';
+      cuerpo+='<div class="row"><span><b>'+c.nombre+'</b> — '+(c.banco||'')+'</span><span>'+bdg+'</span></div>'
+        +'<div class="row"><span>Cuota mensual</span><span class="neg">'+fmtR(c.cuota_mensual)+'</span></div>'
+        +'<div class="row"><span>Deuda restante</span><span class="neg">'+fmtR(c.monto_restante)+'</span></div>'
+        +'<div class="row"><span>Cuotas pagadas</span><span>'+(c.cuotas_pagadas||0)+'/'+( c.total_cuotas||0)+' ('+pct+'%)</span></div>'
+        +'<div class="row" style="margin-bottom:10px"><span>Termina</span><span>'+term+'</span></div>';
+    });
+    cuerpo+='<div class="row tot"><span>Total deuda</span><span class="neg">'+fmtR(tDeuda)+'</span></div>'
+      +'<div class="row tot"><span>Total cuotas mensuales</span><span class="neg">'+fmtR(tCuota)+'</span></div>';
+    abrirPDF('Créditos — Estado actual', cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+// ── 6. Balance anual ──
+async function reporteBalance(){
+  var v=getSelMesAnio('rep-bal');
+  if(!v){alert('Selecciona un período');return;}
+  var a=v.a;
+  var MC2=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  try{
+    var d1=a+'-01-01',d2=(a+1)+'-01-01';
+    var [rC,rF,rP,rG]=await Promise.all([
+      fetch(SU+'/rest/v1/cierres_caja?select=fecha,total_z&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/facturas?select=fecha,total&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/pagos_personal?select=fecha,monto&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/gastos_fijos?select=mes,anio,sueldos,previred,arriendo,luz,credito,iva,contabilidad,otros&cliente_id=eq.'+cli.id+'&anio=eq.'+a,{headers:H()})
+    ]);
+    var cierres=await rC.json(),facturas=await rF.json(),personal=await rP.json(),gastos=await rG.json();
+    var meses={};
+    for(var i=1;i<=12;i++)meses[i]={v:0,c:0,p:0,g:0};
+    cierres.forEach(function(x){meses[parseInt(x.fecha.substring(5,7))].v+=(x.total_z||0);});
+    facturas.forEach(function(x){meses[parseInt(x.fecha.substring(5,7))].c+=(x.total||0);});
+    personal.forEach(function(x){meses[parseInt(x.fecha.substring(5,7))].p+=(x.monto||0);});
+    gastos.forEach(function(x){
+      var mn=x.mes;
+      if(mn>=1&&mn<=12)meses[mn].g+=(x.sueldos||0)+(x.previred||0)+(x.arriendo||0)+(x.luz||0)+(x.credito||0)+(x.iva||0)+(x.contabilidad||0)+(x.otros||0);
+    });
+    var tV=0,tC=0,tP=0,tG=0;
+    var filas='';
+    for(var mi=1;mi<=12;mi++){
+      var md=meses[mi];
+      if(!md.v&&!md.c&&!md.p&&!md.g)continue;
+      var res=md.v-md.c-md.p-md.g;
+      var pct=md.v?Math.round(res/md.v*100):0;
+      tV+=md.v;tC+=md.c;tP+=md.p;tG+=md.g;
+      filas+='<tr><td>'+MC2[mi-1]+'</td><td class="pos">'+fmtR(md.v)+'</td><td class="neg">'+fmtR(md.c)+'</td>'
+        +'<td class="pen">'+fmtR(md.p)+'</td><td class="neg">'+fmtR(md.g)+'</td>'
+        +'<td class="'+(res>=0?'pos':'neg')+'">'+fmtR(res)+'</td>'
+        +'<td class="'+(pct>=0?'pos':'neg')+'">'+(pct>=0?'+':'')+pct+'%</td></tr>';
+    }
+    var tRes=tV-tC-tP-tG,tPct=tV?Math.round(tRes/tV*100):0;
+    var cuerpo='<div class="sec">Resumen anual — '+a+'</div>'
+      +'<div class="row"><span>Total ventas</span><span class="pos">'+fmtR(tV)+'</span></div>'
+      +'<div class="row"><span>Total compras</span><span class="neg">'+fmtR(tC)+'</span></div>'
+      +'<div class="row"><span>Total personal</span><span class="pen">'+fmtR(tP)+'</span></div>'
+      +'<div class="row"><span>Total gastos fijos</span><span class="neg">'+fmtR(tG)+'</span></div>'
+      +'<div class="row tot"><span>Resultado anual</span><span class="'+(tRes>=0?'pos':'neg')+'">'+fmtR(tRes)+' ('+tPct+'%)</span></div>'
+      +'<div class="sec">Detalle por mes</div>'
+      +'<table><tr><th>Mes</th><th>Ventas</th><th>Compras</th><th>Personal</th><th>G.Fijos</th><th>Resultado</th><th>Margen</th></tr>'+filas+'</table>';
+    abrirPDF('Balance anual — '+a, cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+// ── 7. Dashboard ──
+async function reporteDashboard(){
+  var a=anioSel,m=mesSel;
+  var mf=m===12?1:m+1,af=m===12?a+1:a;
+  var d1=a+'-'+String(m).padStart(2,'0')+'-01';
+  var d2=af+'-'+String(mf).padStart(2,'0')+'-01';
+  try{
+    var [rC,rF,rP,rG,rFV,rCred]=await Promise.all([
+      fetch(SU+'/rest/v1/cierres_caja?select=total_z,diferencia&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/facturas?select=total,estado&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/pagos_personal?select=monto,empleado&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&mes=eq.'+m+'&anio=eq.'+a,{headers:H()}),
+      fetch(SU+'/rest/v1/facturas_venta?select=total,estado,fecha_vencimiento&cliente_id=eq.'+cli.id+'&fecha=gte.'+d1+'&fecha=lt.'+d2,{headers:H()}),
+      fetch(SU+'/rest/v1/creditos?select=nombre,banco,cuota_mensual,monto_restante,pagado_mes_actual&cliente_id=eq.'+cli.id,{headers:H()})
+    ]);
+    var c=await rC.json(),f=await rF.json(),p=await rP.json(),g=await rG.json(),fv=await rFV.json(),cred=await rCred.json();
+    var V=c.reduce(function(s,x){return s+(x.total_z||0);},0);
+    var C=f.reduce(function(s,x){return s+(x.total||0);},0);
+    var P=p.reduce(function(s,x){return s+(x.monto||0);},0);
+    var GF=g.length?(g[0].total||0):0,G=P+GF,U=V-C-G,M=V?Math.round(U/V*100):0;
+    var nMal=c.filter(function(x){return(x.diferencia||0)!==0;}).length;
+    var diasMes=new Date(a,m,0).getDate();
+    var hoy2=new Date();hoy2.setHours(0,0,0,0);
+    var fvCob=0,fvPend=0,fvVenc=0;
+    fv.forEach(function(x){
+      var venc=x.fecha_vencimiento?new Date(x.fecha_vencimiento+'T12:00:00'):null;
+      var isV=venc&&venc<hoy2&&x.estado!=='pagado';
+      if(x.estado==='pagado')fvCob+=(x.total||0);
+      else if(isV)fvVenc+=(x.total||0);
+      else fvPend+=(x.total||0);
+    });
+    var colorU=U>=0?'#087a55':'#e03131';
+    var cuerpo='<div class="sec">Resumen ejecutivo — '+MS[m-1]+' '+a+'</div>'
+      +'<div class="row"><span>Utilidad neta</span><span style="color:'+colorU+';font-weight:bold">'+fmtR(U)+' ('+M+'%)</span></div>'
+      +'<div class="row"><span>Ventas</span><span class="pos">'+fmtR(V)+'</span></div>'
+      +'<div class="row"><span>Compras</span><span class="neg">'+fmtR(C)+'</span></div>'
+      +'<div class="row"><span>Personal</span><span class="pen">'+fmtR(P)+'</span></div>'
+      +'<div class="row"><span>Gastos fijos</span><span class="neg">'+fmtR(GF)+'</span></div>'
+      +'<div class="row tot"><span>Días registrados</span><span>'+c.length+' de '+diasMes+'</span></div>';
+    if(c.length){
+      cuerpo+='<div class="sec">Cierres</div>'
+        +'<div class="row"><span>Días registrados</span><span>'+c.length+'</span></div>'
+        +'<div class="row tot"><span>Con descuadre</span><span class="'+(nMal>0?'neg':'pos')+'">'+nMal+'</span></div>';
+    }
+    if(f.length){
+      var fPag=f.filter(function(x){return x.estado==='pagado';}).length;
+      cuerpo+='<div class="sec">Facturas de compra</div>'
+        +'<div class="row"><span>Total facturas</span><span>'+f.length+'</span></div>'
+        +'<div class="row"><span>Monto total</span><span class="neg">'+fmtR(C)+'</span></div>'
+        +'<div class="row tot"><span>Pendientes</span><span class="pen">'+(f.length-fPag)+'</span></div>';
+    }
+    if(fv.length){
+      cuerpo+='<div class="sec">Facturas de venta</div>'
+        +'<div class="row"><span>Total emitido</span><span class="az">'+fmtR(fvCob+fvPend+fvVenc)+'</span></div>'
+        +'<div class="row"><span>Cobrado</span><span class="pos">'+fmtR(fvCob)+'</span></div>'
+        +'<div class="row"><span>Por cobrar</span><span class="pen">'+fmtR(fvPend)+'</span></div>'
+        +'<div class="row tot"><span>Vencido</span><span class="neg">'+fmtR(fvVenc)+'</span></div>';
+    }
+    if(cred.length){
+      var tCuota=cred.reduce(function(s,x){return s+(x.cuota_mensual||0);},0);
+      var tDeuda=cred.reduce(function(s,x){return s+(x.monto_restante||0);},0);
+      cuerpo+='<div class="sec">Créditos</div>'
+        +'<div class="row"><span>Cuotas del mes</span><span class="neg">'+fmtR(tCuota)+'</span></div>'
+        +'<div class="row tot"><span>Deuda total</span><span class="neg">'+fmtR(tDeuda)+'</span></div>';
+    }
+    abrirPDF('Resumen ejecutivo — '+MS[m-1]+' '+a, cuerpo);
+  }catch(ex){alert(mensajeError(ex));}
+}
+
+
 function calcCaja(){
   var ci=v('cj-ci'),cf=v('cj-cf'),z=v('cj-z'),rc=v('cj-rc'),cr=v('cj-cr'),ot=v('cj-ot'),tr=v('cj-tr'),nu=v('cj-nu'),re=v('cj-re'),ga=v('cj-ga');
   var dif=-(ci+z-rc-cr-ot-tr-nu-re-cf-ga);
@@ -3655,6 +3985,10 @@ function dpage(n,el){
   document.getElementById('tbt').textContent=t[n]||n;
   if(n==='balance')loadB();
   if(n==='personal'){loadTD('pagos_personal','dpe',renderPersonalTabla);inicSelectMesPersonal();}
+  if(n==='cierres')inicSelReporte('rep-cierres');
+  if(n==='gastosfijos')inicSelReporte('rep-gf');
+  if(n==='creditos')inicSelReporte('rep-cred');
+  if(n==='balance')inicSelReporte('rep-bal');
   if(n==='cierres'){
     if(cli.rol_usuario==='jefe_local'){
       // Solo mostrar formulario celular de cierre, no historial
@@ -3663,8 +3997,8 @@ function dpage(n,el){
     }
     loadCierresDash();
   }
-  if(n==='facturas'){inicSelectMes('rep-mes-factc');loadFacturasDash();}
-  if(n==='factventas'){inicSelectMes('rep-mes-factv');loadFactVentasDash();}
+  if(n==='facturas'){inicSelReporte('rep-factc');loadFacturasDash();}
+  if(n==='factventas'){inicSelReporte('rep-factv');loadFactVentasDash();}
   if(n==='cierres')inicSelectMes('rep-mes-cierres');
   if(n==='gastosfijos')inicSelectMes('rep-mes-gf');
   if(n==='creditos')inicSelectMes('rep-mes-cred');
