@@ -716,13 +716,36 @@ tr:hover td{background:var(--g50)}
 
 <!-- MODAL EMPLEADO -->
 <div class="modal-bg" id="modal-emp">
-  <div class="modal">
+  <div class="modal" style="max-width:520px">
     <div class="modal-t"><span id="memp-titulo">Agregar empleado</span><button class="modal-x" onclick="cerrarModal('emp')">×</button></div>
     <input type="hidden" id="memp-id">
-    <label class="modal-label">Nombre completo</label>
-    <input class="modal-input" type="text" id="memp-nombre" placeholder="Ej: Juan Pérez">
-    <label class="modal-label">Sueldo mensual (opcional)</label>
-    <input class="modal-input" type="number" id="memp-sueldo" placeholder="0">
+    <div class="modal-div">Datos personales</div>
+    <div class="modal-grid2">
+      <div><label class="modal-label">Nombre completo</label><input class="modal-input" type="text" id="memp-nombre" placeholder="Ej: Juan Pérez"></div>
+      <div><label class="modal-label">RUT</label><input class="modal-input" type="text" id="memp-rut" placeholder="Ej: 12.345.678-9"></div>
+    </div>
+    <label class="modal-label">Domicilio</label>
+    <input class="modal-input" type="text" id="memp-domicilio" placeholder="Ej: Av. Principal 123, Santiago">
+    <div class="modal-grid2">
+      <div><label class="modal-label">Teléfono</label><input class="modal-input" type="text" id="memp-telefono" placeholder="+56 9 1234 5678"></div>
+      <div><label class="modal-label">Email</label><input class="modal-input" type="email" id="memp-email" placeholder="correo@mail.com"></div>
+    </div>
+    <div class="modal-div">Datos laborales</div>
+    <div class="modal-grid2">
+      <div><label class="modal-label">Cargo</label><input class="modal-input" type="text" id="memp-cargo" placeholder="Ej: Vendedor"></div>
+      <div><label class="modal-label">Fecha de ingreso</label><input class="modal-input" type="date" id="memp-ingreso"></div>
+    </div>
+    <div class="modal-grid2">
+      <div><label class="modal-label">Tipo de contrato</label>
+        <select class="modal-select" id="memp-contrato">
+          <option value="indefinido">Indefinido</option>
+          <option value="plazo_fijo">Plazo fijo</option>
+          <option value="part_time">Part time</option>
+          <option value="honorarios">Honorarios</option>
+        </select>
+      </div>
+      <div><label class="modal-label">Sueldo mensual</label><input class="modal-input" type="number" id="memp-sueldo" placeholder="0"></div>
+    </div>
     <label class="modal-label">Estado</label>
     <select class="modal-select" id="memp-activo">
       <option value="true">Activo</option>
@@ -4356,12 +4379,17 @@ async function loadEmpleados(){
       document.getElementById('dem').innerHTML=h;return;
     }
     h+='<div class="tc"><div class="tc-h"><span class="tc-t">Empleados activos</span><span class="tc-c">'+activos.length+'</span></div>';
-    h+='<table><tr><th>Nombre</th><th>Sueldo mensual</th><th>Estado</th><th></th></tr>';
+    h+='<div class="tc"><div class="tc-h"><span class="tc-t">Empleados activos</span><span class="tc-c">'+activos.length+'</span></div>';
+    h+='<table><tr><th>Nombre</th><th>RUT</th><th>Cargo</th><th>Contrato</th><th>Ingreso</th><th>Sueldo</th><th></th></tr>';
     activos.forEach(function(e){
-      h+='<tr><td style="font-weight:500">'+e.nombre+'</td><td>'+fmt(e.sueldo_mensual||0)+'</td>';
-      h+='<td><span class="bdg quincena">Activo</span></td>';
-      h+='<td style="white-space:nowrap"><button class="btn-edit" onclick=\'abrirEditEmp('+JSON.stringify(e)+')\'>✏️</button>';
-      h+='<button class="btn-del" onclick="desactivarEmp(\''+e.id+'\',\''+e.nombre+'\')">🚫</button></td></tr>';
+      var fi=e.fecha_ingreso?new Date(e.fecha_ingreso+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}):'—';
+      var contratos={indefinido:'Indefinido',plazo_fijo:'Plazo fijo',part_time:'Part time',honorarios:'Honorarios'};
+      h+='<tr><td style="font-weight:500">'+e.nombre+'</td><td style="font-size:12px;color:var(--g500)">'+(e.rut||'—')+'</td><td>'+(e.cargo||'—')+'</td><td><span class="bdg quincena">'+(contratos[e.tipo_contrato]||'Indefinido')+'</span></td><td style="font-size:12px;color:var(--g500)">'+fi+'</td><td>'+fmt(e.sueldo_mensual||0)+'</td>';
+      h+='<td style="white-space:nowrap;display:flex;gap:4px;align-items:center">';
+      h+='<button onclick=\'verFichaEmp('+JSON.stringify(e)+')\' style="padding:3px 10px;border:1px solid #c1c7cd;border-radius:6px;background:white;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;color:#212529">Ver ficha</button>';
+      h+='<button class="btn-edit" onclick=\'abrirEditEmp('+JSON.stringify(e)+')\'>✏️</button>';
+      h+='<button class="btn-del" onclick="desactivarEmp(\''+e.id+'\',\''+e.nombre+'\')" title="Desactivar">🚫</button>';
+      h+='</td></tr>';
     });
     h+='</table></div>';
     if(inactivos.length>0){
@@ -4381,17 +4409,60 @@ async function loadEmpleados(){
 function nuevoEmp(){
   document.getElementById('memp-id').value='';
   document.getElementById('memp-titulo').textContent='Agregar empleado';
-  document.getElementById('memp-nombre').value='';
-  document.getElementById('memp-sueldo').value='';
+  ['memp-nombre','memp-rut','memp-domicilio','memp-telefono','memp-email','memp-cargo','memp-ingreso','memp-sueldo'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('memp-contrato').value='indefinido';
   document.getElementById('memp-activo').value='true';
   document.getElementById('memp-btn').textContent='Agregar';
   abrirModal('emp');
+}
+
+function verFichaEmp(e){
+  var contratos={indefinido:'Indefinido',plazo_fijo:'Plazo fijo',part_time:'Part time',honorarios:'Honorarios'};
+  var fi=e.fecha_ingreso?new Date(e.fecha_ingreso+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}):'No registrada';
+  var row=function(lbl,val){return val?'<div class="row"><span style="color:var(--g500)">'+lbl+'</span><span style="font-weight:500">'+val+'</span></div>':'';};
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ficha '+e.nombre+'</title>'
+    +'<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:13px;color:#212529;margin:0;padding:20px;max-width:500px}'
+    +'.hdr{background:#0d9e6e;color:white;padding:16px 20px;border-radius:6px 6px 0 0}'
+    +'.hdr h1{font-size:17px;margin:0 0 3px;font-weight:500;color:white}'
+    +'.hdr p{font-size:12px;margin:0;opacity:.85;color:white}'
+    +'.body{border:1px solid #c1c7cd;border-top:none;border-radius:0 0 6px 6px;padding:16px 20px}'
+    +'.sec{font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.05em;color:#adb5bd;margin:14px 0 7px}'
+    +'.sec:first-child{margin-top:0}'
+    +'.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f3f5;font-size:13px}'
+    +'.row:last-child{border-bottom:none}'
+    +'.badge{display:inline-block;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}'
+    +'.footer{text-align:center;font-size:10px;color:#adb5bd;margin-top:16px;padding-top:10px;border-top:1px solid #e9ecef}'
+    +'@media print{button{display:none}}'
+    +'</style></head><body>'
+    +'<div class="hdr"><h1>'+e.nombre+'</h1><p>'+(e.cargo||'Empleado')+' &middot; <span class="badge" style="background:rgba(255,255,255,.2);color:white">'+(contratos[e.tipo_contrato]||'Indefinido')+'</span></p></div>'
+    +'<div class="body">'
+    +'<div class="sec">Datos personales</div>'
+    +row('RUT',e.rut)
+    +row('Domicilio',e.domicilio)
+    +row('Teléfono',e.telefono)
+    +row('Email',e.email)
+    +'<div class="sec">Datos laborales</div>'
+    +row('Cargo',e.cargo)
+    +row('Fecha de ingreso',fi)
+    +row('Tipo de contrato',contratos[e.tipo_contrato]||'Indefinido')
+    +row('Sueldo mensual',e.sueldo_mensual?fmt(e.sueldo_mensual):null)
+    +'<div class="footer">EZadmin &middot; Ficha generada el '+new Date().toLocaleDateString('es-CL')+'</div>'
+    +'</div></body></html>';
+  var win=window.open('','_blank');
+  if(win){win.document.write(html);win.document.close();setTimeout(function(){win.print();},400);}
 }
 
 function abrirEditEmp(e){
   document.getElementById('memp-id').value=e.id;
   document.getElementById('memp-titulo').textContent='Editar empleado';
   document.getElementById('memp-nombre').value=e.nombre||'';
+  document.getElementById('memp-rut').value=e.rut||'';
+  document.getElementById('memp-domicilio').value=e.domicilio||'';
+  document.getElementById('memp-telefono').value=e.telefono||'';
+  document.getElementById('memp-email').value=e.email||'';
+  document.getElementById('memp-cargo').value=e.cargo||'';
+  document.getElementById('memp-ingreso').value=e.fecha_ingreso||'';
+  document.getElementById('memp-contrato').value=e.tipo_contrato||'indefinido';
   document.getElementById('memp-sueldo').value=e.sueldo_mensual||'';
   document.getElementById('memp-activo').value=e.activo?'true':'false';
   document.getElementById('memp-btn').textContent='Guardar cambios';
@@ -4404,18 +4475,26 @@ async function guardarEmp(){
   var id=document.getElementById('memp-id').value;
   var sueldo=parseFloat(document.getElementById('memp-sueldo').value)||0;
   var activo=document.getElementById('memp-activo').value==='true';
+  var rut=document.getElementById('memp-rut').value.trim();
+  var domicilio=document.getElementById('memp-domicilio').value.trim();
+  var telefono=document.getElementById('memp-telefono').value.trim();
+  var email=document.getElementById('memp-email').value.trim();
+  var cargo=document.getElementById('memp-cargo').value.trim();
+  var fechaIngreso=document.getElementById('memp-ingreso').value||null;
+  var tipoContrato=document.getElementById('memp-contrato').value;
+  var payload={nombre,rut,domicilio,telefono,email,cargo,fecha_ingreso:fechaIngreso,tipo_contrato:tipoContrato,sueldo_mensual:sueldo,activo};
   var btn=document.getElementById('memp-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
     var r;
     if(id){
-      r=await fetch(SU+'/rest/v1/empleados?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify({nombre,sueldo_mensual:sueldo,activo})});
+      r=await fetch(SU+'/rest/v1/empleados?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'PATCH',headers:HJ(),body:JSON.stringify(payload)});
     }else{
-      r=await fetch(SU+'/rest/v1/empleados',{method:'POST',headers:HJ(),body:JSON.stringify({nombre,sueldo_mensual:sueldo,activo:true,cliente_id:cli.id})});
+      r=await fetch(SU+'/rest/v1/empleados',{method:'POST',headers:HJ(),body:JSON.stringify({...payload,cliente_id:cli.id})});
     }
     if(r.ok){
       cerrarModal('emp');
       loadEmpleados();
-      cargarEmps(); // refrescar lista en celular también
+      cargarEmps();
     }else throw new Error(await r.text());
   }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent=id?'Guardar cambios':'Agregar';
