@@ -1482,7 +1482,9 @@ function generarPDFCierre(r){
     +'<div class="hdr"><h1>Cierre de caja &mdash; '+fecha+'</h1><p>'+cli.nombre_negocio+' &middot; Generado el '+new Date().toLocaleDateString('es-CL')+'</p></div>'
     +'<div class="body">'
     +'<div class="sec">Resumen del dia</div>'
-    +'<div class="row"><span>Ventas</span><span class="pos">'+f2(r.total_z)+'</span></div>'
+    +'<div class="row"><span>Ventas local</span><span class="pos">'+f2(r.total_z)+'</span></div>'
+    +((r.delivery_efectivo||r.delivery_tarjeta)?'<div class="sec">Delivery</div><div class="row"><span>Efectivo</span><span class="pos">'+f2(r.delivery_efectivo)+'</span></div><div class="row"><span>Tarjeta</span><span class="pos">'+f2(r.delivery_tarjeta)+'</span></div><div class="row tot"><span>Total delivery</span><span class="pos">'+f2((r.delivery_efectivo||0)+(r.delivery_tarjeta||0))+'</span></div>':'')
+    +'<div class="row tot"><span>Total ventas</span><span class="pos">'+f2((r.total_z||0)+(r.delivery_efectivo||0)+(r.delivery_tarjeta||0))+'</span></div>'
     +'<div class="row"><span>Retiros</span><span>'+f2(r.retiros)+'</span></div>'
     +'<div class="row"><span>Diferencia de caja</span><span class="'+(dif===0?'pos':'neg')+'">'+f2(dif)+(dif===0?' ok':' !')+'</span></div>'
     +'<div class="sec">Detalle de caja</div>'
