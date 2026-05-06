@@ -1109,11 +1109,19 @@ async function loadR(){
     if(V>0&&Vp>0){
       var diffV=V-Vp,diffC=C-Cp,diffG=G-Gp;
       var causas=[];
-      if(Math.abs(diffV)>1000)causas.push(diffV<0?'vendiste menos ('+fmt(Math.abs(diffV))+')':'vendiste más ('+fmt(Math.abs(diffV))+')');
-      if(Math.abs(diffC)>1000)causas.push(diffC>0?'tus compras subieron ('+fmt(Math.abs(diffC))+')':'tus compras bajaron ('+fmt(Math.abs(diffC))+')');
-      if(Math.abs(diffG)>1000)causas.push(diffG>0?'tus gastos subieron ('+fmt(Math.abs(diffG))+')':'tus gastos bajaron ('+fmt(Math.abs(diffG))+')');
-      if(causas.length>0)textoExpl='Bajó principalmente porque '+causas.join(' y ')+'.';
-      if(diffM>=0&&causas.length>0)textoExpl='Subió principalmente porque '+causas.join(' y ')+'.';
+      if(diffM<0){
+        // Margen bajó — mostrar solo causas negativas
+        if(diffV<-1000)causas.push('vendiste menos ('+fmt(Math.abs(diffV))+')');
+        if(diffC>1000)causas.push('tus compras subieron ('+fmt(diffC)+')');
+        if(diffG>1000)causas.push('tus gastos fijos subieron ('+fmt(diffG)+')');
+        if(causas.length>0)textoExpl=causas.join(' y ');
+      } else if(diffM>0){
+        // Margen subió — mostrar solo causas positivas
+        if(diffV>1000)causas.push('vendiste más ('+fmt(diffV)+')');
+        if(diffC<-1000)causas.push('tus compras bajaron ('+fmt(Math.abs(diffC))+')');
+        if(diffG<-1000)causas.push('tus gastos fijos bajaron ('+fmt(Math.abs(diffG))+')');
+        if(causas.length>0)textoExpl=causas.join(' y ');
+      }
     }
     var h='<div style="margin-bottom:1.25rem">';
     h+='<div class="ubanner '+(U>=0?'pos':'neg')+'">';
@@ -1430,10 +1438,17 @@ async function loadDashCelResumen(mesParam,anioParam){
     if(V>0&&Vp>0){
       var diffVc=V-Vp,diffCc=C-Cp,diffGc=G-(Pp+GFp);
       var causasc=[];
-      if(Math.abs(diffVc)>1000)causasc.push(diffVc<0?'vendiste menos':'vendiste más');
-      if(Math.abs(diffCc)>1000)causasc.push(diffCc>0?'tus compras subieron':'tus compras bajaron');
-      if(Math.abs(diffGc)>1000)causasc.push(diffGc>0?'tus gastos subieron':'tus gastos bajaron');
-      if(causasc.length>0)textoExplC=(diffMc>=0?'Subió':'Bajó')+' principalmente porque '+causasc.join(' y ')+'.';
+      if(diffMc<0){
+        if(diffVc<-1000)causasc.push('vendiste menos');
+        if(diffCc>1000)causasc.push('tus compras subieron');
+        if(diffGc>1000)causasc.push('tus gastos fijos subieron');
+        if(causasc.length>0)textoExplC=causasc.join(' y ');
+      } else if(diffMc>0){
+        if(diffVc>1000)causasc.push('vendiste más');
+        if(diffCc<-1000)causasc.push('tus compras bajaron');
+        if(diffGc<-1000)causasc.push('tus gastos fijos bajaron');
+        if(causasc.length>0)textoExplC=causasc.join(' y ');
+      }
     }
     h+='<div style="background:#0d9e6e;border-radius:8px;padding:10px 12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:flex-start">';
     h+='<div><div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.75);margin-bottom:2px">Utilidad neta — '+MS[mes-1]+'</div>';
