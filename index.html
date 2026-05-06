@@ -921,6 +921,39 @@ tr:hover td{background:var(--g50)}
 </div>
 
 <script>
+// ── Detector de conexión ──
+function mostrarSinConexion(){
+  if(document.getElementById('offline-banner'))return;
+  var b=document.createElement('div');
+  b.id='offline-banner';
+  b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:white;text-align:center;padding:10px 16px;font-size:13px;font-weight:500;font-family:inherit';
+  b.textContent='Sin conexión a internet — los datos no se guardarán hasta reconectarte';
+  document.body.appendChild(b);
+}
+function ocultarSinConexion(){
+  var b=document.getElementById('offline-banner');
+  if(b){
+    b.style.background='#0d9e6e';
+    b.textContent='Conexión restaurada ✓';
+    setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b);},2500);
+  }
+}
+window.addEventListener('offline',mostrarSinConexion);
+window.addEventListener('online',ocultarSinConexion);
+if(!navigator.onLine)mostrarSinConexion();
+
+// ── Wrapper fetch con detección de error de red ──
+var _fetchOriginal=window.fetch;
+window.fetch=function(){
+  if(!navigator.onLine){mostrarSinConexion();return Promise.reject(new Error('Sin conexión a internet'));}
+  return _fetchOriginal.apply(this,arguments).catch(function(err){
+    if(err.message&&(err.message.includes('Failed to fetch')||err.message.includes('NetworkError')||err.message.includes('Load failed'))){
+      mostrarSinConexion();
+    }
+    return Promise.reject(err);
+  });
+};
+
 var SU='https://xeitfaxkatsejyyokhwa.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlaXRmYXhrYXRzZWp5eW9raHdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg2MTMsImV4cCI6MjA5MTA4NDYxM30.u-DTGdwaOUiR5oViS4K_JeFahvfaQX4vGygg5kBY4rs';
 var MS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -2642,8 +2675,8 @@ async function marcarCobradaFV(id){
   else alert(mensajeError(new Error(await r.text())));
 }
 
-async function eliminarFactVenta(id){
-  if(!confirm('¿Eliminar esta factura?'))return;
+async function eliminarFactVenta(id,nombre){
+  if(!confirm('¿Eliminar la factura de '+(nombre||'este cliente')+'? Esta acción no se puede deshacer.'))return;
   var r=await fetch(SU+'/rest/v1/facturas_venta?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
   if(r.ok)loadFactVentasDash();
   else alert(mensajeError(new Error(await r.text())));
@@ -3994,7 +4027,7 @@ async function loadCierresDash(){
         h+='<td style="padding:8px 1.25rem;font-size:13px;text-align:right;font-weight:500">'+fmt(tot)+'</td>';
         h+='<td style="padding:8px 1.25rem;font-size:13px;text-align:right">'+fmt(r.retiros)+'</td>';
         h+='<td style="padding:8px 1.25rem;font-size:13px;font-weight:500;text-align:right;color:'+(dif<0?'var(--r)':dif>0?'var(--vd)':'var(--g500)')+'">'+fmt(dif)+(dif!==0?' ⚠':'')+'</td>';
-        h+='<td style="padding:8px 1.25rem;white-space:nowrap"><button class="btn-edit" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="editCaja(JSON.parse(decodeURIComponent(this.dataset.rec)))">✏️</button><button class="btn-del" data-id="'+r.id+'" onclick="eliminarCaja(this.dataset.id)">🗑️</button><button class="btn-pdf" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="generarPDFCierre(JSON.parse(decodeURIComponent(this.dataset.rec)))">📄 PDF</button></td>';
+        h+='<td style="padding:8px 1.25rem;white-space:nowrap"><button class="btn-edit" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="editCaja(JSON.parse(decodeURIComponent(this.dataset.rec)))">✏️</button><button class="btn-del" data-id="'+r.id+'" data-fecha="'+new Date(r.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'})+'" onclick="eliminarCaja(this.dataset.id,this.dataset.fecha)">🗑️</button><button class="btn-pdf" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="generarPDFCierre(JSON.parse(decodeURIComponent(this.dataset.rec)))">📄 PDF</button></td>';
         h+='</tr>';
       });
       h+='</table></div></div>';
@@ -4431,7 +4464,7 @@ async function loadFacturasDash(){
         h+='<td style="padding:9px 1.25rem;font-size:13px;font-weight:500;'+tdB+'">'+r.proveedor+'</td>';
         h+='<td style="padding:9px 1.25rem;font-size:13px;font-weight:500;text-align:right;color:var(--r);'+tdB+'">'+fmt(r.total)+'</td>';
         h+='<td style="padding:9px 1.25rem;'+tdB+'"><button data-fid="'+r.id+'" data-pag="'+r.pagado+'" onclick="togglePagado(this.dataset.fid,this.dataset.pag===&quot;true&quot;)" style="border:none;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;background:'+(r.pagado?'var(--vl)':'var(--al)')+';color:'+(r.pagado?'var(--vd)':'var(--a)')+'">'+(r.pagado?'✅ Pagado':'⏳ Pendiente')+'</button></td>';
-        h+='<td style="padding:9px 1.25rem;white-space:nowrap;'+tdB+'"><button class="btn-edit" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="editFact(JSON.parse(decodeURIComponent(this.dataset.rec)))">✏️</button><button class="btn-del" data-id="'+r.id+'" onclick="eliminarFact(this.dataset.id)">🗑️</button></td>';
+        h+='<td style="padding:9px 1.25rem;white-space:nowrap;'+tdB+'"><button class="btn-edit" data-rec="'+encodeURIComponent(JSON.stringify(r))+'" onclick="editFact(JSON.parse(decodeURIComponent(this.dataset.rec)))">✏️</button><button class="btn-del" data-id="'+r.id+'" data-num="'+r.numero_factura+'" data-prov="'+r.proveedor+'" onclick="eliminarFact(this.dataset.id,this.dataset.num,this.dataset.prov)">🗑️</button></td>';
         h+='</tr>';
       });
       h+='</table></div></div>';
@@ -4659,8 +4692,8 @@ async function guardarEditCaja(){
   }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
-async function eliminarCaja(id){
-  if(!confirm('¿Eliminar este cierre de caja? Esta acción no se puede deshacer.'))return;
+async function eliminarCaja(id,fecha){
+  if(!confirm('¿Eliminar el cierre del '+(fecha||'día seleccionado')+'? Esta acción no se puede deshacer.'))return;
   try{
     var r=await fetch(SU+'/rest/v1/cierres_caja?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('cierres',document.querySelector('.sb-item.active'));
@@ -4695,8 +4728,8 @@ async function guardarEditFact(){
   }catch(ex){alert(mensajeError(ex));}
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
-async function eliminarFact(id){
-  if(!confirm('¿Eliminar esta factura? Esta acción no se puede deshacer.'))return;
+async function eliminarFact(id,num,prov){
+  if(!confirm('¿Eliminar la factura Nº'+(num||'?')+' de '+(prov||'este proveedor')+'? Esta acción no se puede deshacer.'))return;
   try{
     var r=await fetch(SU+'/rest/v1/facturas?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('facturas',document.querySelector('.sb-item.active'));
@@ -4725,7 +4758,7 @@ async function guardarEditPers(){
   btn.disabled=false;btn.textContent='Guardar cambios';
 }
 async function eliminarPers(id){
-  if(!confirm('¿Eliminar este pago? Esta acción no se puede deshacer.'))return;
+  if(!confirm('¿Eliminar el pago de '+nombre+' del '+fecha+'? Esta acción no se puede deshacer.'))return;
   try{
     var r=await fetch(SU+'/rest/v1/pagos_personal?id=eq.'+id+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     if(r.ok)dpage('personal',document.querySelector('.sb-item.active'));
