@@ -927,7 +927,6 @@ tr:hover td{background:var(--g50)}
     <!-- Tabs admin -->
     <div style="display:flex;border-bottom:2px solid #c1c7cd;margin-bottom:1.5rem">
       <button id="atab-clientes" onclick="swAdminTab('clientes')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--vd);border-bottom:2px solid var(--v);margin-bottom:-2px">Clientes</button>
-      <button id="atab-usuarios" onclick="swAdminTab('usuarios')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Usuarios</button>
       <button id="atab-actividad" onclick="swAdminTab('actividad')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Actividad</button>
     </div>
     <!-- Panel clientes -->
@@ -952,17 +951,7 @@ tr:hover td{background:var(--g50)}
       </div>
       <div id="admin-actividad"><div class="ld">Cargando...</div></div>
     </div>
-    <!-- Panel usuarios -->
-    <div id="admin-panel-usuarios" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-        <div>
-          <div style="font-size:20px;font-weight:500;color:var(--g900)">Usuarios</div>
-          <div style="font-size:13px;color:var(--g500);margin-top:2px">Gestiona los accesos por negocio</div>
-        </div>
-        <button onclick="abrirNuevoUsuario()" style="padding:10px 20px;background:var(--v);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">+ Agregar usuario</button>
-      </div>
-      <div id="admin-usuarios-lista"><div class="ld">Cargando...</div></div>
-    </div>
+
   </div>
 </div>
 
@@ -2397,16 +2386,15 @@ async function generarPDFPersonalCompleto(){
 // ── Gestión de usuarios ──
 function swAdminTab(tab){
   document.getElementById('admin-panel-clientes').style.display=tab==='clientes'?'':'none';
-  document.getElementById('admin-panel-usuarios').style.display=tab==='usuarios'?'':'none';
+
   document.getElementById('admin-panel-actividad').style.display=tab==='actividad'?'':'none';
   if(tab==='actividad')loadActividad();
   document.getElementById('atab-clientes').style.color=tab==='clientes'?'var(--vd)':'var(--g500)';
   document.getElementById('atab-clientes').style.borderBottom=tab==='clientes'?'2px solid var(--v)':'2px solid transparent';
-  document.getElementById('atab-usuarios').style.color=tab==='usuarios'?'var(--vd)':'var(--g500)';
-  document.getElementById('atab-usuarios').style.borderBottom=tab==='usuarios'?'2px solid var(--v)':'2px solid transparent';
+
   document.getElementById('atab-actividad').style.color=tab==='actividad'?'var(--vd)':'var(--g500)';
   document.getElementById('atab-actividad').style.borderBottom=tab==='actividad'?'2px solid var(--v)':'2px solid transparent';
-  if(tab==='usuarios')loadUsuariosAdmin();
+
 }
 
 function selRolUsuario(rol){
@@ -2464,7 +2452,25 @@ async function loadActividad(){
       var diasCliente=Math.floor((hoy-creado)/86400000);
       var cierresUltima7=cierres.filter(function(ci){return new Date(ci.fecha+'T12:00:00')>=hace7;}).length;
 
-      return {c:c,cierres:cierres.length,cierresEsteMes:cierresEsteMes,ultimoCierre:ultimoCierre,diasSinRegistrar:diasSinRegistrar,diasCliente:diasCliente,cierresUltima7:cierresUltima7,tieneGastos:gastos.length>0,tieneEmpleados:empleados.length>0,tieneCreditos:creditos.length>0,tieneFacturas:facturas.length>0};
+      // Módulo más usado
+      var conteos={Cierres:cierres.length,Gastos:gastos.length,Personal:empleados.length,Créditos:creditos.length,Facturas:facturas.length};
+      var moduloTop=Object.keys(conteos).reduce(function(a,b){return conteos[a]>=conteos[b]?a:b;});
+      if(conteos[moduloTop]===0)moduloTop='—';
+
+      // Racha de días consecutivos
+      var racha=0;
+      if(cierres.length>0){
+        var fechasCierres=cierres.map(function(ci){return ci.fecha;}).sort().reverse();
+        var diaCheck=new Date(hoy);
+        for(var i=0;i<60;i++){
+          var fStr=diaCheck.getFullYear()+'-'+String(diaCheck.getMonth()+1).padStart(2,'0')+'-'+String(diaCheck.getDate()).padStart(2,'0');
+          if(fechasCierres.indexOf(fStr)>=0){racha++;}
+          else if(racha>0){break;}
+          diaCheck.setDate(diaCheck.getDate()-1);
+        }
+      }
+
+      return {c:c,cierres:cierres.length,cierresEsteMes:cierresEsteMes,ultimoCierre:ultimoCierre,diasSinRegistrar:diasSinRegistrar,diasCliente:diasCliente,cierresUltima7:cierresUltima7,tieneGastos:gastos.length>0,tieneEmpleados:empleados.length>0,tieneCreditos:creditos.length>0,tieneFacturas:facturas.length>0,moduloTop:moduloTop,racha:racha};
     }));
 
     // Calcular caso y mensaje para cada cliente
@@ -2548,14 +2554,15 @@ async function loadActividad(){
       h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">';
       h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+d.cierresEsteMes+'</div><div style="font-size:10px;color:#6c757d">Cierres mes</div></div>';
       h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+fd+'</div><div style="font-size:10px;color:#6c757d">Último reg.</div></div>';
-      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+d.diasCliente+'d</div><div style="font-size:10px;color:#6c757d">Como cliente</div></div>';
-      // Módulos
-      var mods=['G','E','C','F'];
+      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+(d.racha>0?'🔥 '+d.racha+'d':'—')+'</div><div style="font-size:10px;color:#6c757d">Racha</div></div>';
+      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:13px;font-weight:500;color:#212529">'+d.moduloTop+'</div><div style="font-size:10px;color:#6c757d">Módulo top</div></div>';
+      h+='</div>';
+      // Módulos completados
       var modNames=['Gastos','Personal','Créditos','Facturas'];
       var modTiene=[d.tieneGastos,d.tieneEmpleados,d.tieneCreditos,d.tieneFacturas];
-      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:10px;color:#6c757d;margin-bottom:3px">Módulos</div><div style="display:flex;gap:2px;justify-content:center">';
-      for(var i=0;i<4;i++){h+='<span style="font-size:9px;padding:1px 4px;border-radius:3px;'+(modTiene[i]?'background:#0d9e6e;color:white':'background:#e9ecef;color:#adb5bd')+'">'+mods[i]+'</span>';}
-      h+='</div></div></div>';
+      h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">';
+      for(var i=0;i<4;i++){h+='<span style="font-size:11px;padding:2px 8px;border-radius:20px;'+(modTiene[i]?'background:#E1F5EE;color:#085041':'background:#f1f3f5;color:#adb5bd')+'">'+(modTiene[i]?'✓':'✗')+' '+modNames[i]+'</span>';}
+      h+='</div>';
       // Detalle
       h+='<div style="font-size:12px;color:#6c757d;margin-bottom:8px">'+caso.detalle+'</div>';
       // Mensaje
