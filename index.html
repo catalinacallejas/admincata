@@ -2426,10 +2426,9 @@ async function loadActividad(){
   var el=document.getElementById('admin-actividad');
   el.innerHTML='<div class="ld">Analizando actividad...</div>';
   try{
-    // Traer todos los clientes
-    var rc=await fetch(SU+'/rest/v1/clientes?select=*&order=created_at.desc',{headers:H()});
+    // Traer todos los clientes con rol cliente
+    var rc=await fetch(SU+'/rest/v1/clientes?select=*&rol=eq.cliente&order=created_at.desc',{headers:H()});
     var clientes=await rc.json();
-    clientes=clientes.filter(function(c){return c.id!=='98c2e304-2ed8-4ed5-abf6-64f7a930c0a3';});
 
     // Para cada cliente traer sus datos
     var datos=await Promise.all(clientes.map(async function(c){
@@ -2471,52 +2470,54 @@ async function loadActividad(){
     // Calcular caso y mensaje para cada cliente
     function calcCaso(d){
       var c=d.c;
+      if(c.id==='98c2e304-2ed8-4ed5-abf6-64f7a930c0a3'){return {tipo:'ok',titulo:'Cuenta demo',detalle:'Esta es la cuenta de demostración.',msg:null};}
       var dias=d.diasSinRegistrar;
       var url='appnegocio.github.io/admin';
+      var nom=c.nombre_negocio||c.nombre||'Cliente';
 
       // CASO 1: Nunca ha entrado
       if(d.cierres===0&&d.diasCliente>=1){
-        return {tipo:'r',titulo:'Nunca ha entrado',detalle:'La cuenta está creada pero no ha registrado ningún dato.',msg:'Hola '+c.nombre+'! 😊 Ya tienes tu cuenta en EZadmin lista.\n\nPara empezar solo necesitas hacer una cosa: entrar y registrar el cierre de caja de hoy.\n\n👉 '+url+'\n\nCualquier duda me escribes aquí.'};
+        return {tipo:'r',titulo:'Nunca ha entrado',detalle:'La cuenta está creada pero no ha registrado ningún dato.',msg:'Hola '+nom+'! 😊 Ya tienes tu cuenta en EZadmin lista.\n\nPara empezar solo necesitas hacer una cosa: entrar y registrar el cierre de caja de hoy.\n\n👉 '+url+'\n\nCualquier duda me escribes aquí.'};
       }
       // CASO 2: 3+ días sin registrar, primer mes
       if(dias>=3&&dias<7&&d.diasCliente<=30){
-        return {tipo:'r',titulo:dias+' días sin registrar — primer mes',detalle:'Está en su etapa inicial y lleva '+dias+' días sin actividad.',msg:'Hola '+c.nombre+'! ¿Cómo va todo? 😊\n\nNoté que hace unos días no has podido entrar a la app. ¿Hay algo que te complique o que no esté quedando claro?\n\nCuéntame y lo vemos juntos.'};
+        return {tipo:'r',titulo:dias+' días sin registrar — primer mes',detalle:'Está en su etapa inicial y lleva '+dias+' días sin actividad.',msg:'Hola '+nom+'! ¿Cómo va todo? 😊\n\nNoté que hace unos días no has podido entrar a la app. ¿Hay algo que te complique o que no esté quedando claro?\n\nCuéntame y lo vemos juntos.'};
       }
       // CASO 3: 7+ días sin registrar, primer mes
       if(dias>=7&&d.diasCliente<=30){
-        return {tipo:'r',titulo:dias+' días sin registrar — crítico',detalle:'Cliente nuevo con más de una semana inactivo. Alto riesgo de abandono.',msg:'Hola '+c.nombre+'! Quería saber cómo estás 😊\n\nNoto que no has podido usar EZadmin esta semana. ¿Hay algo que no esté funcionando bien o que no te esté siendo útil?\n\nMe interesa mucho que te sirva — cuéntame y lo solucionamos.'};
+        return {tipo:'r',titulo:dias+' días sin registrar — crítico',detalle:'Cliente nuevo con más de una semana inactivo. Alto riesgo de abandono.',msg:'Hola '+nom+'! Quería saber cómo estás 😊\n\nNoto que no has podido usar EZadmin esta semana. ¿Hay algo que no esté funcionando bien o que no te esté siendo útil?\n\nMe interesa mucho que te sirva — cuéntame y lo solucionamos.'};
       }
       // CASO 4: Cliente activo que dejó de usar
       if(dias>=5&&d.diasCliente>30&&d.cierresUltima7===0){
-        return {tipo:'a',titulo:dias+' días sin registrar — era activo',detalle:'Tenía uso regular y dejó de entrar.',msg:'Hola '+c.nombre+'! ¿Todo bien? 😊\n\nNoté que llevas varios días sin entrar a la app — lo que es poco habitual en ti. ¿Pasó algo? ¿Hay algo que pueda mejorar para que te sea más útil?'};
+        return {tipo:'a',titulo:dias+' días sin registrar — era activo',detalle:'Tenía uso regular y dejó de entrar.',msg:'Hola '+nom+'! ¿Todo bien? 😊\n\nNoté que llevas varios días sin entrar a la app — lo que es poco habitual en ti. ¿Pasó algo? ¿Hay algo que pueda mejorar para que te sea más útil?'};
       }
       // CASO 5: Cliente antiguo con uso esporádico
       if(d.diasCliente>30&&d.cierres<5){
-        return {tipo:'a',titulo:'Uso muy esporádico — '+d.cierres+' registros en total',detalle:'Lleva '+d.diasCliente+' días y tiene muy poca actividad.',msg:'Hola '+c.nombre+'! ¿Cómo ha ido el negocio? 😊\n\nQuería saber si EZadmin te ha sido útil o si hay algo que no te esté sirviendo. Tu opinión me ayuda mucho para mejorarla.'};
+        return {tipo:'a',titulo:'Uso muy esporádico — '+d.cierres+' registros en total',detalle:'Lleva '+d.diasCliente+' días y tiene muy poca actividad.',msg:'Hola '+nom+'! ¿Cómo ha ido el negocio? 😊\n\nQuería saber si EZadmin te ha sido útil o si hay algo que no te esté sirviendo. Tu opinión me ayuda mucho para mejorarla.'};
       }
       // CASO 6: Primera semana exitosa
       if(d.diasCliente<=10&&d.cierresEsteMes>=5){
-        return {tipo:'v',titulo:'Primera semana con uso constante 🎉',detalle:d.cierresEsteMes+' cierres registrados en los primeros días.',msg:'Hola '+c.nombre+'! Ya llevas una semana con EZadmin 🎉\n\n¿La app te ayudó a enterarte de algo que no sabías de tu negocio?\n\nMe encantaría saber tu experiencia.'};
+        return {tipo:'v',titulo:'Primera semana con uso constante 🎉',detalle:d.cierresEsteMes+' cierres registrados en los primeros días.',msg:'Hola '+nom+'! Ya llevas una semana con EZadmin 🎉\n\n¿La app te ayudó a enterarte de algo que no sabías de tu negocio?\n\nMe encantaría saber tu experiencia.'};
       }
       // CASO 7: Sin gastos fijos
       if(d.cierresEsteMes>=5&&!d.tieneGastos){
-        return {tipo:'i',titulo:'Sin gastos fijos registrados',detalle:'Lleva '+d.cierresEsteMes+' cierres pero no ha ingresado los gastos fijos del mes.',msg:'Hola '+c.nombre+'! Llevas '+d.cierresEsteMes+' cierres registrados este mes 💪\n\nEl siguiente paso es agregar tus gastos fijos del mes — arriendo, luz, lo que pagas fijo. Así la app te dice exactamente si ya cubriste tus costos o cuánto te falta.\n\nLo encuentras en el menú como "Gastos fijos" 👉'};
+        return {tipo:'i',titulo:'Sin gastos fijos registrados',detalle:'Lleva '+d.cierresEsteMes+' cierres pero no ha ingresado los gastos fijos del mes.',msg:'Hola '+nom+'! Llevas '+d.cierresEsteMes+' cierres registrados este mes 💪\n\nEl siguiente paso es agregar tus gastos fijos del mes — arriendo, luz, lo que pagas fijo. Así la app te dice exactamente si ya cubriste tus costos o cuánto te falta.\n\nLo encuentras en el menú como "Gastos fijos" 👉'};
       }
       // CASO 8: Sin empleados
       if(d.tieneGastos&&!d.tieneEmpleados){
-        return {tipo:'i',titulo:'Sin empleados registrados',detalle:'Tiene cierres y gastos pero no ha registrado empleados.',msg:'Hola '+c.nombre+'! La app ya te muestra tu utilidad y punto de equilibrio 📊\n\n¿Tienes empleados en el negocio? Si los agregas en EZadmin puedes llevar el control de sueldos, quincenas y adelantos todo en un lugar.\n\nLo encuentras en "Personal" en el menú 👉'};
+        return {tipo:'i',titulo:'Sin empleados registrados',detalle:'Tiene cierres y gastos pero no ha registrado empleados.',msg:'Hola '+nom+'! La app ya te muestra tu utilidad y punto de equilibrio 📊\n\n¿Tienes empleados en el negocio? Si los agregas en EZadmin puedes llevar el control de sueldos, quincenas y adelantos todo en un lugar.\n\nLo encuentras en "Personal" en el menú 👉'};
       }
       // CASO 9: Sin créditos
       if(d.tieneGastos&&d.tieneEmpleados&&!d.tieneCreditos){
-        return {tipo:'i',titulo:'Sin créditos registrados',detalle:'Usa la mayoría de módulos pero no ha registrado créditos.',msg:'Hola '+c.nombre+'! ¿Tienes créditos bancarios o cuotas del negocio?\n\nSi los agregas en EZadmin puedes ver exactamente cuánto pagas en total cada mes. Muchos se sorprenden con el número cuando lo ven junto.'};
+        return {tipo:'i',titulo:'Sin créditos registrados',detalle:'Usa la mayoría de módulos pero no ha registrado créditos.',msg:'Hola '+nom+'! ¿Tienes créditos bancarios o cuotas del negocio?\n\nSi los agregas en EZadmin puedes ver exactamente cuánto pagas en total cada mes. Muchos se sorprenden con el número cuando lo ven junto.'};
       }
       // CASO 10: Sin facturas
       if(d.tieneGastos&&d.tieneEmpleados&&d.tieneCreditos&&!d.tieneFacturas){
-        return {tipo:'i',titulo:'Sin facturas registradas',detalle:'Todo completo excepto facturas.',msg:'Hola '+c.nombre+'! ¿Le facturas a clientes o recibes facturas de proveedores?\n\nEn EZadmin puedes registrarlas y la app te avisa automáticamente cuando alguna esté por vencer — así no se te pasa ningún cobro.'};
+        return {tipo:'i',titulo:'Sin facturas registradas',detalle:'Todo completo excepto facturas.',msg:'Hola '+nom+'! ¿Le facturas a clientes o recibes facturas de proveedores?\n\nEn EZadmin puedes registrarlas y la app te avisa automáticamente cuando alguna esté por vencer — así no se te pasa ningún cobro.'};
       }
       // CASO 11: Cliente maduro — todo completo
       if(d.diasCliente>=30&&d.tieneGastos&&d.tieneEmpleados&&d.cierresEsteMes>=15){
-        return {tipo:'v',titulo:'Cliente maduro — uso excelente ⭐',detalle:d.diasCliente+' días activo con uso diario constante.',msg:'Hola '+c.nombre+'! Ya llevas un mes con EZadmin y lo has aprovechado muy bien 🙌\n\n¿Hay algo que le agregarías o mejorarías? Tu opinión me ayuda mucho para seguir desarrollándola.\n\nY si conoces a alguien con negocio que lo pueda necesitar, me encantaría que le contaras 😊'};
+        return {tipo:'v',titulo:'Cliente maduro — uso excelente ⭐',detalle:d.diasCliente+' días activo con uso diario constante.',msg:'Hola '+nom+'! Ya llevas un mes con EZadmin y lo has aprovechado muy bien 🙌\n\n¿Hay algo que le agregarías o mejorarías? Tu opinión me ayuda mucho para seguir desarrollándola.\n\nY si conoces a alguien con negocio que lo pueda necesitar, me encantaría que le contaras 😊'};
       }
       // CASO DEFAULT: Activo sin acción específica
       return {tipo:'ok',titulo:'Activo — sin acción requerida',detalle:'Usando la app normalmente.',msg:null};
@@ -2539,7 +2540,7 @@ async function loadActividad(){
       var fd=d.ultimoCierre?d.ultimoCierre.toLocaleDateString('es-CL',{day:'numeric',month:'short'}):'Nunca';
       var h='<div style="border:1px solid '+col.border+';border-radius:10px;padding:1rem;margin-bottom:10px;background:'+col.bg+'">';
       h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
-      h+='<div><div style="font-size:14px;font-weight:500;color:#212529">'+d.c.nombre+'</div>';
+      h+='<div><div style="font-size:14px;font-weight:500;color:#212529">'+(d.c.nombre_negocio||d.c.nombre||'Sin nombre')+'</div>';
       h+='<div style="font-size:11px;color:#6c757d;margin-top:2px">'+caso.titulo+'</div></div>';
       if(col.badgeTxt)h+='<span style="font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;'+col.badge+'">'+col.badgeTxt+'</span>';
       h+='</div>';
