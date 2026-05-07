@@ -928,6 +928,7 @@ tr:hover td{background:var(--g50)}
     <div style="display:flex;border-bottom:2px solid #c1c7cd;margin-bottom:1.5rem">
       <button id="atab-clientes" onclick="swAdminTab('clientes')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--vd);border-bottom:2px solid var(--v);margin-bottom:-2px">Clientes</button>
       <button id="atab-usuarios" onclick="swAdminTab('usuarios')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Usuarios</button>
+      <button id="atab-actividad" onclick="swAdminTab('actividad')" style="padding:8px 20px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500);border-bottom:2px solid transparent;margin-bottom:-2px">Actividad</button>
     </div>
     <!-- Panel clientes -->
     <div id="admin-panel-clientes">
@@ -939,6 +940,17 @@ tr:hover td{background:var(--g50)}
         <button onclick="abrirNuevoCliente()" style="padding:10px 20px;background:var(--v);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">+ Nuevo cliente</button>
       </div>
       <div id="admin-clientes"><div class="ld">Cargando...</div></div>
+    </div>
+    <!-- Panel actividad -->
+    <div id="admin-panel-actividad" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+        <div>
+          <div style="font-size:20px;font-weight:500;color:var(--g900)">Actividad de clientes</div>
+          <div style="font-size:13px;color:var(--g500);margin-top:2px">Qué hacer hoy con cada cliente</div>
+        </div>
+        <button onclick="loadActividad()" style="padding:8px 16px;background:var(--v);color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">↻ Actualizar</button>
+      </div>
+      <div id="admin-actividad"><div class="ld">Cargando...</div></div>
     </div>
     <!-- Panel usuarios -->
     <div id="admin-panel-usuarios" style="display:none">
@@ -2386,10 +2398,14 @@ async function generarPDFPersonalCompleto(){
 function swAdminTab(tab){
   document.getElementById('admin-panel-clientes').style.display=tab==='clientes'?'':'none';
   document.getElementById('admin-panel-usuarios').style.display=tab==='usuarios'?'':'none';
+  document.getElementById('admin-panel-actividad').style.display=tab==='actividad'?'':'none';
+  if(tab==='actividad')loadActividad();
   document.getElementById('atab-clientes').style.color=tab==='clientes'?'var(--vd)':'var(--g500)';
   document.getElementById('atab-clientes').style.borderBottom=tab==='clientes'?'2px solid var(--v)':'2px solid transparent';
   document.getElementById('atab-usuarios').style.color=tab==='usuarios'?'var(--vd)':'var(--g500)';
   document.getElementById('atab-usuarios').style.borderBottom=tab==='usuarios'?'2px solid var(--v)':'2px solid transparent';
+  document.getElementById('atab-actividad').style.color=tab==='actividad'?'var(--vd)':'var(--g500)';
+  document.getElementById('atab-actividad').style.borderBottom=tab==='actividad'?'2px solid var(--v)':'2px solid transparent';
   if(tab==='usuarios')loadUsuariosAdmin();
 }
 
@@ -2402,6 +2418,188 @@ function selRolUsuario(rol){
   document.getElementById('musr-rol-admin').style.border=!esJefe?'1px solid #9FE1CB':'1px solid #c1c7cd';
   document.getElementById('musr-rol-admin').style.background=!esJefe?'#e8f7f2':'white';
   document.getElementById('musr-rol-admin').style.color=!esJefe?'#087a55':'#495057';
+}
+
+
+// ── Panel Actividad de clientes ──
+async function loadActividad(){
+  var el=document.getElementById('admin-actividad');
+  el.innerHTML='<div class="ld">Analizando actividad...</div>';
+  try{
+    // Traer todos los clientes
+    var rc=await fetch(SU+'/rest/v1/clientes?select=*&order=created_at.desc',{headers:H()});
+    var clientes=await rc.json();
+    clientes=clientes.filter(function(c){return c.id!=='98c2e304-2ed8-4ed5-abf6-64f7a930c0a3';});
+
+    // Para cada cliente traer sus datos
+    var datos=await Promise.all(clientes.map(async function(c){
+      var hoy=new Date();hoy.setHours(0,0,0,0);
+      var hace30=new Date(hoy);hace30.setDate(hace30.getDate()-30);
+      var hace7=new Date(hoy);hace7.setDate(hace7.getDate()-7);
+
+      // Cierres
+      var rCi=await fetch(SU+'/rest/v1/cierres_caja?select=fecha,created_at&cliente_id=eq.'+c.id+'&order=fecha.desc&limit=100',{headers:H()});
+      var cierres=await rCi.json()||[];
+
+      // Gastos fijos este mes
+      var mesA=hoy.getMonth()+1,anioA=hoy.getFullYear();
+      var rGf=await fetch(SU+'/rest/v1/gastos_fijos?select=id&cliente_id=eq.'+c.id+'&mes=eq.'+mesA+'&anio=eq.'+anioA,{headers:H()});
+      var gastos=await rGf.json()||[];
+
+      // Empleados
+      var rEm=await fetch(SU+'/rest/v1/empleados?select=id&cliente_id=eq.'+c.id+'&activo=eq.true',{headers:H()});
+      var empleados=await rEm.json()||[];
+
+      // Creditos
+      var rCr=await fetch(SU+'/rest/v1/creditos?select=id&cliente_id=eq.'+c.id+'&activo=eq.true',{headers:H()});
+      var creditos=await rCr.json()||[];
+
+      // Facturas
+      var rFa=await fetch(SU+'/rest/v1/facturas?select=id&cliente_id=eq.'+c.id+'&limit=1',{headers:H()});
+      var facturas=await rFa.json()||[];
+
+      var ultimoCierre=cierres.length>0?new Date(cierres[0].fecha+'T12:00:00'):null;
+      var diasSinRegistrar=ultimoCierre?Math.floor((hoy-ultimoCierre)/86400000):null;
+      var cierresEsteMes=cierres.filter(function(ci){return ci.fecha&&ci.fecha.startsWith(anioA+'-'+String(mesA).padStart(2,'0'));}).length;
+      var creado=new Date(c.created_at);
+      var diasCliente=Math.floor((hoy-creado)/86400000);
+      var cierresUltima7=cierres.filter(function(ci){return new Date(ci.fecha+'T12:00:00')>=hace7;}).length;
+
+      return {c:c,cierres:cierres.length,cierresEsteMes:cierresEsteMes,ultimoCierre:ultimoCierre,diasSinRegistrar:diasSinRegistrar,diasCliente:diasCliente,cierresUltima7:cierresUltima7,tieneGastos:gastos.length>0,tieneEmpleados:empleados.length>0,tieneCreditos:creditos.length>0,tieneFacturas:facturas.length>0};
+    }));
+
+    // Calcular caso y mensaje para cada cliente
+    function calcCaso(d){
+      var c=d.c;
+      var dias=d.diasSinRegistrar;
+      var url='appnegocio.github.io/admin';
+
+      // CASO 1: Nunca ha entrado
+      if(d.cierres===0&&d.diasCliente>=1){
+        return {tipo:'r',titulo:'Nunca ha entrado',detalle:'La cuenta está creada pero no ha registrado ningún dato.',msg:'Hola '+c.nombre+'! 😊 Ya tienes tu cuenta en EZadmin lista.\n\nPara empezar solo necesitas hacer una cosa: entrar y registrar el cierre de caja de hoy.\n\n👉 '+url+'\n\nCualquier duda me escribes aquí.'};
+      }
+      // CASO 2: 3+ días sin registrar, primer mes
+      if(dias>=3&&dias<7&&d.diasCliente<=30){
+        return {tipo:'r',titulo:dias+' días sin registrar — primer mes',detalle:'Está en su etapa inicial y lleva '+dias+' días sin actividad.',msg:'Hola '+c.nombre+'! ¿Cómo va todo? 😊\n\nNoté que hace unos días no has podido entrar a la app. ¿Hay algo que te complique o que no esté quedando claro?\n\nCuéntame y lo vemos juntos.'};
+      }
+      // CASO 3: 7+ días sin registrar, primer mes
+      if(dias>=7&&d.diasCliente<=30){
+        return {tipo:'r',titulo:dias+' días sin registrar — crítico',detalle:'Cliente nuevo con más de una semana inactivo. Alto riesgo de abandono.',msg:'Hola '+c.nombre+'! Quería saber cómo estás 😊\n\nNoto que no has podido usar EZadmin esta semana. ¿Hay algo que no esté funcionando bien o que no te esté siendo útil?\n\nMe interesa mucho que te sirva — cuéntame y lo solucionamos.'};
+      }
+      // CASO 4: Cliente activo que dejó de usar
+      if(dias>=5&&d.diasCliente>30&&d.cierresUltima7===0){
+        return {tipo:'a',titulo:dias+' días sin registrar — era activo',detalle:'Tenía uso regular y dejó de entrar.',msg:'Hola '+c.nombre+'! ¿Todo bien? 😊\n\nNoté que llevas varios días sin entrar a la app — lo que es poco habitual en ti. ¿Pasó algo? ¿Hay algo que pueda mejorar para que te sea más útil?'};
+      }
+      // CASO 5: Cliente antiguo con uso esporádico
+      if(d.diasCliente>30&&d.cierres<5){
+        return {tipo:'a',titulo:'Uso muy esporádico — '+d.cierres+' registros en total',detalle:'Lleva '+d.diasCliente+' días y tiene muy poca actividad.',msg:'Hola '+c.nombre+'! ¿Cómo ha ido el negocio? 😊\n\nQuería saber si EZadmin te ha sido útil o si hay algo que no te esté sirviendo. Tu opinión me ayuda mucho para mejorarla.'};
+      }
+      // CASO 6: Primera semana exitosa
+      if(d.diasCliente<=10&&d.cierresEsteMes>=5){
+        return {tipo:'v',titulo:'Primera semana con uso constante 🎉',detalle:d.cierresEsteMes+' cierres registrados en los primeros días.',msg:'Hola '+c.nombre+'! Ya llevas una semana con EZadmin 🎉\n\n¿La app te ayudó a enterarte de algo que no sabías de tu negocio?\n\nMe encantaría saber tu experiencia.'};
+      }
+      // CASO 7: Sin gastos fijos
+      if(d.cierresEsteMes>=5&&!d.tieneGastos){
+        return {tipo:'i',titulo:'Sin gastos fijos registrados',detalle:'Lleva '+d.cierresEsteMes+' cierres pero no ha ingresado los gastos fijos del mes.',msg:'Hola '+c.nombre+'! Llevas '+d.cierresEsteMes+' cierres registrados este mes 💪\n\nEl siguiente paso es agregar tus gastos fijos del mes — arriendo, luz, lo que pagas fijo. Así la app te dice exactamente si ya cubriste tus costos o cuánto te falta.\n\nLo encuentras en el menú como "Gastos fijos" 👉'};
+      }
+      // CASO 8: Sin empleados
+      if(d.tieneGastos&&!d.tieneEmpleados){
+        return {tipo:'i',titulo:'Sin empleados registrados',detalle:'Tiene cierres y gastos pero no ha registrado empleados.',msg:'Hola '+c.nombre+'! La app ya te muestra tu utilidad y punto de equilibrio 📊\n\n¿Tienes empleados en el negocio? Si los agregas en EZadmin puedes llevar el control de sueldos, quincenas y adelantos todo en un lugar.\n\nLo encuentras en "Personal" en el menú 👉'};
+      }
+      // CASO 9: Sin créditos
+      if(d.tieneGastos&&d.tieneEmpleados&&!d.tieneCreditos){
+        return {tipo:'i',titulo:'Sin créditos registrados',detalle:'Usa la mayoría de módulos pero no ha registrado créditos.',msg:'Hola '+c.nombre+'! ¿Tienes créditos bancarios o cuotas del negocio?\n\nSi los agregas en EZadmin puedes ver exactamente cuánto pagas en total cada mes. Muchos se sorprenden con el número cuando lo ven junto.'};
+      }
+      // CASO 10: Sin facturas
+      if(d.tieneGastos&&d.tieneEmpleados&&d.tieneCreditos&&!d.tieneFacturas){
+        return {tipo:'i',titulo:'Sin facturas registradas',detalle:'Todo completo excepto facturas.',msg:'Hola '+c.nombre+'! ¿Le facturas a clientes o recibes facturas de proveedores?\n\nEn EZadmin puedes registrarlas y la app te avisa automáticamente cuando alguna esté por vencer — así no se te pasa ningún cobro.'};
+      }
+      // CASO 11: Cliente maduro — todo completo
+      if(d.diasCliente>=30&&d.tieneGastos&&d.tieneEmpleados&&d.cierresEsteMes>=15){
+        return {tipo:'v',titulo:'Cliente maduro — uso excelente ⭐',detalle:d.diasCliente+' días activo con uso diario constante.',msg:'Hola '+c.nombre+'! Ya llevas un mes con EZadmin y lo has aprovechado muy bien 🙌\n\n¿Hay algo que le agregarías o mejorarías? Tu opinión me ayuda mucho para seguir desarrollándola.\n\nY si conoces a alguien con negocio que lo pueda necesitar, me encantaría que le contaras 😊'};
+      }
+      // CASO DEFAULT: Activo sin acción específica
+      return {tipo:'ok',titulo:'Activo — sin acción requerida',detalle:'Usando la app normalmente.',msg:null};
+    }
+
+    var urgentes=[],atencion=[],sugerencias=[],bien=[];
+    datos.forEach(function(d){
+      var caso=calcCaso(d);
+      d.caso=caso;
+      if(caso.tipo==='r')urgentes.push(d);
+      else if(caso.tipo==='a')atencion.push(d);
+      else if(caso.tipo==='i')sugerencias.push(d);
+      else bien.push(d);
+    });
+
+    function renderCliente(d){
+      var caso=d.caso;
+      var colores={r:{bg:'#FCEBEB',border:'#F09595',badge:'background:#FCEBEB;color:#c0392b',badgeTxt:'Urgente'},a:{bg:'#FAEEDA',border:'#FAC775',badge:'background:#FAEEDA;color:#7c4a00',badgeTxt:'Atención'},i:{bg:'#EEF3FF',border:'#B0C4F8',badge:'background:#EEF3FF;color:#1a3a9e',badgeTxt:'Sugerencia'},v:{bg:'#E1F5EE',border:'#9FE1CB',badge:'background:#E1F5EE;color:#085041',badgeTxt:''},ok:{bg:'var(--g50)',border:'var(--g200)',badge:'background:var(--g100);color:var(--g500)',badgeTxt:''}};
+      var col=colores[caso.tipo];
+      var fd=d.ultimoCierre?d.ultimoCierre.toLocaleDateString('es-CL',{day:'numeric',month:'short'}):'Nunca';
+      var h='<div style="border:1px solid '+col.border+';border-radius:10px;padding:1rem;margin-bottom:10px;background:'+col.bg+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+      h+='<div><div style="font-size:14px;font-weight:500;color:#212529">'+d.c.nombre+'</div>';
+      h+='<div style="font-size:11px;color:#6c757d;margin-top:2px">'+caso.titulo+'</div></div>';
+      if(col.badgeTxt)h+='<span style="font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;'+col.badge+'">'+col.badgeTxt+'</span>';
+      h+='</div>';
+      // Stats
+      h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">';
+      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+d.cierresEsteMes+'</div><div style="font-size:10px;color:#6c757d">Cierres mes</div></div>';
+      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+fd+'</div><div style="font-size:10px;color:#6c757d">Último reg.</div></div>';
+      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:500;color:#212529">'+d.diasCliente+'d</div><div style="font-size:10px;color:#6c757d">Como cliente</div></div>';
+      // Módulos
+      var mods=['G','E','C','F'];
+      var modNames=['Gastos','Personal','Créditos','Facturas'];
+      var modTiene=[d.tieneGastos,d.tieneEmpleados,d.tieneCreditos,d.tieneFacturas];
+      h+='<div style="background:rgba(255,255,255,.6);border-radius:6px;padding:6px;text-align:center"><div style="font-size:10px;color:#6c757d;margin-bottom:3px">Módulos</div><div style="display:flex;gap:2px;justify-content:center">';
+      for(var i=0;i<4;i++){h+='<span style="font-size:9px;padding:1px 4px;border-radius:3px;'+(modTiene[i]?'background:#0d9e6e;color:white':'background:#e9ecef;color:#adb5bd')+'">'+mods[i]+'</span>';}
+      h+='</div></div></div>';
+      // Detalle
+      h+='<div style="font-size:12px;color:#6c757d;margin-bottom:8px">'+caso.detalle+'</div>';
+      // Mensaje
+      if(caso.msg){
+        h+='<div style="font-size:11px;font-weight:500;color:#6c757d;margin-bottom:5px">💬 Mensaje sugerido</div>';
+        h+='<div style="background:rgba(255,255,255,.8);border-radius:8px;padding:10px 12px;font-size:12px;color:#212529;line-height:1.7;white-space:pre-line;font-family:Georgia,serif">'+caso.msg+'</div>';
+        h+='<button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)" style="margin-top:6px;padding:5px 12px;border-radius:6px;border:1px solid #c1c7cd;background:white;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;color:#212529">📋 Copiar mensaje</button>';
+      }
+      h+='</div>';
+      return h;
+    }
+
+    var h='';
+    // Resumen
+    h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem">';
+    h+='<div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #e9ecef"><div style="font-size:22px;font-weight:500;color:'+(urgentes.length>0?'#c0392b':'#212529')+'">'+urgentes.length+'</div><div style="font-size:11px;color:#6c757d">Urgentes</div></div>';
+    h+='<div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #e9ecef"><div style="font-size:22px;font-weight:500;color:'+(atencion.length>0?'#e67700':'#212529')+'">'+atencion.length+'</div><div style="font-size:11px;color:#6c757d">Atención</div></div>';
+    h+='<div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #e9ecef"><div style="font-size:22px;font-weight:500;color:#1a3a9e">'+sugerencias.length+'</div><div style="font-size:11px;color:#6c757d">Sugerencias</div></div>';
+    h+='<div style="background:white;border-radius:10px;padding:12px;text-align:center;border:1px solid #e9ecef"><div style="font-size:22px;font-weight:500;color:#0d9e6e">'+bien.length+'</div><div style="font-size:11px;color:#6c757d">Sin acción</div></div>';
+    h+='</div>';
+
+    if(urgentes.length>0){
+      h+='<div style="font-size:11px;font-weight:500;color:#c0392b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🔴 Acción urgente</div>';
+      urgentes.forEach(function(d){h+=renderCliente(d);});
+    }
+    if(atencion.length>0){
+      h+='<div style="font-size:11px;font-weight:500;color:#e67700;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">🟡 Requiere atención</div>';
+      atencion.forEach(function(d){h+=renderCliente(d);});
+    }
+    if(sugerencias.length>0){
+      h+='<div style="font-size:11px;font-weight:500;color:#1a3a9e;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">🔵 Sugerencia de siguiente paso</div>';
+      sugerencias.forEach(function(d){h+=renderCliente(d);});
+    }
+    if(bien.length>0){
+      h+='<div style="font-size:11px;font-weight:500;color:#0d9e6e;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">🟢 Sin acción requerida</div>';
+      bien.forEach(function(d){h+=renderCliente(d);});
+    }
+    if(datos.length===0){
+      h='<div style="text-align:center;padding:2rem;color:#6c757d">No hay clientes registrados aún.</div>';
+    }
+
+    el.innerHTML=h;
+  }catch(ex){
+    document.getElementById('admin-actividad').innerHTML='<div style="color:#c0392b;padding:1rem">Error al cargar actividad: '+ex.message+'</div>';
+  }
 }
 
 async function loadUsuariosAdmin(){
