@@ -383,7 +383,7 @@ tr:hover td{background:var(--g50)}
 <div id="p-login" style="display:none">
   <div class="lcard">
     <div class="lbrand"><div class="lbrand-n"><span style="font-weight:700">EZ</span>admin</div><div class="lbrand-s">Sistema de administración para negocios</div></div>
-    <div class="lf"><label class="ll">Email</label><input class="li" type="email" id="le" placeholder="tu@email.cl" autocomplete="email"></div>
+    <div class="lf"><label class="ll">Email</label><input class="li" type="email" id="le" placeholder="tu@email.cl" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
     <div class="lf"><label class="ll">Contraseña</label><input class="li" type="password" id="lp" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()"></div>
     <button class="lb" onclick="entrar()">Entrar al sistema</button>
     <div class="lerr" id="lerr">Email o contraseña incorrectos</div>
@@ -1130,7 +1130,7 @@ function setFecha(id){document.getElementById(id).value=hoy.getFullYear()+'-'+St
 function mkMesSel(id){var s=document.getElementById(id);s.innerHTML='';for(var i=0;i<12;i++){var o=document.createElement('option');o.value=i+1;o.textContent=MS[i]+' '+hoy.getFullYear();if(i===hoy.getMonth())o.selected=true;s.appendChild(o);}}
 
 async function entrar(){
-  var e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
+  var e=document.getElementById('le').value.trim().toLowerCase(),p=document.getElementById('lp').value;
   if(!e||!p){document.getElementById('lerr').style.display='block';document.getElementById('lerr').textContent='Ingresa email y contraseña';return;}
   try{
     // 1. Buscar en clientes (dueño/admin)
@@ -4474,7 +4474,7 @@ async function guardarCliente(){
   var id=document.getElementById('mcli-id').value;
   var btn=document.getElementById('mcli-btn');btn.disabled=true;btn.textContent='Guardando...';
   try{
-    var payload={nombre_negocio:nombre,rubro:document.getElementById('mcli-rubro').value.trim(),email:email,activo:document.getElementById('mcli-activo').value==='true',rol:'cliente'};
+    var payload={nombre_negocio:nombre,rubro:document.getElementById('mcli-rubro').value.trim(),email:email.toLowerCase(),activo:document.getElementById('mcli-activo').value==='true',rol:'cliente'};
     if(pass)payload.password=pass;
     var r;
     if(id){
