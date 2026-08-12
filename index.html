@@ -575,8 +575,7 @@ tr:hover td{background:var(--g50)}
     </div>
   </div>
 
-  <!-- SCREEN DASHBOARD CEL -->
-  <div class="cscreen" id="sc-dash">
+</div>
     <div class="csh"><button class="csh-back" onclick="irInicio()"><svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><div><div style="font-size:15px;font-weight:500;color:white" id="dash-neg"></div><div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px" id="dash-fecha"></div></div></div>
     <div class="tabbar"><button class="tabbtn active" onclick="swDashTab('resumen',this)">Resumen</button><button class="tabbtn" onclick="swDashTab('detalle',this)">Detalle</button></div>
     <div class="csb" id="dash-body">
@@ -649,15 +648,15 @@ tr:hover td{background:var(--g50)}
         <div class="frow">
           <div class="fhalf">
             <label class="fl">Monto neto</label>
-            <input class="fi" type="text" inputmode="numeric" id="fvc-neto" placeholder="0" oninput="fmtInput(this);calcFVC()">
+            <input class="fi" type="number" id="fvc-neto" placeholder="0" oninput="calcFVC()">
           </div>
           <div class="fhalf">
             <label class="fl">IVA</label>
-            <input class="fi" type="text" inputmode="numeric" id="fvc-iva" placeholder="0" oninput="fmtInput(this);calcFVC()">
+            <input class="fi" type="number" id="fvc-iva" placeholder="0" oninput="calcFVC()">
           </div>
         </div>
         <label class="fl">Total</label>
-        <input class="fi" type="text" id="fvc-total" placeholder="0" readonly style="background:var(--g50)">
+        <input class="fi" type="number" id="fvc-total" placeholder="0" readonly style="background:var(--g50)">
         <label class="fl">Fecha vencimiento</label>
         <input class="fi" type="date" id="fvc-venc">
         <label class="fl">Estado</label>
@@ -697,9 +696,9 @@ tr:hover td{background:var(--g50)}
         <label class="fl">Proveedor</label><div class="prov-wrap"><input class="fi" type="text" id="ft-pv" placeholder="Nombre del proveedor" autocomplete="off" oninput="buscarProveedor(this,'ft-pv-drop','ft-rut')" onfocus="setTimeout(function(){buscarProveedor(document.getElementById('ft-pv'),'ft-pv-drop','ft-rut')},100)"><div class="prov-dropdown" id="ft-pv-drop"></div></div>
         <label class="fl">RUT proveedor</label><input class="fi" type="text" id="ft-rut" placeholder="Ej: 76.123.456-7" style="margin-bottom:6px">
         <div class="fdiv">Montos</div>
-        <label class="fl">Monto neto</label><input class="fi" type="text" inputmode="numeric" id="ft-ne" placeholder="0" oninput="fmtInput(this);calcFact()">
-        <div class="fg2"><div><label class="fl">IVA</label><input class="fi" type="text" inputmode="numeric" id="ft-iv" placeholder="0" oninput="fmtInput(this);calcFact()"></div><div><label class="fl">Impuesto</label><input class="fi" type="text" inputmode="numeric" id="ft-im" placeholder="0" oninput="fmtInput(this);calcFact()"></div></div>
-        <label class="fl">Total</label><input class="fi" type="text" id="ft-to" placeholder="0" readonly style="background:var(--g50)">
+        <label class="fl">Monto neto</label><input class="fi" type="number" id="ft-ne" placeholder="0" oninput="calcFact()">
+        <div class="fg2"><div><label class="fl">IVA</label><input class="fi" type="number" id="ft-iv" placeholder="0" oninput="calcFact()"></div><div><label class="fl">Impuesto</label><input class="fi" type="number" id="ft-im" placeholder="0" oninput="calcFact()"></div></div>
+        <label class="fl">Total</label><input class="fi" type="number" id="ft-to" placeholder="0">
         <label class="fl">Estado de pago</label>
         <div style="display:flex;gap:10px;margin-top:4px">
           <button type="button" id="ft-pg-no" onclick="selPago(false)" style="flex:1;height:48px;border:2px solid #c1c7cd;border-radius:10px;background:white;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--g500)">❌ No pagado</button>
@@ -761,11 +760,11 @@ tr:hover td{background:var(--g50)}
     <div class="csb">
       <label class="fl">Mes</label><select class="fsel" id="gf-mes"></select>
       <div style="height:.75rem"></div>
-      <div class="grow"><span class="gnom">Previred</span><input class="ginp" type="text" inputmode="numeric" id="gf-pr" placeholder="0" oninput="fmtInput(this);calcGF()"></div>
-      <div class="grow"><span class="gnom">Arriendo</span><input class="ginp" type="text" inputmode="numeric" id="gf-ar" placeholder="0" oninput="fmtInput(this);calcGF()"></div>
-      <div class="grow"><span class="gnom">Luz</span><input class="ginp" type="text" inputmode="numeric" id="gf-lu" placeholder="0" oninput="fmtInput(this);calcGF()"></div>
-      <div class="grow"><span class="gnom">Crédito</span><input class="ginp" type="text" inputmode="numeric" id="gf-cr" placeholder="0" oninput="fmtInput(this);calcGF()"></div>
-      <div class="grow"><span class="gnom">Contabilidad</span><input class="ginp" type="text" inputmode="numeric" id="gf-co" placeholder="0" oninput="fmtInput(this);calcGF()"></div>
+      <div class="grow"><span class="gnom">Previred</span><input class="ginp" type="number" id="gf-pr" placeholder="0" oninput="calcGF()"></div>
+      <div class="grow"><span class="gnom">Arriendo</span><input class="ginp" type="number" id="gf-ar" placeholder="0" oninput="calcGF()"></div>
+      <div class="grow"><span class="gnom">Luz</span><input class="ginp" type="number" id="gf-lu" placeholder="0" oninput="calcGF()"></div>
+      <div class="grow"><span class="gnom">Crédito</span><input class="ginp" type="number" id="gf-cr" placeholder="0" oninput="calcGF()"></div>
+      <div class="grow"><span class="gnom">Contabilidad</span><input class="ginp" type="number" id="gf-co" placeholder="0" oninput="calcGF()"></div>
       <div class="grow" style="flex-direction:column;align-items:stretch">
         <span class="gnom" style="margin-bottom:6px">Otros</span>
         <div id="gf-otros-lista"></div>
@@ -777,6 +776,9 @@ tr:hover td{background:var(--g50)}
       <div class="fmsg ok" id="gf-ok">✓ Gastos guardados correctamente</div>
       <div class="fmsg err" id="gf-err">Error al guardar</div>
       <button class="fbtn" id="gf-btn" onclick="guardarGF()">Guardar gastos del mes</button>
+      <div style="height:1.5rem"></div>
+      <div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:#adb5bd;margin-bottom:8px">Historial</div>
+      <div id="gf-hist-cel"><div class="ld">Cargando...</div></div>
       <div style="height:1rem"></div>
     </div>
   </div>
@@ -805,8 +807,8 @@ tr:hover td{background:var(--g50)}
       <div id="cred-hist" style="display:none">
         <label class="fl">Nombre del crédito</label><input class="fi" type="text" id="cred-nombre" placeholder="Ej: BancoEstado comercial">
         <label class="fl">Banco / entidad</label><input class="fi" type="text" id="cred-banco" placeholder="Ej: BancoEstado">
-        <label class="fl">Monto total del crédito</label><input class="fi" type="text" inputmode="numeric" id="cred-total" placeholder="0" oninput="fmtInput(this)">
-        <label class="fl">Cuota mensual</label><input class="fi" type="text" inputmode="numeric" id="cred-cuota" placeholder="0" oninput="fmtInput(this)">
+        <label class="fl">Monto total del crédito</label><input class="fi" type="number" id="cred-total" placeholder="0">
+        <label class="fl">Cuota mensual</label><input class="fi" type="number" id="cred-cuota" placeholder="0">
         <label class="fl">Total de cuotas</label><input class="fi" type="number" id="cred-ncuotas" placeholder="Ej: 24">
         <label class="fl">Fecha primer pago</label><input class="fi" type="date" id="cred-finicio">
         <div class="fmsg ok" id="cred-ok">✓ Crédito guardado correctamente</div>
@@ -1031,11 +1033,11 @@ tr:hover td{background:var(--g50)}
           <div id="gf-pc-form" style="display:none;background:white;border:1px solid #c1c7cd;border-radius:10px;padding:1.25rem;margin-bottom:1.25rem">
             <div style="font-size:14px;font-weight:500;color:#212529;margin-bottom:1rem">Gastos fijos del mes</div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem">
-              <div><label class="modal-label">Previred</label><input class="modal-input" type="text" inputmode="numeric" id="gfpc-pr" placeholder="0" oninput="fmtInput(this);calcGFPC()"></div>
-              <div><label class="modal-label">Arriendo</label><input class="modal-input" type="text" inputmode="numeric" id="gfpc-ar" placeholder="0" oninput="fmtInput(this);calcGFPC()"></div>
-              <div><label class="modal-label">Luz</label><input class="modal-input" type="text" inputmode="numeric" id="gfpc-lu" placeholder="0" oninput="fmtInput(this);calcGFPC()"></div>
-              <div><label class="modal-label">Crédito</label><input class="modal-input" type="text" inputmode="numeric" id="gfpc-cr" placeholder="0" oninput="fmtInput(this);calcGFPC()"></div>
-              <div><label class="modal-label">Contabilidad</label><input class="modal-input" type="text" inputmode="numeric" id="gfpc-co" placeholder="0" oninput="fmtInput(this);calcGFPC()"></div>
+              <div><label class="modal-label">Previred</label><input class="modal-input" type="number" id="gfpc-pr" placeholder="0" oninput="calcGFPC()"></div>
+              <div><label class="modal-label">Arriendo</label><input class="modal-input" type="number" id="gfpc-ar" placeholder="0" oninput="calcGFPC()"></div>
+              <div><label class="modal-label">Luz</label><input class="modal-input" type="number" id="gfpc-lu" placeholder="0" oninput="calcGFPC()"></div>
+              <div><label class="modal-label">Crédito</label><input class="modal-input" type="number" id="gfpc-cr" placeholder="0" oninput="calcGFPC()"></div>
+              <div><label class="modal-label">Contabilidad</label><input class="modal-input" type="number" id="gfpc-co" placeholder="0" oninput="calcGFPC()"></div>
             </div>
             <div style="margin-bottom:1rem">
               <label class="modal-label">Otros gastos</label>
@@ -1134,9 +1136,9 @@ tr:hover td{background:var(--g50)}
     <div class="modal-grid2"><div><label class="modal-label">N° Factura</label><input class="modal-input" type="text" id="mft-nm"></div><div><label class="modal-label">Proveedor</label><div class="prov-wrap"><input class="modal-input" type="text" id="mft-pv" autocomplete="off" oninput="buscarProveedor(this,'mft-pv-drop','mft-rut')" onfocus="setTimeout(function(){buscarProveedor(document.getElementById('mft-pv'),'mft-pv-drop','mft-rut')},100)"><div class="prov-dropdown" id="mft-pv-drop"></div></div></div>
     <div><label class="modal-label">RUT proveedor</label><input class="modal-input" type="text" id="mft-rut" placeholder="Ej: 76.123.456-7"></div></div>
     <div class="modal-div">Montos</div>
-    <label class="modal-label">Monto neto</label><input class="modal-input" type="text" inputmode="numeric" id="mft-ne" oninput="fmtInput(this);calcModalFact()">
-    <div class="modal-grid2"><div><label class="modal-label">IVA</label><input class="modal-input" type="text" inputmode="numeric" id="mft-iv" oninput="fmtInput(this);calcModalFact()"></div><div><label class="modal-label">Impuesto</label><input class="modal-input" type="text" inputmode="numeric" id="mft-im" oninput="fmtInput(this);calcModalFact()"></div></div>
-    <label class="modal-label">Total</label><input class="modal-input" type="text" id="mft-to" readonly style="background:var(--g50)">
+    <label class="modal-label">Monto neto</label><input class="modal-input" type="number" id="mft-ne" oninput="calcModalFact()">
+    <div class="modal-grid2"><div><label class="modal-label">IVA</label><input class="modal-input" type="number" id="mft-iv" oninput="calcModalFact()"></div><div><label class="modal-label">Impuesto</label><input class="modal-input" type="number" id="mft-im" oninput="calcModalFact()"></div></div>
+    <label class="modal-label">Total</label><input class="modal-input" type="number" id="mft-to">
     <label class="modal-label">Estado de pago</label>
     <select class="modal-select" id="mft-pagado">
       <option value="false">❌ No pagado</option>
@@ -1155,7 +1157,7 @@ tr:hover td{background:var(--g50)}
   <div class="modal">
     <div class="modal-t">Editar pago de personal <button class="modal-x" onclick="cerrarModal('pers')">×</button></div>
     <input type="hidden" id="mps-id">
-    <div class="modal-grid2"><div><label class="modal-label">Fecha</label><input class="modal-input" type="date" id="mps-f"></div><div><label class="modal-label">Monto</label><input class="modal-input" type="text" inputmode="numeric" id="mps-mo" oninput="fmtInput(this)"></div></div>
+    <div class="modal-grid2"><div><label class="modal-label">Fecha</label><input class="modal-input" type="date" id="mps-f"></div><div><label class="modal-label">Monto</label><input class="modal-input" type="number" id="mps-mo"></div></div>
     <label class="modal-label">Empleado</label><input class="modal-input" type="text" id="mps-em">
     <label class="modal-label">Tipo</label>
     <select class="modal-select" id="mps-tp"><option value="Quincena">Quincena</option><option value="Adelanto">Adelanto</option><option value="Sueldo">Sueldo</option><option value="Comisión">Comisión</option><option value="Otro">Otro</option></select>
@@ -1173,11 +1175,11 @@ tr:hover td{background:var(--g50)}
     <select class="modal-select" id="mgf-mes"></select>
     <div style="height:.5rem"></div>
     <div class="modal-grid2">
-      <div><label class="modal-label">Previred</label><input class="modal-input" type="text" inputmode="numeric" id="mgf-pr" oninput="fmtInput(this);calcModalGF()"></div>
-      <div><label class="modal-label">Arriendo</label><input class="modal-input" type="text" inputmode="numeric" id="mgf-ar" oninput="fmtInput(this);calcModalGF()"></div>
-      <div><label class="modal-label">Luz</label><input class="modal-input" type="text" inputmode="numeric" id="mgf-lu" oninput="fmtInput(this);calcModalGF()"></div>
-      <div><label class="modal-label">Crédito</label><input class="modal-input" type="text" inputmode="numeric" id="mgf-cr" oninput="fmtInput(this);calcModalGF()"></div>
-      <div><label class="modal-label">Contabilidad</label><input class="modal-input" type="text" inputmode="numeric" id="mgf-co" oninput="fmtInput(this);calcModalGF()"></div>
+      <div><label class="modal-label">Previred</label><input class="modal-input" type="number" id="mgf-pr" oninput="calcModalGF()"></div>
+      <div><label class="modal-label">Arriendo</label><input class="modal-input" type="number" id="mgf-ar" oninput="calcModalGF()"></div>
+      <div><label class="modal-label">Luz</label><input class="modal-input" type="number" id="mgf-lu" oninput="calcModalGF()"></div>
+      <div><label class="modal-label">Crédito</label><input class="modal-input" type="number" id="mgf-cr" oninput="calcModalGF()"></div>
+      <div><label class="modal-label">Contabilidad</label><input class="modal-input" type="number" id="mgf-co" oninput="calcModalGF()"></div>
       <div style="grid-column:span 2">
       <label class="modal-label">Otros</label>
       <div id="mgf-otros-lista"></div>
@@ -1224,7 +1226,7 @@ tr:hover td{background:var(--g50)}
           <option value="honorarios">Honorarios</option>
         </select>
       </div>
-      <div><label class="modal-label">Sueldo mensual</label><input class="modal-input" type="text" inputmode="numeric" id="memp-sueldo" placeholder="0" oninput="fmtInput(this)"></div>
+      <div><label class="modal-label">Sueldo mensual</label><input class="modal-input" type="number" id="memp-sueldo" placeholder="0"></div>
     </div>
     <label class="modal-label">Estado</label>
     <select class="modal-select" id="memp-activo">
@@ -1303,15 +1305,15 @@ tr:hover td{background:var(--g50)}
       </div>
       <div>
         <label class="modal-label">Monto neto</label>
-        <input class="modal-input" type="text" inputmode="numeric" id="mfv-neto" placeholder="0" oninput="fmtInput(this);calcModalFV()">
+        <input class="modal-input" type="number" id="mfv-neto" placeholder="0" oninput="calcModalFV()">
       </div>
       <div>
         <label class="modal-label">IVA</label>
-        <input class="modal-input" type="text" inputmode="numeric" id="mfv-iva" placeholder="0" oninput="fmtInput(this);calcModalFV()">
+        <input class="modal-input" type="number" id="mfv-iva" placeholder="0" oninput="calcModalFV()">
       </div>
       <div>
         <label class="modal-label">Total</label>
-        <input class="modal-input" type="text" id="mfv-total" placeholder="0" readonly style="background:var(--g50)">
+        <input class="modal-input" type="number" id="mfv-total" placeholder="0" readonly style="background:var(--g50)">
       </div>
       <div>
         <label class="modal-label">Fecha vencimiento</label>
@@ -1900,6 +1902,7 @@ function abrirScreen(n){
     ['cel-cfg-neg-ok','cel-cfg-neg-err','cel-cfg-pass-ok','cel-cfg-pass-err'].forEach(function(id){document.getElementById(id).style.display='none';});
     loadConfigUsuariosCel();
   }
+  if(n==='gf')loadGFHistCel();
   if(n==='prop'){
     var pf=document.getElementById('prop-fecha');
     if(!pf.value)pf.value=hoy.toISOString().split('T')[0];
@@ -3409,10 +3412,9 @@ function toggleOtrosDetalle(id){
 // FACTURAS DE VENTA
 // ══════════════════════════════════════
 function calcModalFV(){
-  var n=parseCLP(document.getElementById('mfv-neto').value);
-  var i=parseCLP(document.getElementById('mfv-iva').value);
-  var total=Math.round(n+i);
-  document.getElementById('mfv-total').value=total>0?total.toLocaleString('es-CL'):'';
+  var n=parseFloat(document.getElementById('mfv-neto').value)||0;
+  var i=parseFloat(document.getElementById('mfv-iva').value)||0;
+  document.getElementById('mfv-total').value=Math.round(n+i)||'';
 }
 
 async function loadFactVentasDash(){
@@ -3611,10 +3613,9 @@ async function eliminarFactVenta(id,nombre){
 
 // ── Facturas de venta celular ──
 function calcFVC(){
-  var n=parseCLP(document.getElementById('fvc-neto').value);
-  var i=parseCLP(document.getElementById('fvc-iva').value);
-  var total=Math.round(n+i);
-  document.getElementById('fvc-total').value=total>0?total.toLocaleString('es-CL'):'';
+  var n=parseFloat(document.getElementById('fvc-neto').value)||0;
+  var i=parseFloat(document.getElementById('fvc-iva').value)||0;
+  document.getElementById('fvc-total').value=Math.round(n+i)||'';
 }
 
 function setEstadoFVC(estado){
@@ -4076,7 +4077,7 @@ function abrirModalAbono(id,saldo,proveedor){
 }
 
 async function guardarAbono(){
-  var monto=parseFloat((document.getElementById('mab-monto').value||'0').replace(/\./g,'').replace(',','.'))||0;
+  var monto=parseFloat(document.getElementById('mab-monto').value)||0;
   if(!monto){alert('Ingresa el monto del abono');return;}
   var fecha=document.getElementById('mab-fecha').value;
   if(!fecha){alert('Ingresa la fecha');return;}
@@ -4447,8 +4448,8 @@ async function togglePagado(id,actual){
 
 
 function calcFact(){
-  var t=v('ft-ne')+v('ft-iv')+v('ft-im');
-  if(t>0)document.getElementById('ft-to').value=t.toLocaleString('es-CL');
+  var ne=v('ft-ne');if(ne>0&&!v('ft-iv'))document.getElementById('ft-iv').value=Math.round(ne*.19);
+  var t=v('ft-ne')+v('ft-iv')+v('ft-im');if(t>0)document.getElementById('ft-to').value=t;
 }
 async function guardarFact(){
   var pv=document.getElementById('ft-pv').value.trim();if(!pv){alert('Ingresa el proveedor');return;}
@@ -4728,12 +4729,12 @@ function toggleFormGFPC(){
   }
 }
 function calcGFPC(){
-  var pr=parseCLP(document.getElementById('gfpc-pr').value);
-  var ar=parseCLP(document.getElementById('gfpc-ar').value);
-  var lu=parseCLP(document.getElementById('gfpc-lu').value);
-  var cr=parseCLP(document.getElementById('gfpc-cr').value);
-  var co=parseCLP(document.getElementById('gfpc-co').value);
-  var ot=parseCLP(document.getElementById('gfpc-ot').value);
+  var pr=parseFloat(document.getElementById('gfpc-pr').value)||0;
+  var ar=parseFloat(document.getElementById('gfpc-ar').value)||0;
+  var lu=parseFloat(document.getElementById('gfpc-lu').value)||0;
+  var cr=parseFloat(document.getElementById('gfpc-cr').value)||0;
+  var co=parseFloat(document.getElementById('gfpc-co').value)||0;
+  var ot=parseFloat(document.getElementById('gfpc-ot').value)||0;
   document.getElementById('gfpc-tv').textContent=fmt(pr+ar+lu+cr+co+ot);
 }
 function agregarOtroGFPC(){
@@ -4757,12 +4758,12 @@ function recalcOtrosGFPC(){
   calcGFPC();
 }
 async function guardarGFPC(){
-  var pr=parseCLP(document.getElementById('gfpc-pr').value);
-  var ar=parseCLP(document.getElementById('gfpc-ar').value);
-  var lu=parseCLP(document.getElementById('gfpc-lu').value);
-  var cr=parseCLP(document.getElementById('gfpc-cr').value);
-  var co=parseCLP(document.getElementById('gfpc-co').value);
-  var ot=parseCLP(document.getElementById('gfpc-ot').value);
+  var pr=parseFloat(document.getElementById('gfpc-pr').value)||0;
+  var ar=parseFloat(document.getElementById('gfpc-ar').value)||0;
+  var lu=parseFloat(document.getElementById('gfpc-lu').value)||0;
+  var cr=parseFloat(document.getElementById('gfpc-cr').value)||0;
+  var co=parseFloat(document.getElementById('gfpc-co').value)||0;
+  var ot=parseFloat(document.getElementById('gfpc-ot').value)||0;
   var lista=document.getElementById('gfpc-otros-lista');
   var otrosDetalle=Array.from(lista.children).map(function(div){
     var inputs=div.querySelectorAll('input');
@@ -4794,6 +4795,45 @@ async function guardarGFPC(){
   }catch(ex){err.textContent=mensajeError(ex);err.style.display='block';}
   btn.disabled=false;btn.textContent='Guardar gastos';
 }
+async function loadGFHistCel(){
+  var el=document.getElementById('gf-hist-cel');
+  if(!el)return;
+  try{
+    var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&order=anio.desc,mes.desc&limit=12',{headers:H()});
+    var d=await r.json();
+    if(!d||!d.length){el.innerHTML='<div class="empty">Sin gastos registrados</div>';return;}
+    var h='';
+    d.forEach(function(g){
+      var mid='gfhc-'+g.mes+'-'+g.anio;
+      h+='<div style="border:1px solid #c1c7cd;border-radius:10px;margin-bottom:8px;overflow:hidden">';
+      h+='<div class="bal-toggle" data-target="'+mid+'" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:white;cursor:pointer">';
+      h+='<span style="font-size:14px;font-weight:500;color:#212529">'+MS[g.mes-1]+' '+g.anio+'</span>';
+      h+='<div style="display:flex;align-items:center;gap:8px"><span style="font-size:13px;font-weight:500;color:var(--r)">'+fmt(g.total||0)+'</span><span style="color:#adb5bd">▼</span></div></div>';
+      h+='<div id="'+mid+'" style="display:none;padding:10px 12px;background:var(--g50);border-top:1px solid #c1c7cd">';
+      if(g.previred)h+='<div class="hrow"><span>Previred</span><span>'+fmt(g.previred)+'</span></div>';
+      if(g.arriendo)h+='<div class="hrow"><span>Arriendo</span><span>'+fmt(g.arriendo)+'</span></div>';
+      if(g.luz)h+='<div class="hrow"><span>Luz</span><span>'+fmt(g.luz)+'</span></div>';
+      if(g.credito)h+='<div class="hrow"><span>Crédito</span><span>'+fmt(g.credito)+'</span></div>';
+      if(g.contabilidad)h+='<div class="hrow"><span>Contabilidad</span><span>'+fmt(g.contabilidad)+'</span></div>';
+      if(g.otros)h+='<div class="hrow"><span>Otros</span><span>'+fmt(g.otros)+'</span></div>';
+      if(g.otros_detalle&&g.otros_detalle.length){
+        g.otros_detalle.forEach(function(o){
+          h+='<div class="hrow" style="padding-left:12px"><span style="color:#adb5bd">↳ '+o.desc+'</span><span>'+fmt(o.monto)+'</span></div>';
+        });
+      }
+      h+='<div class="hrow" style="border-top:1px solid #c1c7cd;margin-top:4px;padding-top:6px"><span style="font-weight:500">Total</span><span style="font-weight:500;color:var(--r)">'+fmt(g.total||0)+'</span></div>';
+      h+='</div></div>';
+    });
+    el.innerHTML=h;
+    // Activar toggles
+    el.querySelectorAll('.bal-toggle').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var t=document.getElementById(btn.dataset.target);
+        if(t)t.style.display=t.style.display==='block'?'none':'block';
+      });
+    });
+  }catch(ex){el.innerHTML='<div class="empty">Error al cargar</div>';}
+}
 async function loadGFUltimo(){
   try{var r=await fetch(SU+'/rest/v1/gastos_fijos?select=*&cliente_id=eq.'+cli.id+'&order=anio.desc,mes.desc&limit=1',{headers:H()});var d=await r.json();
     if(d&&d.length>0){GFC.forEach(function(c,i){if(d[0][GFKEYS[i]])document.getElementById('gf-'+c).value=d[0][GFKEYS[i]];});calcGF();}}catch(ex){}
@@ -4808,7 +4848,7 @@ async function guardarGF(){
   try{
     await fetch(SU+'/rest/v1/gastos_fijos?mes=eq.'+mes+'&anio=eq.'+anio+'&cliente_id=eq.'+cli.id,{method:'DELETE',headers:H()});
     var r=await fetch(SU+'/rest/v1/gastos_fijos',{method:'POST',headers:HJ(),body:JSON.stringify(payload)});
-    if(r.ok){document.getElementById('gf-ok').style.display='block';btn.textContent='✓ Guardado';setTimeout(function(){document.getElementById('gf-otros-lista').innerHTML='';document.getElementById('gf-ot-total').textContent='$0';btn.disabled=false;btn.textContent='Guardar gastos del mes';document.getElementById('gf-ok').style.display='none';},2500);}
+    if(r.ok){document.getElementById('gf-ok').style.display='block';btn.textContent='✓ Guardado';setTimeout(function(){document.getElementById('gf-otros-lista').innerHTML='';document.getElementById('gf-ot-total').textContent='$0';btn.disabled=false;btn.textContent='Guardar gastos del mes';document.getElementById('gf-ok').style.display='none';loadGFHistCel();},2500);}
     else throw new Error(await r.text());
   }catch(ex){document.getElementById('gf-err').style.display='block';btn.disabled=false;btn.textContent='Guardar gastos del mes';}
 }
@@ -5544,8 +5584,8 @@ function abrirNuevoCreditoCel(){
 async function guardarCreditoCel(){
   var nombre=document.getElementById('cred-nombre').value.trim();
   if(!nombre){alert('Ingresa el nombre del crédito');return;}
-  var cuota=parseCLP(document.getElementById('cred-cuota').value)||0;
-  var total=parseCLP(document.getElementById('cred-total').value)||0;
+  var cuota=parseFloat(document.getElementById('cred-cuota').value)||0;
+  var total=parseFloat(document.getElementById('cred-total').value)||0;
   var ncuotas=parseInt(document.getElementById('cred-ncuotas').value)||0;
   if(!cuota){alert('Ingresa la cuota mensual');return;}
   if(!ncuotas){alert('Ingresa el total de cuotas');return;}
@@ -5678,8 +5718,8 @@ function editCreditoPC(c){
 async function guardarCreditoPC(){
   var nombre=document.getElementById('mcred-nombre').value.trim();
   if(!nombre){alert('Ingresa el nombre');return;}
-  var cuota=parseCLP(document.getElementById('mcred-cuota').value)||0;
-  var total=parseCLP(document.getElementById('mcred-total').value)||0;
+  var cuota=parseFloat(document.getElementById('mcred-cuota').value)||0;
+  var total=parseFloat(document.getElementById('mcred-total').value)||0;
   var ncuotas=parseInt(document.getElementById('mcred-ncuotas').value)||0;
   if(!cuota||!ncuotas){alert('Ingresa cuota y total de cuotas');return;}
   var finicio=document.getElementById('mcred-finicio').value;
@@ -5716,7 +5756,7 @@ async function guardarPagoCreditoPC(){
   var creditoId=document.getElementById('mpagocred-credito-id').value;
   var mes=parseInt(document.getElementById('mpagocred-mes').value);
   var anio=hoy.getFullYear();
-  var monto=parseCLP(document.getElementById('mpagocred-monto').value)||0;
+  var monto=parseFloat(document.getElementById('mpagocred-monto').value)||0;
   var fecha=document.getElementById('mpagocred-fecha').value;
   if(!monto){alert('Ingresa el monto');return;}
   var btn=document.getElementById('mpagocred-btn');btn.disabled=true;btn.textContent='Guardando...';
@@ -6038,7 +6078,7 @@ function selTipoPC(t,el){
 async function guardarNuevoPagoPC(){
   if(!empSelPC){alert('Selecciona un empleado');return;}
   if(!tipoSelPC){alert('Selecciona el tipo de pago');return;}
-  var mo=parseCLP(document.getElementById('mnp-monto').value)||0;
+  var mo=parseFloat(document.getElementById('mnp-monto').value)||0;
   if(!mo&&tipoSelPC!=='Otro'){alert('Ingresa el monto');return;}
   var fecha=document.getElementById('mnp-fecha').value;
   if(!fecha){alert('Ingresa la fecha');return;}
@@ -6317,7 +6357,7 @@ async function guardarEmp(){
   var nombre=document.getElementById('memp-nombre').value.trim();
   if(!nombre){alert('Ingresa el nombre del empleado');return;}
   var id=document.getElementById('memp-id').value;
-  var sueldo=parseCLP(document.getElementById('memp-sueldo').value)||0;
+  var sueldo=parseFloat(document.getElementById('memp-sueldo').value)||0;
   var activo=document.getElementById('memp-activo').value==='true';
   var rut=document.getElementById('memp-rut').value.trim();
   var domicilio=document.getElementById('memp-domicilio').value.trim();
@@ -6469,8 +6509,9 @@ function editFact(r){
   abrirModal('fact');
 }
 function calcModalFact(){
-  var t=mv('mft-ne')+mv('mft-iv')+mv('mft-im');
-  if(t>0)document.getElementById('mft-to').value=t.toLocaleString('es-CL');
+  var ne=mv('mft-ne'),iv=mv('mft-iv');
+  if(ne>0&&!iv)document.getElementById('mft-iv').value=Math.round(ne*.19);
+  var t=mv('mft-ne')+mv('mft-iv')+mv('mft-im');if(t>0)document.getElementById('mft-to').value=t;
 }
 async function guardarEditFact(){
   var id=document.getElementById('mft-id').value;
@@ -6706,8 +6747,8 @@ setInterval(function(){
     <label class="modal-label">Nombre del crédito</label><input class="modal-input" type="text" id="mcred-nombre" placeholder="Ej: BancoEstado comercial">
     <label class="modal-label">Banco / entidad</label><input class="modal-input" type="text" id="mcred-banco" placeholder="Ej: BancoEstado">
     <div class="modal-grid2">
-      <div><label class="modal-label">Monto total</label><input class="modal-input" type="text" inputmode="numeric" id="mcred-total" placeholder="0" oninput="fmtInput(this)"></div>
-      <div><label class="modal-label">Cuota mensual</label><input class="modal-input" type="text" inputmode="numeric" id="mcred-cuota" placeholder="0" oninput="fmtInput(this)"></div>
+      <div><label class="modal-label">Monto total</label><input class="modal-input" type="number" id="mcred-total" placeholder="0"></div>
+      <div><label class="modal-label">Cuota mensual</label><input class="modal-input" type="number" id="mcred-cuota" placeholder="0"></div>
     </div>
     <div class="modal-grid2">
       <div><label class="modal-label">Total cuotas</label><input class="modal-input" type="number" id="mcred-ncuotas" placeholder="Ej: 24"></div>
@@ -6728,7 +6769,7 @@ setInterval(function(){
     <label class="modal-label">Mes</label>
     <select class="modal-select" id="mpagocred-mes"></select>
     <label class="modal-label">Monto pagado</label>
-    <input class="modal-input" type="text" inputmode="numeric" id="mpagocred-monto" placeholder="0" oninput="fmtInput(this)">
+    <input class="modal-input" type="number" id="mpagocred-monto" placeholder="0">
     <label class="modal-label">Fecha de pago</label>
     <input class="modal-input" type="date" id="mpagocred-fecha">
     <div class="modal-btns">
@@ -6755,7 +6796,7 @@ setInterval(function(){
       <button class="ebtn" onclick="selTipoPC('Otro',this)">📝 Otro</button>
     </div>
     <label class="modal-label">Monto</label>
-    <input class="modal-input" type="text" inputmode="numeric" id="mnp-monto" placeholder="0" oninput="fmtInput(this)">
+    <input class="modal-input" type="number" id="mnp-monto" placeholder="0">
     <label class="modal-label">Observación (opcional)</label>
     <input class="modal-input" type="text" id="mnp-obs" placeholder="Ej: anticipo semana 2">
     <div class="modal-btns">
@@ -6773,7 +6814,7 @@ setInterval(function(){
     <label class="modal-label">Fecha del abono</label>
     <input class="modal-input" type="date" id="mab-fecha">
     <label class="modal-label">Monto</label>
-    <input class="modal-input" type="text" inputmode="numeric" id="mab-monto" placeholder="$0" oninput="fmtInput(this)">
+    <input class="modal-input" type="number" id="mab-monto" placeholder="0">
     <label class="modal-label">Nota (opcional)</label>
     <input class="modal-input" type="text" id="mab-nota" placeholder="Ej: Primer abono, transferencia...">
     <div class="modal-btns">
